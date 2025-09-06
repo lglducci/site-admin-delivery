@@ -1,6 +1,8 @@
-import React from 'react';
-import Dashboard from './pages/dashboard';
+import React from "react";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
-  return <Dashboard />;
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  return isLoggedIn ? <Dashboard /> : <Login onLogin={() => setIsLoggedIn(true)} />;
 }
