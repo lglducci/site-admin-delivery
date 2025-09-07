@@ -18,8 +18,8 @@ export default function PedidoCard({ pedido, onAvancar }) {
        
        //<a href="#" className="hover:underline">nº {pedido.numero}</a> - {pedido.nomeCliente}
         <a 
-           href={`https://n8n.lglducci.com.br/webhook/pedido-html?numero=${pedido.numero}`}
-           //href={`https://n8n.lglducci.com.br/webhook-test/pedido-html?numero=${pedido.numero}`}
+          // href={`https://n8n.lglducci.com.br/webhook/pedido-html?numero=${pedido.numero}`}
+           href={`https://n8n.lglducci.com.br/webhook-test/pedido-html?numero=${pedido.numero}`}
             
            target="_blank"
            rel="noopener noreferrer"
@@ -44,6 +44,7 @@ export default function PedidoCard({ pedido, onAvancar }) {
     </div>
   );
 }
+
 
 
 
