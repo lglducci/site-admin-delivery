@@ -10,7 +10,7 @@ export default function Dashboard() {
       try {
         const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
         const data = await response.json();
-
+        console.log("🚀 Dados brutos recebidos:", data);
         const pedidosAdaptados = data.map((p) => ({
           numero: p.pedido_id,
           status: p.status.toLowerCase(), // converte para minúsculas
@@ -18,7 +18,7 @@ export default function Dashboard() {
           valor: Number(p.valor), // garante que seja número
           data: p.create_at,
         }));
-
+           console.log("✅ Adaptados:", pedidosAdaptados);
         setPedidos(pedidosAdaptados);
       } catch (error) {
         console.error("Erro ao buscar pedidos:", error);
