@@ -1,5 +1,6 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PedidoCard from "../components/PedidoCard";
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
