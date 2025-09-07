@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Pedido</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      background-color: #1e90ff;
+      color: white;
+      padding: 10px;
+      border-radius: 8px 8px 0 0;
+      margin: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    td, th {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    .total {
+      font-weight: bold;
+    }
+    .comentario {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Detalhes do Pedido</h2>
+    <div id="dados"></div>
+  </div>
+
+  <script>
+    async function carregarPedido() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const numero = urlParams.get("numero");
+      if (!numero) return document.getElementById("dados").innerText = "Pedido não informado.";
+
+      const res = await fetch(`https://n8n.lglducci.com.br/webhook-test/pedidos?numero=${numero}`);
+      const data = await res.json();
+      const pedido = data[0];
+
+      const html = `
+        <table>
+          <tr><th>Endereço</th><td>${pedido.endereço}<br>Bairro: ${pedido.bairro}</td></tr>
+          <tr><th>Pagamento & Entrega</th><td>Forma de pagamento: ${pedido.tipo_cobranca}</td></tr>
+        </table>
+
+        <h3 style="margin-top:20px">Resumo:</h3>
+        <table>
+          <tr><th>Descrição</th><th>Valor</th></tr>
+          ${pedido.resumo.split('\n')
+            .filter(l => l.includes('R$'))
+            .map(l => {
+              const partes = l.split(' - R$ ');
+              return `<tr><td>${partes[0]}</td><td>R$ ${partes[1]}</td></tr>`;
+            }).join('')
+          }
+        </table>
+
+        <div class="comentario">
+          <strong>Comentário:</strong> ${pedido.resumo.includes('Comentário:') ? pedido.resumo.split('Comentário:')[1].trim() : 'Nenhum'}
+        </div>
+      `;
+
+      document.getElementById("dados").innerHTML = html;
+    }
+
+    carregarPedido();
+  </script>
+</body>
+</html>
