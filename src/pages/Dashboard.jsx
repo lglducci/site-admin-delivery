@@ -21,13 +21,15 @@ export default function Dashboard() {
         return;
       }
 
-      const pedidosAdaptados = lista.map((p) => ({
-        numero: p.pedido_id,
-        status: p.status.toLowerCase(),
-        nomeCliente: p.nome,
-        valor: Number(p.valor),
-        data: p.create_at,
-      }));
+   const lista = Array.isArray(data) ? data : [data]; // transforma em array se for objeto único
+
+const pedidosAdaptados = lista.map((p) => ({
+  numero: p.pedido_id,
+  status: p.status?.toLowerCase(),
+  nomeCliente: p.nome,
+  valor: Number(p.valor),
+  data: p.create_at,
+}));
 
       console.log("✅ Adaptados:", pedidosAdaptados);
       setPedidos(pedidosAdaptados);
