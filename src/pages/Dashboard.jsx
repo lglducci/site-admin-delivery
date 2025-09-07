@@ -5,8 +5,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchPedidos = async () => {
-      const response = await fetch("https://n8n.lglducci.com.br/webhook-test/pedidos"); // webhook de teste
-      // const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos"); // produção
+     // const response = await fetch("https://n8n.lglducci.com.br/webhook-test/pedidos"); // webhook de teste
+      const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos"); // produção
       const data = await response.json();
       setPedidos(data);
     };
