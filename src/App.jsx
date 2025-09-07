@@ -1,8 +1,16 @@
-import React from "react";
-import Login from "./pages/Login";
+ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 
-export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  return isLoggedIn ? <Dashboard /> : <Login onLogin={() => setIsLoggedIn(true)} />;
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
+
+export default App;
