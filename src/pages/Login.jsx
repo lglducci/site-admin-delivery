@@ -6,7 +6,7 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("https://n8n.lglducci.com.br/webhook-test/login", {
+    const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
