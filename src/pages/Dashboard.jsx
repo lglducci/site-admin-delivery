@@ -50,7 +50,9 @@ export default function Dashboard() {
 
   const handleSair = () => {
     localStorage.removeItem("token"); // se estiver usando token
-    navigate("/login"); // redireciona pra tela de login
+    //navigate("/login"); // redireciona pra tela de login
+    navigate("/");
+
   };
 
   return (
