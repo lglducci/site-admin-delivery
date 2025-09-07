@@ -90,27 +90,20 @@ export default function Dashboard() {
             className="bg-white dark:bg-gray-800 p-4 rounded shadow"
           >
             <h2 className="text-lg font-semibold mb-2">{coluna.titulo}</h2>
-            {pedidos
-              .filter((p) => p.status === coluna.status)
-              .map((p) => (
-                <div
-                  key={p.numero}
-                  className="bg-gray-100 dark:bg-gray-700 p-2 rounded mb-2 text-sm"
-                >
-                  <p>
-                    <strong>#{p.numero}</strong> - {p.nomeCliente}
-                  </p>
-                  <p>
-                    {formatarValor(p.valor)} | {formatarData(p.data)}
-                  </p>
-                  <button
-                    className="mt-1 text-xs text-blue-400 hover:underline"
-                    onClick={() => avancarPedido(p.numero)}
-                  >
-                    Avançar →
-                  </button>
-                </div>
-              ))}
+        
+           {pedidos
+  .filter((p) => p.status === coluna.status)
+  .map((p) => (
+    <PedidoCard
+      key={p.numero}
+      pedido={p}
+      onAvancar={avancarPedido}
+    />
+))}
+
+          
+
+           
           </div>
         ))}
       </div>
