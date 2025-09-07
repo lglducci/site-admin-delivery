@@ -21,9 +21,7 @@ export default function Dashboard() {
         return;
       }
 
-   const lista = Array.isArray(data) ? data : [data]; // transforma em array se for objeto único
-
-const pedidosAdaptados = lista.map((p) => ({
+ const pedidosAdaptados = (Array.isArray(data) ? data : [data]).map((p) => ({
   numero: p.pedido_id,
   status: p.status?.toLowerCase(),
   nomeCliente: p.nome,
