@@ -15,10 +15,8 @@ export default function Login() {
     });
 
     const data = await response.json();
-    if (data?.success && data.user_id) {
-      // Salva user_id no localStorage
-      localStorage.setItem("user_id", data.user_id);
-      navigate("/dashboard");
+    if (data?.success) {
+      navigate("/dashboard");  // Redireciona para o dashboard
     } else {
       alert("Login inválido");
     }
