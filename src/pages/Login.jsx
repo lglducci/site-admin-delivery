@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+ import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,8 +15,10 @@ export default function Login({ onLogin }) {
     });
 
     const data = await response.json();
-    if (data?.success) {
-      onLogin();
+    if (data?.success && data.user_id) {
+      // Salva user_id no localStorage
+      localStorage.setItem("user_id", data.user_id);
+      navigate("/dashboard");
     } else {
       alert("Login inválido");
     }
