@@ -8,17 +8,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
-     //   const response = await fetch("https://n8n.lglducci.com.br/webhook-test/pedidos");
-         const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
-        
+        const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
         const data = await response.json();
 
-        // Adapta os campos do webhook para o front
         const pedidosAdaptados = data.map((p) => ({
           numero: p.pedido_id,
-          status: p.status,
+          status: p.status.toLowerCase(), // converte para minúsculas
           nomeCliente: p.nome,
-          valor: p.valor,
+          valor: Number(p.valor), // garante que seja número
           data: p.create_at,
         }));
 
@@ -44,15 +41,21 @@ export default function Dashboard() {
     valor?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const formatarData = (data) =>
-    new Date(data).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+    new Date(data).toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
 
-  const colunas = ["Recebido", "Produção", "Entrega", "Concluído"];
+  const colunas = [
+    { status: "recebido", titulo: "Recebido" },
+    { status: "producao", titulo: "Produção" },
+    { status: "entrega", titulo: "Entrega" },
+    { status: "concluido", titulo: "Concluído" },
+  ];
 
   const handleSair = () => {
-    localStorage.removeItem("token"); // se estiver usando token
-    //navigate("/login"); // redireciona pra tela de login
+    localStorage.removeItem("token");
     navigate("/");
-
   };
 
   return (
@@ -68,11 +71,14 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {colunas.map((status) => (
-          <div key={status} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-            <h2 className="text-lg font-semibold mb-2">{status}</h2>
+        {colunas.map((coluna) => (
+          <div
+            key={coluna.status}
+            className="bg-white dark:bg-gray-800 p-4 rounded shadow"
+          >
+            <h2 className="text-lg font-semibold mb-2">{coluna.titulo}</h2>
             {pedidos
-              .filter((p) => p.status.toLowerCase() === status.toLowerCase())
+              .filter((p) => p.status === coluna.status)
               .map((p) => (
                 <div
                   key={p.numero}
