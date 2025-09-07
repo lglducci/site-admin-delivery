@@ -15,18 +15,29 @@ export default function PedidoCard({ pedido, onAvancar }) {
   return (
     <div className="flex justify-between items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 mb-2 text-sm font-medium text-gray-800 dark:text-white">
       <span className="text-blue-900 dark:text-blue-300">
+
+
+       <a
+        href={`/detalhes.html?numero=${pedido.numero}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline"
+      >
+        nº {pedido.numero}
+      </a>
+
        
        //<a href="#" className="hover:underline">nº {pedido.numero}</a> - {pedido.nomeCliente}
-        <a 
-           href={`https://n8n.lglducci.com.br/webhook/pedido-html?numero=${pedido.numero}`}
+      //  <a 
+     //      href={`https://n8n.lglducci.com.br/webhook/pedido-html?numero=${pedido.numero}`}
         //   href={`https://n8n.lglducci.com.br/webhook-test/pedido-html?numero=${pedido.numero}`}
             
-           target="_blank"
-           rel="noopener noreferrer"
-           className="hover:underline"
-         >
-           nº {pedido.numero}
-         </a>
+     //      target="_blank"
+     //      rel="noopener noreferrer"
+     //      className="hover:underline"
+       //  >
+       //    nº {pedido.numero}
+      //   </a>
 
 
        
@@ -44,6 +55,7 @@ export default function PedidoCard({ pedido, onAvancar }) {
     </div>
   );
 }
+
 
 
 
