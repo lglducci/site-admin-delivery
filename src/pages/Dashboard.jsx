@@ -5,28 +5,38 @@ export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
-        const data = await response.json();
-        console.log("🚀 Dados brutos recebidos:", data);
-        const pedidosAdaptados = data.map((p) => ({
-          numero: p.pedido_id,
-          status: p.status.toLowerCase(), // converte para minúsculas
-          nomeCliente: p.nome,
-          valor: Number(p.valor), // garante que seja número
-          data: p.create_at,
-        }));
-           console.log("✅ Adaptados:", pedidosAdaptados);
-        setPedidos(pedidosAdaptados);
-      } catch (error) {
-        console.error("Erro ao buscar pedidos:", error);
-      }
-    };
+   useEffect(() => {
+  const fetchPedidos = async () => {
+    try {
+      const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
+      const data = await response.json();
+      console.log("🚀 Dados brutos recebidos:", data);
 
-    fetchPedidos();
-  }, []);
+      const lista = data.data || data.pedidos || data; // tentativa de extrair array correto
+
+      if (!Array.isArray(lista)) {
+        console.error("❌ Resposta inesperada: não é um array", data);
+        return;
+      }
+
+      const pedidosAdaptados = lista.map((p) => ({
+        numero: p.pedido_id,
+        status: p.status.toLowerCase(),
+        nomeCliente: p.nome,
+        valor: Number(p.valor),
+        data: p.create_at,
+      }));
+
+      console.log("✅ Adaptados:", pedidosAdaptados);
+      setPedidos(pedidosAdaptados);
+    } catch (error) {
+      console.error("Erro ao buscar pedidos:", error);
+    }
+  };
+
+  fetchPedidos();
+}, []);
+
 
   const avancarPedido = async (numero) => {
     await fetch("https://n8n.lglducci.com.br/webhook-test/avancar-pedido", {
