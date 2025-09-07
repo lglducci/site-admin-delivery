@@ -1,91 +1,119 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+ <!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes do Pedido</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
+      background-color: #f4f4f4;
       padding: 20px;
-      background: #f2f2f2;
     }
     .container {
+      background: white;
       max-width: 800px;
       margin: auto;
-      background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    h2 {
-      background-color: #1e90ff;
+    .header {
+      background: #007BBA;
       color: white;
-      padding: 10px;
-      border-radius: 8px 8px 0 0;
-      margin: 0;
+      padding: 10px 20px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      display: flex;
+      justify-content: space-between;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+    .section {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
     }
-    td, th {
-      padding: 8px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    .total {
+    .section-title {
       font-weight: bold;
+      margin-bottom: 5px;
     }
-    .comentario {
-      background: #f9f9f9;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 10px;
+    .description {
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+    }
+    .footer {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .label {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Detalhes do Pedido</h2>
-    <div id="dados"></div>
+  <div class="container" id="pedido-container">
+    <div class="header">
+      <span>Detalhes do pedido</span>
+      <span id="pedido-numero"></span>
+    </div>
+
+    <div class="section">
+      <div>
+        <div class="section-title">Endereço</div>
+        <div id="endereco"></div>
+        <div id="bairro"></div>
+      </div>
+      <div>
+        <div class="section-title">Pagamento & Entrega</div>
+        <div id="pagamento"></div>
+      </div>
+    </div>
+
+    <div class="description" id="descricao"></div>
+    <div class="footer">
+      <div class="row"><span class="label">Total:</span> <span id="total"></span></div>
+      <div class="row"><span class="label">Comentário:</span> <span id="comentario"></span></div>
+    </div>
   </div>
 
   <script>
     async function carregarPedido() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const numero = urlParams.get("numero");
-      if (!numero) return document.getElementById("dados").innerText = "Pedido não informado.";
+      const params = new URLSearchParams(window.location.search);
+      const numero = params.get("numero");
+      const url = `https://n8n.lglducci.com.br/webhook/pedido-html?numero=${numero}`;
 
-      const res = await fetch(`https://n8n.lglducci.com.br/webhook-test/pedidos?numero=${numero}`);
-      const data = await res.json();
-      const pedido = data[0];
+      const response = await fetch(url);
+      const dados = await response.json();
+      const pedido = dados[0];
 
-      const html = `
-        <table>
-          <tr><th>Endereço</th><td>${pedido.endereço}<br>Bairro: ${pedido.bairro}</td></tr>
-          <tr><th>Pagamento & Entrega</th><td>Forma de pagamento: ${pedido.tipo_cobranca}</td></tr>
-        </table>
+      document.getElementById("pedido-numero").innerText = `Pedido nº ${numero}`;
+      document.getElementById("endereco").innerText = pedido.endereço;
+      document.getElementById("bairro").innerText = `Bairro: ${pedido.bairro}`;
+      document.getElementById("pagamento").innerText = `Forma de pagamento: ${pedido.tipo_cobranca}`;
 
-        <h3 style="margin-top:20px">Resumo:</h3>
-        <table>
-          <tr><th>Descrição</th><th>Valor</th></tr>
-          ${pedido.resumo.split('\n')
-            .filter(l => l.includes('R$'))
-            .map(l => {
-              const partes = l.split(' - R$ ');
-              return `<tr><td>${partes[0]}</td><td>R$ ${partes[1]}</td></tr>`;
-            }).join('')
+      const linhas = pedido.resumo.split("\n");
+      let html = "";
+      linhas.forEach(linha => {
+        if (linha.trim() !== "") {
+          const partes = linha.split(" - R$");
+          if (partes.length === 2) {
+            html += `<div class='row'><span>${partes[0]}</span><span>R$ ${partes[1]}</span></div>`;
+          } else {
+            html += `<div class='row'><span>${linha}</span></div>`;
           }
-        </table>
+        }
+      });
 
-        <div class="comentario">
-          <strong>Comentário:</strong> ${pedido.resumo.includes('Comentário:') ? pedido.resumo.split('Comentário:')[1].trim() : 'Nenhum'}
-        </div>
-      `;
-
-      document.getElementById("dados").innerHTML = html;
+      document.getElementById("descricao").innerHTML = html;
+      const total = linhas.find(l => l.includes("Total:"))?.split(":")?.[1]?.trim();
+      const comentario = linhas.find(l => l.includes("Comentário:"))?.split(":")?.slice(1)?.join(":")?.trim();
+      document.getElementById("total").innerText = total || "-";
+      document.getElementById("comentario").innerText = comentario || "-";
     }
 
     carregarPedido();
