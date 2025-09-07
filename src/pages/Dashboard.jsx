@@ -8,12 +8,38 @@ export default function Dashboard() {
      // const response = await fetch("https://n8n.lglducci.com.br/webhook-test/pedidos"); // webhook de teste
       const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos"); // produção
       const data = await response.json();
+     useEffect(() => {
+  const fetchPedidos = async () => {
+    const response = await fetch("https://n8n.lglducci.com.br/webhook-test/pedidos");
+    const data = await response.json();
+
+    // Conversão de campos
+    const pedidosAdaptados = data.map((p) => ({
+      numero: p.pedido_id,            // transforma pedido_id em numero
+      status: p.status,
+      nomeCliente: p.nome,            // transforma nome em nomeCliente
+      valor: p.valor,
+      data: p.create_at               // transforma create_at em data
+    }));
+
+    setPedidos(pedidosAdaptados);
+  };
+
+  fetchPedidos();
+}, []);
+
+   
+   
+     
       setPedidos(data);
     };
 
     fetchPedidos();
   }, []);
 
+
+
+ 
   const avancarPedido = async (numero) => {
     await fetch("https://n8n.lglducci.com.br/webhook-test/avancar-pedido", {
       method: "POST",
@@ -23,6 +49,11 @@ export default function Dashboard() {
     window.location.reload(); // simples: recarrega pedidos
   };
 
+
+
+
+
+ 
   const formatarValor = (valor) =>
     valor?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
