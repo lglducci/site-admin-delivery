@@ -10,12 +10,14 @@ export default function Dashboard() {
     try {
       const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
       const data = await response.json();
-      console.log("🚀 Dados brutos recebidos:", data);
 
-      const lista = data.data || data.pedidos || data; // tentativa de extrair array correto
+      console.log("🚀 Dados brutos recebidos:", JSON.stringify(data, null, 2));
+
+      // Tente encontrar a chave correta onde está o array de pedidos
+      const lista = data.result || data.pedidos || data.data || [];
 
       if (!Array.isArray(lista)) {
-        console.error("❌ Resposta inesperada: não é um array", data);
+        console.error("❌ Resposta inesperada: não é um array", lista);
         return;
       }
 
