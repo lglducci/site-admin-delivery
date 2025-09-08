@@ -27,35 +27,45 @@
   <body>
     <h1>📦 Pedidos Atuais</h1>
     <div id="lista-pedidos">Carregando pedidos...</div>
+ <script>
+  fetch("https://webhook.lglducci.com.br/webhook/pedidos")
+    .then((r) => r.json())
+    .then((dados) => {
+      const container = document.getElementById("lista-pedidos");
+      container.innerHTML = "";
 
-    <script>
-      fetch("https://webhook.lglducci.com.br/webhook/pedidos")
-        .then((r) => r.json())
-        .then((dados) => {
-          const container = document.getElementById("lista-pedidos");
-          container.innerHTML = "";
+      if (!Array.isArray(dados) || dados.length === 0) {
+        container.innerHTML = "Nenhum pedido encontrado.";
+        return;
+      }
 
-          if (!Array.isArray(dados) || dados.length === 0) {
-            container.innerHTML = "Nenhum pedido encontrado.";
-            return;
-          }
+      dados.forEach((pedido) => {
+        const agora = new Date();
+        const dataPedido = new Date(pedido.data);
+        const minutosParado = (agora - dataPedido) / 60000;
+        const isParado = minutosParado > 15;
 
-          dados.forEach((pedido) => {
-            const div = document.createElement("div");
-            div.className = "pedido";
-            div.innerHTML = `
-              <div class="numero">Pedido nº ${pedido.numero}</div>
-              <div>Cliente: ${pedido.nomeCliente}</div>
-              <div>Data: ${new Date(pedido.data).toLocaleString("pt-BR")}</div>
-            `;
-            container.appendChild(div);
-          });
-        })
-        .catch((err) => {
-          document.getElementById("lista-pedidos").innerText =
-            "Erro ao carregar pedidos.";
-          console.error(err);
-        });
-    </script>
+        const div = document.createElement("div");
+        div.className = "pedido";
+        if (isParado) {
+          div.style.background = "#ffe5e5"; // vermelho claro
+          div.style.borderLeft = "5px solid red";
+        }
+
+        div.innerHTML = `
+          <div class="numero">Pedido nº ${pedido.numero}</div>
+          <div>Cliente: ${pedido.nomeCliente}</div>
+          <div>Data: ${new Date(pedido.data).toLocaleString("pt-BR")}</div>
+        `;
+        container.appendChild(div);
+      });
+    })
+    .catch((err) => {
+      document.getElementById("lista-pedidos").innerText =
+        "Erro ao carregar pedidos.";
+      console.error(err);
+    });
+</script>
+
   </body>
 </html>
