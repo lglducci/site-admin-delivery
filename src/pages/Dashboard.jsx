@@ -14,21 +14,21 @@ export default function Dashboard() {
 
       console.log("🚀 Dados brutos recebidos:", JSON.stringify(data, null, 2));
 
-      // Tente encontrar a chave correta onde está o array de pedidos
-      const lista = data.result || data.pedidos || data.data || [];
+ const lista = Array.isArray(data) ? data : [];
 
-      if (!Array.isArray(lista)) {
-        console.error("❌ Resposta inesperada: não é um array", lista);
-        return;
-      }
+if (!Array.isArray(lista)) {
+  console.error("❌ Resposta inesperada: não é um array", lista);
+  return;
+}
 
- const pedidosAdaptados = (Array.isArray(data) ? data : [data]).map((p) => ({
-  numero: p.pedido_id,
-  status: p.status?.toLowerCase(),
-  nomeCliente: p.nome,
-  valor: Number(p.valor),
-  data: p.create_at,
+const pedidosAdaptados = lista.map((p) => ({
+  numero: p.numero ?? p.pedido_id,
+  status: p.status?.toLowerCase() ?? "recebido",
+  nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
+  valor: Number(p.valor ?? 0),
+  data: p.data ?? p.create_at ?? new Date().toISOString(),
 }));
+
 
       console.log("✅ Adaptados:", pedidosAdaptados);
       setPedidos(pedidosAdaptados);
