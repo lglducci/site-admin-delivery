@@ -59,12 +59,14 @@ const pedidosAdaptados = lista.map((p) => ({
       timeStyle: "short",
     });
 
-  const colunas = [
-    { status: "recebido", titulo: "Recebido" },
-    { status: "producao", titulo: "Produção" },
-    { status: "entrega", titulo: "Entrega" },
-    { status: "concluido", titulo: "Concluído" },
-  ];
+const colunas = [
+  { status: "recebido", titulo: "Recebido", cor: "bg-blue-100" },
+  { status: "producao", titulo: "Produção", cor: "bg-yellow-100" },
+  { status: "entrega", titulo: "Entrega", cor: "bg-green-100" },
+  { status: "concluido", titulo: "Concluído", cor: "bg-gray-100" },
+];
+
+ 
 
   const handleSair = () => {
     localStorage.removeItem("token");
