@@ -15,8 +15,8 @@ export default function PedidoCard({ pedido }) {
   try {
 
 
-      const resposta = await fetch(`https://n8n.lglducci.com.br/webhook-test/avancar`, {
- //   const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`, {
+//      const resposta = await fetch(`https://n8n.lglducci.com.br/webhook-test/avancar`, {
+  const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,6 +61,7 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
 
 
