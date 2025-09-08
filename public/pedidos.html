@@ -27,7 +27,8 @@
   <body>
     <h1>📦 Pedidos Atuais</h1>
     <div id="lista-pedidos">Carregando pedidos...</div>
- <script>
+ 
+<script>
   fetch("https://webhook.lglducci.com.br/webhook/pedidos")
     .then((r) => r.json())
     .then((dados) => {
@@ -42,20 +43,29 @@
       dados.forEach((pedido) => {
         const agora = new Date();
         const dataPedido = new Date(pedido.data);
-        const minutosParado = (agora - dataPedido) / 60000;
+        const minutosParado = Math.floor((agora - dataPedido) / 60000);
         const isParado = minutosParado > 15;
 
         const div = document.createElement("div");
         div.className = "pedido";
         if (isParado) {
-          div.style.background = "#ffe5e5"; // vermelho claro
+          div.style.background = "#ffe5e5";
           div.style.borderLeft = "5px solid red";
         }
 
+        const tempoTexto = minutosParado >= 1
+          ? `⏱️ Aguardando há ${minutosParado} minuto${minutosParado > 1 ? 's' : ''}`
+          : `⏱️ Pedido recente`;
+
         div.innerHTML = `
-          <div class="numero">Pedido nº ${pedido.numero}</div>
-          <div>Cliente: ${pedido.nomeCliente}</div>
-          <div>Data: ${new Date(pedido.data).toLocaleString("pt-BR")}</div>
+          <div class="numero">📦 Pedido nº <strong>${pedido.numero}</strong></div>
+          <div>👤 Cliente: ${pedido.nomeCliente}</div>
+          <div>📅 Data: ${dataPedido.toLocaleString("pt-BR")}</div>
+          <div>${tempoTexto}</div>
+          <div style="margin-top: 10px;">
+            <button onclick="avancarPedido(${pedido.numero})" style="margin-right:10px;background:#007bff;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Avançar</button>
+            <button onclick="cancelarPedido(${pedido.numero})" style="background:#dc3545;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Cancelar</button>
+          </div>
         `;
         container.appendChild(div);
       });
@@ -65,6 +75,41 @@
         "Erro ao carregar pedidos.";
       console.error(err);
     });
+
+  function avancarPedido(numero) {
+    fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero }),
+    })
+      .then(() => {
+        alert(`Pedido ${numero} avançado!`);
+        location.reload();
+      })
+      .catch((err) => {
+        alert("Erro ao avançar pedido.");
+        console.error(err);
+      });
+  }
+
+  function cancelarPedido(numero) {
+    const confirmar = confirm(`Tem certeza que deseja cancelar o pedido ${numero}?`);
+    if (!confirmar) return;
+
+    fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero }),
+    })
+      .then(() => {
+        alert(`Pedido ${numero} cancelado!`);
+        location.reload();
+      })
+      .catch((err) => {
+        alert("Erro ao cancelar pedido.");
+        console.error(err);
+      });
+  }
 </script>
 
   </body>
