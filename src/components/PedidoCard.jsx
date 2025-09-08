@@ -1,9 +1,6 @@
- 
+  import React from "react";
 
-
-import React from "react";
-
-export default function PedidoCard({ pedido, onAvancar }) {
+export default function PedidoCard({ pedido }) {
   const hoje = new Date().toDateString();
   const dataPedido = new Date(pedido.data);
   const ehHoje = dataPedido.toDateString() === hoje;
@@ -14,6 +11,18 @@ export default function PedidoCard({ pedido, onAvancar }) {
   });
 
   const mostrarData = ehHoje ? "hoje" : dataPedido.toLocaleDateString("pt-BR");
+
+  const handleAvancar = async () => {
+    try {
+      const resposta = await fetch(
+        `https://webhook.lglducci.com.br/webhook/avancar?numero=${pedido.numero}`
+      );
+      if (!resposta.ok) throw new Error("Erro ao avançar pedido");
+      alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
+    } catch (erro) {
+      alert("Erro ao avançar o pedido.");
+    }
+  };
 
   return (
     <div className="flex justify-between items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 mb-2 text-sm font-medium text-gray-800 dark:text-white">
@@ -36,7 +45,7 @@ export default function PedidoCard({ pedido, onAvancar }) {
       </div>
 
       <button
-        onClick={() => onAvancar(pedido.numero)}
+        onClick={handleAvancar}
         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
       >
         Avançar
@@ -44,5 +53,6 @@ export default function PedidoCard({ pedido, onAvancar }) {
     </div>
   );
 }
+
 
 
