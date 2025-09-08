@@ -88,9 +88,9 @@ const colunas = [
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {colunas.map((coluna) => (
           <div
-            key={coluna.status}
-            className="bg-white dark:bg-gray-800 p-4 rounded shadow"
-          >
+          key={coluna.status}
+          className={`${coluna.cor} dark:bg-gray-800 p-4 rounded shadow`}
+        >
             <h2 className="text-lg font-semibold mb-2">{coluna.titulo}</h2>
         
            {pedidos
