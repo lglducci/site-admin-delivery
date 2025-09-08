@@ -7,7 +7,7 @@ export default function PedidoCard({ pedido }) {
     hour: "2-digit",
     minute: "2-digit",
   });
-
+   
   const handleAvancar = async () => {
     try {
       const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`, {
@@ -77,3 +77,4 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
