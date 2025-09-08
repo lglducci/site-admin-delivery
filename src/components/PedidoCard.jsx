@@ -14,12 +14,10 @@ export default function PedidoCard({ pedido }) {
 
   const handleAvancar = async () => {
     try {
-      const resposta = await fetch(
-        `/https://webhook.lglducci.com.br/webhook/avancar?numero=${pedido.numero}`
-         
+      const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`);
+
        
-        
-      );
+      
       if (!resposta.ok) throw new Error("Erro ao avançar pedido");
       alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
     } catch (erro) {
@@ -56,6 +54,7 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
 
 
