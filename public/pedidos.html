@@ -2,82 +2,151 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Pedidos Atuais</title>
+    <title>📦 Pedidos Atuais</title>
     <style>
       body {
         font-family: sans-serif;
-        background: #f3f3f3;
+        background-color: #f5f5f5;
         padding: 20px;
       }
 
       h1 {
-        color: #333;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #222;
       }
 
       .pedido {
-        background: white;
-        padding: 16px;
-        border-left: 6px solid #3b82f6;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background: #fff;
         margin-bottom: 20px;
+        padding: 15px;
+        border-left: 5px solid #007bff;
         border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: 0.3s;
       }
 
-      .pedido p {
-        margin: 6px 0;
+      .pedido.parado {
+        border-left: 5px solid red;
+        background: #ffe5e5;
       }
 
-      .botoes {
-        margin-top: 10px;
-        display: flex;
-        gap: 10px;
-      }
-
-      .btn {
-        padding: 6px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        color: white;
+      .numero {
+        font-size: 18px;
         font-weight: bold;
       }
 
-      .btn.avancar {
-        background-color: #3b82f6;
+      .info {
+        margin-top: 5px;
+        font-size: 14px;
       }
 
-      .btn.cancelar {
-        background-color: #ef4444;
+      .acoes {
+        margin-top: 15px;
+      }
+
+      .btn {
+        padding: 8px 14px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .btn-avancar {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .btn-cancelar {
+        background-color: #dc3545;
+        color: white;
       }
     </style>
   </head>
-
   <body>
     <h1>📦 Pedidos Atuais</h1>
+    <div id="lista-pedidos">Carregando...</div>
 
-    <div class="pedido">
-      <p><strong>Pedido nº 204</strong></p>
-      <p>👤 Cliente: Luis Gustavo Landucci</p>
-      <p>📅 Data: 08/09/2025</p>
-      <p>⏱️ Pedido recente</p>
-      <div class="botoes">
-        <button class="btn avancar">Avançar</button>
-        <button class="btn cancelar">Cancelar</button>
-      </div>
-    </div>
+    <script>
+      function carregarPedidos() {
+        fetch("https://webhook.lglducci.com.br/webhook/pedidos")
+          .then((r) => r.json())
+          .then((dados) => {
+            const container = document.getElementById("lista-pedidos");
+            container.innerHTML = "";
 
-    <div class="pedido">
-      <p><strong>Pedido nº 205</strong></p>
-      <p>👤 Cliente: João Pedro</p>
-      <p>📅 Data: 08/09/2025</p>
-      <p>⏱️ Pedido recente</p>
-      <div class="botoes">
-        <button class="btn avancar">Avançar</button>
-        <button class="btn cancelar">Cancelar</button>
-      </div>
-    </div>
+            if (!Array.isArray(dados) || dados.length === 0) {
+              container.innerHTML = "Nenhum pedido encontrado.";
+              return;
+            }
+
+            dados.forEach((pedido) => {
+              const dataPedido = new Date(pedido.data);
+              const agora = new Date();
+              const minutos = Math.floor((agora - dataPedido) / 60000);
+              const parado = minutos > 15;
+
+              const div = document.createElement("div");
+              div.className = "pedido" + (parado ? " parado" : "");
+
+              div.innerHTML = `
+                <div class="numero">Pedido nº ${pedido.numero}</div>
+                <div class="info">Cliente: ${pedido.nomeCliente}</div>
+                <div class="info">Data: ${dataPedido.toLocaleString("pt-BR")}</div>
+                <div class="info">⏱️ Aguardando há ${minutos} min</div>
+                <div class="acoes">
+                  <button class="btn btn-avancar" onclick="avancarPedido(${pedido.numero})">➤ Avançar</button>
+                  <button class="btn btn-cancelar" onclick="cancelarPedido(${pedido.numero})">✖ Cancelar</button>
+                </div>
+              `;
+
+              container.appendChild(div);
+            });
+          })
+          .catch((err) => {
+            document.getElementById("lista-pedidos").innerText =
+              "Erro ao carregar pedidos.";
+            console.error(err);
+          });
+      }
+
+      function avancarPedido(numero) {
+        fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero }),
+        })
+          .then(() => {
+            alert(`Pedido ${numero} avançado!`);
+            carregarPedidos();
+          })
+          .catch((err) => {
+            alert("Erro ao avançar pedido.");
+            console.error(err);
+          });
+      }
+
+      function cancelarPedido(numero) {
+        if (!confirm(`Tem certeza que deseja cancelar o pedido ${numero}?`)) return;
+
+        fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero }),
+        })
+          .then(() => {
+            alert(`Pedido ${numero} cancelado!`);
+            carregarPedidos();
+          })
+          .catch((err) => {
+            alert("Erro ao cancelar pedido.");
+            console.error(err);
+          });
+      }
+
+      carregarPedidos();
+    </script>
   </body>
 </html>
