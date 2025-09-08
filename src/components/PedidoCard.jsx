@@ -12,15 +12,15 @@ export default function PedidoCard({ pedido }) {
 
   const mostrarData = ehHoje ? "hoje" : dataPedido.toLocaleDateString("pt-BR");
 
- // const handleAvancar = async () => {
-   // try {
-   //   const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`);
-   //   if (!resposta.ok) throw new Error("Erro ao avançar pedido");
-   //   alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
-  //  } catch (erro) {
-  //    alert("Erro ao avançar o pedido.");
-  //  }
-//  };
+ const handleAvancar = async () => {
+    try {
+      const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`);
+      if (!resposta.ok) throw new Error("Erro ao avançar pedido");
+      alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
+    } catch (erro) {
+    alert("Erro ao avançar o pedido.");
+   }
+  };
 
 
    const avancarPedido = async (numero) => {
@@ -61,4 +61,5 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
