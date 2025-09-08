@@ -15,7 +15,7 @@ export default function Dashboard() {
       console.log("🚀 Dados brutos recebidos:", JSON.stringify(data, null, 2));
 
  const lista = Array.isArray(data) ? data : [];
-
+console.log("🚨 Lista original:", lista);
 if (!Array.isArray(lista)) {
   console.error("❌ Resposta inesperada: não é um array", lista);
   return;
