@@ -15,9 +15,9 @@ export default function PedidoCard({ pedido }) {
   const handleAvancar = async () => {
     try {
       const resposta = await fetch(
-        `https://n8n.lglducci.com.br/webhook-test/avancar?numero=${pedido.numero}`
+        `/https://webhook.lglducci.com.br/webhook/avancar?numero=${pedido.numero}`
          
-        //https://webhook.lglducci.com.br/webhook/avancar
+       
         
       );
       if (!resposta.ok) throw new Error("Erro ao avançar pedido");
@@ -56,6 +56,7 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
 
 
