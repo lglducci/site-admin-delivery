@@ -42,7 +42,7 @@ const pedidosAdaptados = lista.map((p) => ({
 
 
   const avancarPedido = async (numero) => {
-    await fetch("https://n8n.lglducci.com.br/webhook-test/avancar-pedido", {
+    await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ numero }),
