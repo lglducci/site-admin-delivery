@@ -19,7 +19,7 @@ export default function Dashboard() {
 if (!Array.isArray(lista)) {
   console.error("❌ Resposta inesperada: não é um array", lista);
   return;
-}
+}  
 
 const pedidosAdaptados = lista.map((p) => ({
   numero: p.numero ?? p.pedido_id,
