@@ -1,50 +1,27 @@
- <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Detalhes do Pedido</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
-    h1 { margin-bottom: 20px; }
-    pre { background: #f3f3f3; padding: 10px; border-radius: 5px; white-space: pre-wrap; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-    .label { font-weight: bold; color: #555; margin-top: 10px; display: block; }
-  </style>
-</head>
-<body>
-  <h1>Detalhes do Pedido</h1>
-  <div id="detalhes" class="card">Carregando...</div>
+ <div class="card-pedido shadow-md rounded p-4 mb-3 bg-white">
+  <div class="flex justify-between items-center mb-2">
+    <div>
+      <h3 class="font-bold text-lg">Pedido nº 173</h3>
+      <p class="text-gray-600 text-sm">Luis Gustavo - PIX</p>
+    </div>
+    <div class="text-sm">
+      <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Recebido</span>
+    </div>
+  </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const numero = params.get("numero");
-    const detalhesDiv = document.getElementById("detalhes");
+  <div class="text-sm text-gray-800 mb-2">
+    <ul class="list-disc pl-5">
+      <li>2x Coca-Cola 2L - R$ 26,00</li>
+      <li>1/2 Calabria + 1/2 Baiana Fresca - R$ 64,00</li>
+      <li>Mussarela - R$ 50,00</li>
+    </ul>
+    <p class="mt-2 font-semibold">Total: R$ 143,00</p>
+    <p class="text-xs text-gray-500 mt-1">Rua das Bandeira 19 - Patriota</p>
+    <p class="text-xs text-gray-500">Comentário: não quero orégano</p>
+  </div>
 
-    if (!numero) {
-      detalhesDiv.innerHTML = "<b>Erro:</b> número do pedido não informado.";
-    } else {
-      fetch(`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}`)
-        .then(res => res.json())
-        .then(data => {
-          const p = data[0];
-          detalhesDiv.innerHTML = `
-            <div><span class="label">Pedido:</span> nº ${numero}</div>
-            <div><span class="label">Cliente:</span> ${p.nome}</div>
-            <div><span class="label">Endereço:</span> ${p.endereço}, Bairro: ${p.bairro}</div>
-            <div><span class="label">Pagamento:</span> ${p.tipo_cobranca}</div>
-            <div><span class="label">Resumo:</span><pre>${p.resumo}</pre></div>
-          `;
-        })
-        .catch(err => {
-          detalhesDiv.innerHTML = "Erro ao carregar dados.";
-          console.error(err);
-        });
-    }
-  </script>
-</body>
-</html>
+  <div class="flex gap-2">
+    <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">Avançar ⏩</button>
+    <button class="bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1 rounded">Cancelar ❌</button>
+  </div>
+</div>
