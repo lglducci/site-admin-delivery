@@ -1,0 +1,50 @@
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detalhes do Pedido</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 20px; }
+    pre { background: #f3f3f3; padding: 10px; border-radius: 5px; white-space: pre-wrap; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .label { font-weight: bold; color: #555; margin-top: 10px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Detalhes do Pedido</h1>
+  <div id="detalhes" class="card">Carregando...</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const numero = params.get("numero");
+    const detalhesDiv = document.getElementById("detalhes");
+
+    if (!numero) {
+      detalhesDiv.innerHTML = "<b>Erro:</b> número do pedido não informado.";
+    } else {
+      fetch(`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}`)
+        .then(res => res.json())
+        .then(data => {
+          const p = data[0];
+          detalhesDiv.innerHTML = `
+            <div><span class="label">Pedido:</span> nº ${numero}</div>
+            <div><span class="label">Cliente:</span> ${p.nome}</div>
+            <div><span class="label">Endereço:</span> ${p.endereço}, Bairro: ${p.bairro}</div>
+            <div><span class="label">Pagamento:</span> ${p.tipo_cobranca}</div>
+            <div><span class="label">Resumo:</span><pre>${p.resumo}</pre></div>
+          `;
+        })
+        .catch(err => {
+          detalhesDiv.innerHTML = "Erro ao carregar dados.";
+          console.error(err);
+        });
+    }
+  </script>
+</body>
+</html>
