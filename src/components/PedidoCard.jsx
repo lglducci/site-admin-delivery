@@ -21,7 +21,7 @@ export default function PedidoCard({ pedido }) {
     } catch (erro) {
       alert("Erro ao avançar o pedido.");
     }
-  };
+  };         
 
   const cancelarPedido = async (numero) => {
     try {
@@ -77,4 +77,5 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
