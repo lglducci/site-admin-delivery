@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -9,108 +9,109 @@
         background: #f3f3f3;
         padding: 20px;
       }
+
       h1 {
         color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
+
       .pedido {
         background: white;
         margin: 10px 0;
         padding: 10px;
         border-left: 5px solid #007bff;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 6px;
       }
+
+      .pedido.atrasado {
+        border-left-color: red;
+      }
+
       .numero {
         font-weight: bold;
+        font-size: 18px;
+      }
+
+      .botao {
+        margin-top: 8px;
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+      }
+
+      .btn-avancar {
+        background-color: #007bff;
+      }
+
+      .btn-cancelar {
+        background-color: #dc3545;
       }
     </style>
   </head>
   <body>
     <h1>📦 Pedidos Atuais</h1>
     <div id="lista-pedidos">Carregando pedidos...</div>
- 
-<script>
-  fetch("https://webhook.lglducci.com.br/webhook/pedidos")
-    .then((r) => r.json())
-    .then((dados) => {
-      const container = document.getElementById("lista-pedidos");
-      container.innerHTML = "";
 
-      if (!Array.isArray(dados) || dados.length === 0) {
-        container.innerHTML = "Nenhum pedido encontrado.";
-        return;
+    <script>
+      const container = document.getElementById("lista-pedidos");
+
+      fetch("https://webhook.lglducci.com.br/webhook/pedidos")
+        .then((r) => r.json())
+        .then((dados) => {
+          container.innerHTML = "";
+
+          if (!Array.isArray(dados) || dados.length === 0) {
+            container.innerHTML = "Nenhum pedido encontrado.";
+            return;
+          }
+
+          dados.forEach((pedido) => {
+            const div = document.createElement("div");
+            const dataPedido = new Date(pedido.data);
+            const agora = new Date();
+            const minutos = Math.floor((agora - dataPedido) / 60000);
+            const atrasado = minutos > 15;
+
+            div.className = "pedido" + (atrasado ? " atrasado" : "");
+
+            div.innerHTML = `
+              <div class="numero">📦 Pedido nº ${pedido.numero || "?"}</div>
+              <div>🧑 Cliente: ${pedido.nomeCliente || "Desconhecido"}</div>
+              <div>📅 Data: ${isNaN(dataPedido) ? "Data inválida" : dataPedido.toLocaleString("pt-BR")}</div>
+              <div>⏱️ ${atrasado ? "⏰ Pedido parado há mais de 15 minutos" : "Pedido recente"}</div>
+              <div class="botao">
+                <button class="btn-avancar" onclick="avancar(${pedido.numero})">Avançar</button>
+                <button class="btn-cancelar" onclick="cancelar(${pedido.numero})">Cancelar</button>
+              </div>
+            `;
+
+            container.appendChild(div);
+          });
+        })
+        .catch((err) => {
+          container.innerText = "Erro ao carregar pedidos.";
+          console.error(err);
+        });
+
+      function avancar(numero) {
+        alert("Avançar pedido: " + numero);
+        // Aqui você pode fazer um fetch para seu webhook
       }
 
-      dados.forEach((pedido) => {
-        const agora = new Date();
-        const dataPedido = new Date(pedido.data);
-        const minutosParado = Math.floor((agora - dataPedido) / 60000);
-        const isParado = minutosParado > 15;
-
-        const div = document.createElement("div");
-        div.className = "pedido";
-        if (isParado) {
-          div.style.background = "#ffe5e5";
-          div.style.borderLeft = "5px solid red";
-        }
-
-        const tempoTexto = minutosParado >= 1
-          ? `⏱️ Aguardando há ${minutosParado} minuto${minutosParado > 1 ? 's' : ''}`
-          : `⏱️ Pedido recente`;
-
-        div.innerHTML = `
-          <div class="numero">📦 Pedido nº <strong>${pedido.numero}</strong></div>
-          <div>👤 Cliente: ${pedido.nomeCliente}</div>
-          <div>📅 Data: ${dataPedido.toLocaleString("pt-BR")}</div>
-          <div>${tempoTexto}</div>
-          <div style="margin-top: 10px;">
-            <button onclick="avancarPedido(${pedido.numero})" style="margin-right:10px;background:#007bff;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Avançar</button>
-            <button onclick="cancelarPedido(${pedido.numero})" style="background:#dc3545;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Cancelar</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    })
-    .catch((err) => {
-      document.getElementById("lista-pedidos").innerText =
-        "Erro ao carregar pedidos.";
-      console.error(err);
-    });
-
-  function avancarPedido(numero) {
-    fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero }),
-    })
-      .then(() => {
-        alert(`Pedido ${numero} avançado!`);
-        location.reload();
-      })
-      .catch((err) => {
-        alert("Erro ao avançar pedido.");
-        console.error(err);
-      });
-  }
-
-  function cancelarPedido(numero) {
-    const confirmar = confirm(`Tem certeza que deseja cancelar o pedido ${numero}?`);
-    if (!confirmar) return;
-
-    fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero }),
-    })
-      .then(() => {
-        alert(`Pedido ${numero} cancelado!`);
-        location.reload();
-      })
-      .catch((err) => {
-        alert("Erro ao cancelar pedido.");
-        console.error(err);
-      });
-  }
-</script>
-
+      function cancelar(numero) {
+        alert("Cancelar pedido: " + numero);
+        // Aqui você pode fazer um fetch para cancelar o pedido
+      }
+    </script>
   </body>
 </html>
