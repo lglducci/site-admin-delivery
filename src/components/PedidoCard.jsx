@@ -1,69 +1,53 @@
- import { ArrowRight, XCircle } from "lucide-react"; // ⬅️ Ícones
-import React from "react";
+ import React from "react";
 
-const PedidoCard = ({ pedido, onAvancar }) => {
-  const agora = new Date();
+export default function PedidoCard({ pedido }) {
+  const hoje = new Date().toDateString();
   const dataPedido = new Date(pedido.data);
-  const minutosParado = Math.floor((agora - dataPedido) / 60000);
-  const isParado = minutosParado > 15;
+  const ehHoje = dataPedido.toDateString() === hoje;
 
-  const tempoTexto =
-    minutosParado >= 1
-      ? `⏱️ Aguardando há ${minutosParado} minuto${minutosParado > 1 ? "s" : ""}`
-      : `⏱️ Pedido recente`;
+  const hora = dataPedido.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-  const cancelarPedido = () => {
-    const confirmar = window.confirm(
-      `Tem certeza que deseja cancelar o pedido nº ${pedido.numero}?`
-    );
-    if (!confirmar) return;
+  const mostrarData = ehHoje ? "hoje" : dataPedido.toLocaleDateString("pt-BR");
 
-    fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero: pedido.numero }),
-    })
-      .then(() => {
-        alert(`Pedido ${pedido.numero} cancelado!`);
-        location.reload();
-      })
-      .catch((err) => {
-        alert("Erro ao cancelar pedido.");
-        console.error(err);
-      });
+  const handleAvancar = async () => {
+    try {
+      const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`);
+      if (!resposta.ok) throw new Error("Erro ao avançar pedido");
+      alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
+    } catch (erro) {
+      alert("Erro ao avançar o pedido.");
+    }
   };
 
   return (
-    <div
-      className={`bg-white p-3 my-2 rounded shadow-md ${
-        isParado ? "border-l-4 border-red-600 bg-red-50" : "border-l-4 border-blue-500"
-      }`}
-    >
-      <div className="font-semibold">
-        📦 nº {pedido.numero} - {pedido.nomeCliente}
+    <div className="flex justify-between items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 mb-2 text-sm font-medium text-gray-800 dark:text-white">
+      <div className="flex-1">
+        <span className="text-blue-900 dark:text-blue-300">
+          <a
+            href={`/detalhes.html?numero=${pedido.numero}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            nº {pedido.numero}
+          </a>{" "}
+          - {pedido.nomeCliente}
+        </span>
       </div>
-      <div className="text-sm text-gray-600">{tempoTexto}</div>
-      <div className="text-xs text-gray-500 mb-2">
-        {new Date(pedido.data).toLocaleString("pt-BR")}
+
+      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">
+        {mostrarData} às {hora}
       </div>
-      <div className="flex gap-2">
-        <button
-          onClick={() => onAvancar(pedido.numero)}
-          className="bg-blue-500 text-white p-1 rounded hover:bg-blue-600"
-          title="Avançar"
-        >
-          <ArrowRight size={18} />
-        </button>
-        <button
-          onClick={cancelarPedido}
-          className="bg-red-500 text-white p-1 rounded hover:bg-red-600"
-          title="Cancelar"
-        >
-          <XCircle size={18} />
-        </button>
-      </div>
+
+      <button
+        onClick={handleAvancar}
+        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
+      >
+        Avançar
+      </button>
     </div>
   );
-};
-
-export default PedidoCard;
+}
