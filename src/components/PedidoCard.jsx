@@ -60,12 +60,12 @@ export default function PedidoCard({ pedido }) {
       </div>
 
       <div className="flex space-x-2 items-center">
-        <span className="text-blue-600 dark:text-blue-300 text-sm">📦</span>
+        <span className="text-blue-600 dark:text-blue-300 text-sm"></span>
         <button
           onClick={handleAvancar}
           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
         >
-           ▶️
+          --> ▶️
         </button>
         <button
           onClick={() => cancelarPedido(pedido.numero)}
@@ -78,6 +78,7 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
 
 
