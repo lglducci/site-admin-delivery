@@ -66,19 +66,20 @@ export default function PedidoCard({ pedido }) {
           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
         >
            ▶️
-         //Avançar
+         
         </button>
         <button
           onClick={() => cancelarPedido(pedido.numero)}
           className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
         >
            ❌
-         //Cancelar
+         
         </button>
       </div>
     </div>
   );
 }
+
 
 
 
