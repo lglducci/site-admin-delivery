@@ -65,17 +65,20 @@ export default function PedidoCard({ pedido }) {
           onClick={handleAvancar}
           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
         >
-          Avançar
+           ▶️
+         //Avançar
         </button>
         <button
           onClick={() => cancelarPedido(pedido.numero)}
           className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
         >
-          Cancelar
+           ❌
+         //Cancelar
         </button>
       </div>
     </div>
   );
 }
+
 
 
