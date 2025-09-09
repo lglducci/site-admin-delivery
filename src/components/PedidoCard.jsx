@@ -21,7 +21,7 @@ export default function PedidoCard({ pedido }) {
     } catch (erro) {
       alert("Erro ao avançar o pedido.");
     }
-  };         
+  };          
 
   const cancelarPedido = async (numero) => {
     try {
@@ -66,7 +66,6 @@ export default function PedidoCard({ pedido }) {
           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
         >
            ▶️
-         
         </button>
         <button
           onClick={() => cancelarPedido(pedido.numero)}
@@ -79,6 +78,7 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
 
 
