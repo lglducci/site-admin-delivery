@@ -7,14 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // 🔒 tenta usar o contexto, mas não trava se ele não existir ainda
-  let salvarEmpresaSafe = () => {};
-  try {
-    const { salvarEmpresa } = useEmpresa();
-    if (salvarEmpresa) salvarEmpresaSafe = salvarEmpresa;
-  } catch (e) {
-    console.warn("Contexto da empresa ainda não carregou (seguro)");
-  }
+  const { salvarEmpresa } = useEmpresa();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,23 +20,26 @@ export default function Login() {
       });
 
       const data = await response.json();
+      console.log("🔐 Resposta do login:", data);
 
-    if (data?.id_empresa) {
-  salvarEmpresaSafe({
-    id_empresa: data.id_empresa,
-    nome: data.nome_empresa,
-    saudacao: data.saudacao,
-  });
+      // 🔸 valida se veio o id_empresa
+      if (data?.id_empresa) {
+        const empresaData = {
+          id_empresa: data.id_empresa,
+          nome_empresa: data.nome_empresa,
+          saudacao: data.saudacao,
+        };
 
-  localStorage.setItem("user_id", data.user_id);
-  localStorage.setItem("email", data.email);
-  navigate("/dashboard");
-} else {
-  alert("Usuário inválido ou empresa não encontrada.");
-}
+        salvarEmpresa(empresaData);
+        localStorage.setItem("empresa", JSON.stringify(empresaData));
 
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("email", data.email);
 
-     
+        navigate("/dashboard");
+      } else {
+        alert("Usuário inválido ou empresa não encontrada.");
+      }
     } catch (error) {
       console.error("Erro no login:", error);
       alert("Erro ao conectar com o servidor.");
