@@ -7,28 +7,37 @@ export default function PedidoCard({ pedido }) {
     hour: "2-digit",
     minute: "2-digit",
   });
-   
+
+  const empresaId = localStorage.getItem("id_empresa"); // 🟢 pega o id_empresa salvo no login
+
   const handleAvancar = async () => {
     try {
       const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero: pedido.numero }),
+        body: JSON.stringify({
+          numero: pedido.numero,
+          id_empresa: empresaId, // 🟢 envia junto
+        }),
       });
+
       if (!resposta.ok) throw new Error("Erro ao avançar pedido");
       alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
       window.location.reload();
     } catch (erro) {
       alert("Erro ao avançar o pedido.");
     }
-  };          
+  };
 
   const cancelarPedido = async (numero) => {
     try {
       const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/cancelar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero }),
+        body: JSON.stringify({
+          numero,
+          id_empresa: empresaId, // 🟢 envia junto
+        }),
       });
 
       if (!resposta.ok) throw new Error("Erro ao cancelar pedido");
@@ -60,27 +69,21 @@ export default function PedidoCard({ pedido }) {
       </div>
 
       <div className="flex space-x-2 items-center">
-        <span className="text-blue-600 dark:text-blue-300 text-sm"></span>
         <button
           onClick={handleAvancar}
           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
+          title="Avançar pedido"
         >
-          --> ▶️
+          ▶️
         </button>
         <button
           onClick={() => cancelarPedido(pedido.numero)}
           className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
+          title="Cancelar pedido"
         >
-           ❌
-         
+          ❌
         </button>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
