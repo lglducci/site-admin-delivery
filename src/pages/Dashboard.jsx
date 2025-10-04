@@ -18,38 +18,39 @@ export default function Dashboard() {
     console.warn("Contexto da empresa ainda não carregado (seguro)");
   }
 
-  useEffect(() => {
- const fetchPedidos = async () => {
-  try {
-    // tenta pegar o id da empresa do contexto, senão busca no localStorage
+useEffect(() => {
+  const fetchPedidos = async () => {
+    if (!carregado) return; // espera o contexto
     const empresaId =
       (empresa && empresa.id_empresa) ||
-      localStorage.getItem("id_empresa") ||
-      1; // valor padrão se não houver (ex: 1)
+      localStorage.getItem("id_empresa");
+
+    if (!empresaId) {
+      console.warn("Nenhum id_empresa disponível ainda");
+      return;
+    }
 
     const response = await fetch(
       `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${empresaId}`
     );
-
     const data = await response.json();
+    const lista = Array.isArray(data) ? data : [];
 
-        const lista = Array.isArray(data) ? data : [];
-        const pedidosAdaptados = lista.map((p) => ({
-          numero: p.numero ?? p.pedido_id,
-          status: p.status?.toLowerCase() ?? "recebido",
-          nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
-          valor: Number(p.valor ?? 0),
-          data: p.data ?? p.create_at ?? new Date().toISOString(),
-        }));
+    const pedidosAdaptados = lista.map((p) => ({
+      numero: p.numero ?? p.pedido_id,
+      status: p.status?.toLowerCase() ?? "recebido",
+      nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
+      valor: Number(p.valor ?? 0),
+      data: p.data ?? p.create_at ?? new Date().toISOString(),
+    }));
 
-        setPedidos(pedidosAdaptados);
-      } catch (error) {
-        console.error("Erro ao buscar pedidos:", error);
-      }
-    };
+    setPedidos(pedidosAdaptados);
+  };
 
-    fetchPedidos();
-  }, []);
+  fetchPedidos();
+}, [empresa, carregado]);
+
+  
 
   const avancarPedido = async (numero) => {
     await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
