@@ -2,6 +2,20 @@
 import { useNavigate } from "react-router-dom";
 import { useEmpresa } from "../context/EmpresaContext";
 
+
+
+// debug
+console.log("Importou useEmpresa:", useEmpresa);
+
+export default function Login() {
+  try {
+    const { salvarEmpresa } = useEmpresa();
+  } catch (e) {
+    console.error("Erro ao chamar useEmpresa():", e);
+  }
+  // resto do componente...
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
