@@ -1,6 +1,10 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PedidoCard from "../components/PedidoCard";
+import { useEmpresa } from "../context/EmpresaContext";
+
+const { empresa, limparEmpresa } = useEmpresa();
+
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
@@ -76,7 +80,11 @@ const colunas = [
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-900 dark:text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Painel de Pedidos</h1>
+       
+       <h1 className="text-3xl font-bold">
+         {empresa ? `Painel de ${empresa.nome}` : "Painel de Pedidos"}
+       </h1>
+       
         <button
           onClick={handleSair}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
