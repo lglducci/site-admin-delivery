@@ -146,6 +146,14 @@ return (
               >
                 📈 Relatórios
               </button>
+
+             <button
+              onClick={() => window.open("/cardapio", "_self")}
+              className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            >
+              🍕 Cardápio
+            </button>
+
             </div>
           )}
         </div>
