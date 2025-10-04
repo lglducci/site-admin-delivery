@@ -3,15 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PedidoCard from "../components/PedidoCard";
 import { useEmpresa } from "../context/EmpresaContext";
 
-
-if (!empresa && !localStorage.getItem("id_empresa")) {
-  return (
-    <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      <h2>Carregando empresa...</h2>
-    </div>
-  );
-}
-
+ 
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
@@ -28,6 +20,19 @@ export default function Dashboard() {
     console.warn("Contexto da empresa ainda não carregado (seguro)");
   }
 
+
+
+if (!empresa && !localStorage.getItem("id_empresa")) {
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      <h2>Carregando empresa...</h2>
+    </div>
+  );
+}
+
+
+
+  
 useEffect(() => {
   const fetchPedidos = async () => {
     if (!carregado) return; // espera o contexto
