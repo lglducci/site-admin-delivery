@@ -4,116 +4,138 @@ import { useEmpresa } from "../context/EmpresaContext";
 export default function Cardapio() {
   const { empresa, carregado } = useEmpresa();
   const [itens, setItens] = useState([]);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("TODOS");
   const [erro, setErro] = useState(null);
 
+  const categoriasFixas = ["TODOS", "PIZZA", "ESFIRRA", "REFRIGERANTE", "ÁGUA", "ALCOÓLICA", "BORDA"];
+
   useEffect(() => {
-    if (!carregado) return;
+    if (!carregado || !empresa?.id_empresa) return;
 
-    if (!empresa?.id_empresa) {
-      setErro("Nenhuma empresa logada.");
-      return;
-    }
-
-    const fetchCardapio = async () => {
+    const carregarCardapio = async () => {
       try {
-        console.log("🔎 Buscando cardápio para empresa:", empresa.id_empresa);
-
         const res = await fetch(
-          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`,
-          { cache: "no-store" }
+          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`
         );
-
-        if (!res.ok) throw new Error("Falha na requisição");
-
-        // pega a resposta como texto bruto
-        const texto = await res.text();
-        console.log("📦 Resposta bruta (texto):", texto);
-
-        // tenta converter em JSON
-        const data = JSON.parse(texto || "[]");
-
-        // adapta para lista
-        const lista = Array.isArray(data)
-          ? data
-          : Array.isArray(data.data)
-          ? data.data
-          : [];
-
-        setItens(lista);
+        if (!res.ok) throw new Error("Erro ao buscar cardápio");
+        const data = await res.json();
+        setItens(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("❌ Erro ao buscar cardápio:", err);
-        setErro("Erro ao buscar cardápio: " + err.message);
+        console.error("❌ Erro:", err);
+        setErro("Erro ao carregar cardápio.");
       }
     };
 
-    fetchCardapio();
+    carregarCardapio();
   }, [empresa, carregado]);
 
-  if (!carregado) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        <p>Carregando empresa...</p>
-      </div>
-    );
-  }
+  const itensFiltrados =
+    categoriaSelecionada === "TODOS"
+      ? itens
+      : itens.filter(
+          (i) => i.categoria?.toUpperCase() === categoriaSelecionada
+        );
 
-  if (erro) {
+  if (!carregado)
     return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        <p>{erro}</p>
+      <div className="flex justify-center items-center h-screen text-gray-500">
+        Carregando empresa...
       </div>
     );
-  }
 
-  if (!itens.length) {
+  if (erro)
     return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        <p>Carregando cardápio...</p>
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {erro}
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Cardápio de {empresa?.nome_empresa || "Minha Pizzaria"}
-      </h1>
+    <div className="min-h-screen bg-gray-50 text-gray-800 p-6">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          🍕 Cardápio
+        </h1>
+        <span className="text-sm text-gray-500">
+          Itens: {itensFiltrados.length}
+        </span>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {itens.map((item) => (
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {categoriasFixas.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setCategoriaSelecionada(cat)}
+            className={`px-4 py-2 rounded-full font-semibold text-sm transition ${
+              categoriaSelecionada === cat
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid de produtos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+        {itensFiltrados.map((item) => (
           <div
             key={item.id}
-            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow hover:shadow-lg transition"
+            className="bg-white rounded-lg shadow hover:shadow-lg transition duration-300 overflow-hidden border border-gray-100"
           >
             <img
               src={
                 item.imagem ||
                 "https://placehold.co/400x250?text=Sem+Imagem"
               }
-              alt={item.nome || "Sem nome"}
-              className="w-full h-48 object-cover rounded-md mb-3"
+              alt={item.nome}
+              className="w-full h-48 object-cover"
             />
-            <h2 className="text-lg font-semibold">{item.nome}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {item.descricao || "Sem descrição"}
-            </p>
-            <p className="text-lg font-bold text-green-600">
-              R$ {item.preco_grande || item.preco || (item.tamanhos?.[0]?.preco ?? 0)}
-            </p>
-            <button
-              onClick={() =>
-                window.open(
-                  `https://webhook.lglducci.com.br/webhook/editar_item?id=${item.id}`,
-                  "_blank"
-                )
-              }
-              className="mt-3 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
-            >
-              ✏️ Editar
-            </button>
+            <div className="p-4">
+              <h2 className="font-bold text-lg">{item.nome}</h2>
+              <p className="text-sm text-gray-600 mb-3">
+                {item.descricao || "Sem descrição"}
+              </p>
+
+              {/* Tamanhos */}
+              <div className="flex flex-col gap-2 text-sm">
+                {item.tamanhos?.map((t) => (
+                  <div
+                    key={t.nome}
+                    className="bg-blue-50 border border-blue-200 rounded px-3 py-1 flex justify-between items-center"
+                  >
+                    <span>{t.nome === "M" ? "Média" : t.nome === "G" ? "Grande" : t.nome}</span>
+                    <span className="font-bold text-blue-700">
+                      R$ {t.preco?.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() =>
+                  window.open(
+                    `https://webhook.lglducci.com.br/webhook/editar_item?id=${item.id}`,
+                    "_blank"
+                  )
+                }
+                className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
+              >
+                ✏️ Editar
+              </button>
+            </div>
           </div>
         ))}
       </div>
+
+      {itensFiltrados.length === 0 && (
+        <div className="text-center text-gray-500 mt-10">
+          Nenhum item encontrado
+        </div>
+      )}
     </div>
   );
 }
