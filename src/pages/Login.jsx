@@ -1,13 +1,20 @@
  import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEmpresa } from "../context/EmpresaContext";
- 
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { salvarEmpresa } = useEmpresa();
+
+  // 🔒 tenta usar o contexto, mas não trava se ele não existir ainda
+  let salvarEmpresaSafe = () => {};
+  try {
+    const { salvarEmpresa } = useEmpresa();
+    if (salvarEmpresa) salvarEmpresaSafe = salvarEmpresa;
+  } catch (e) {
+    console.warn("Contexto da empresa ainda não carregou (seguro)");
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +29,7 @@ export default function Login() {
       const data = await response.json();
 
       if (data?.success) {
-        salvarEmpresa({
+        salvarEmpresaSafe({
           id_empresa: data.id_empresa,
           nome: data.nome_empresa,
           saudacao: data.saudacao,
