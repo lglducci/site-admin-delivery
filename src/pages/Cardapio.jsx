@@ -58,11 +58,21 @@ export default function Cardapio() {
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{item.descricao}</p>
 
-              <div className="flex flex-col gap-1 text-sm mb-3">
-                <span>Pequena: R$ {item.preco_pequena}</span>
-                <span>Média: R$ {item.preco_medio}</span>
-                <span>Grande: R$ {item.preco_grande}</span>
-              </div>
+           <div className="flex flex-col gap-1 text-sm mb-3">
+              {item.tamanhos && item.tamanhos.length > 0 ? (
+                item.tamanhos.map((t) => (
+                  <span key={t.nome}>
+                    {t.nome}: R$ {t.preco?.toFixed(2)}
+                  </span>
+                ))
+              ) : (
+                <>
+                  <span>Média: R$ {item.preco_medio}</span>
+                  <span>Grande: R$ {item.preco_grande}</span>
+                </>
+              )}
+            </div>
+
 
               <button
                 onClick={() =>
