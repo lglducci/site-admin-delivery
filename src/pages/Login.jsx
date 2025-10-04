@@ -28,18 +28,22 @@ export default function Login() {
 
       const data = await response.json();
 
-      if (data?.success) {
-        salvarEmpresaSafe({
-          id_empresa: data.id_empresa,
-          nome: data.nome_empresa,
-          saudacao: data.saudacao,
-        });
+    if (data?.id_empresa) {
+  salvarEmpresaSafe({
+    id_empresa: data.id_empresa,
+    nome: data.nome_empresa,
+    saudacao: data.saudacao,
+  });
 
-        localStorage.setItem("token", data.token);
-        navigate("/dashboard");
-      } else {
-        alert("Login inválido");
-      }
+  localStorage.setItem("user_id", data.user_id);
+  localStorage.setItem("email", data.email);
+  navigate("/dashboard");
+} else {
+  alert("Usuário inválido ou empresa não encontrada.");
+}
+
+
+     
     } catch (error) {
       console.error("Erro no login:", error);
       alert("Erro ao conectar com o servidor.");
