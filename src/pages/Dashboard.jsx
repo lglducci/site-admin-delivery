@@ -72,10 +72,17 @@ const colunas = [
 
  
 
-  const handleSair = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+  
+
+const handleSair = () => {
+  localStorage.removeItem("token");
+  limparEmpresa();
+  navigate("/");
+};
+
+
+
+ 
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-900 dark:text-white">
