@@ -7,25 +7,32 @@ export default function Cardapio() {
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    // só executa depois que o contexto estiver carregado
     if (!carregado) return;
 
-    const buscar = async () => {
-      try {
-        const id_empresa = empresa?.id_empresa;
-        if (!id_empresa) {
-          setErro("Nenhuma empresa logada");
-          return;
-        }
+    if (!empresa?.id_empresa) {
+      setErro("Nenhuma empresa logada.");
+      return;
+    }
 
-        console.log("🔎 Buscando cardápio para empresa:", id_empresa);
+    const fetchCardapio = async () => {
+      try {
+        console.log("🔎 Buscando cardápio para empresa:", empresa.id_empresa);
 
         const res = await fetch(
-          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${id_empresa}`
+          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`,
+          { cache: "no-store" }
         );
-        if (!res.ok) throw new Error("Erro ao buscar cardápio");
 
-        const data = await res.json();
+        if (!res.ok) throw new Error("Falha na requisição");
+
+        // pega a resposta como texto bruto
+        const texto = await res.text();
+        console.log("📦 Resposta bruta (texto):", texto);
+
+        // tenta converter em JSON
+        const data = JSON.parse(texto || "[]");
+
+        // adapta para lista
         const lista = Array.isArray(data)
           ? data
           : Array.isArray(data.data)
@@ -33,14 +40,14 @@ export default function Cardapio() {
           : [];
 
         setItens(lista);
-      } catch (e) {
-        console.error("Erro ao carregar cardápio:", e);
-        setErro("Erro ao carregar cardápio");
+      } catch (err) {
+        console.error("❌ Erro ao buscar cardápio:", err);
+        setErro("Erro ao buscar cardápio: " + err.message);
       }
     };
 
-    buscar();
-  }, [carregado, empresa]);
+    fetchCardapio();
+  }, [empresa, carregado]);
 
   if (!carregado) {
     return (
@@ -91,10 +98,7 @@ export default function Cardapio() {
               {item.descricao || "Sem descrição"}
             </p>
             <p className="text-lg font-bold text-green-600">
-              R$
-              {item.preco_grande ||
-                item.preco ||
-                (item.tamanhos?.[0]?.preco ?? 0)}
+              R$ {item.preco_grande || item.preco || (item.tamanhos?.[0]?.preco ?? 0)}
             </p>
             <button
               onClick={() =>
