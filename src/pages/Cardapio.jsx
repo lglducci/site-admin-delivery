@@ -71,15 +71,16 @@ export default function Cardapio() {
               key={item.id}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition"
             >
-              <img
-               
-               
-               src={item.imagem || "https://placehold.co/400x250/EEE/AAA?text=Sem+Imagem"}
+           
+             <img
+             src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
+             alt={item.nome || "Sem nome"}
+             className="w-full h-48 object-cover rounded-md"
+           />
 
-               
-                alt={item.nome}
-                className="w-full h-40 object-cover"
-              />
+
+
+             
               <div className="p-4">
                 <h2 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-1">
                   {item.nome}
