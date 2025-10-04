@@ -73,8 +73,9 @@ export default function Cardapio() {
             >
               <img
                
-                 src={item.imagem || "https://via.placeholder.com/400x250.png?text=Sem+Imagem"}
                
+               src={item.imagem || "https://placehold.co/400x250/EEE/AAA?text=Sem+Imagem"}
+
                
                 alt={item.nome}
                 className="w-full h-40 object-cover"
