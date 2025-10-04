@@ -19,10 +19,19 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        const response = await fetch("https://webhook.lglducci.com.br/webhook/pedidos");
-        const data = await response.json();
+ const fetchPedidos = async () => {
+  try {
+    // tenta pegar o id da empresa do contexto, senão busca no localStorage
+    const empresaId =
+      (empresa && empresa.id_empresa) ||
+      localStorage.getItem("id_empresa") ||
+      1; // valor padrão se não houver (ex: 1)
+
+    const response = await fetch(
+      `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${empresaId}`
+    );
+
+    const data = await response.json();
 
         const lista = Array.isArray(data) ? data : [];
         const pedidosAdaptados = lista.map((p) => ({
