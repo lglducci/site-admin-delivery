@@ -7,8 +7,8 @@ export default function Cardapio() {
   useEffect(() => {
     const empresaId = localStorage.getItem("id_empresa");
     if (!empresaId) return;
-
-    fetch(`https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresaId}`)
+             
+    fetch(`https://webhook.lglducci.com.br/webhook/cardapio_publico?id_empresa=${empresaId}`)
       .then((res) => res.json())
       .then((data) => setItens(data))
       .catch((err) => console.error("Erro ao carregar cardápio:", err));
