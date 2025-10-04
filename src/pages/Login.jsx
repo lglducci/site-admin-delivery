@@ -2,46 +2,39 @@
 import { useNavigate } from "react-router-dom";
 import { useEmpresa } from "../context/EmpresaContext";
 
-
-
-// debug
-console.log("Importou useEmpresa:", useEmpresa);
-
- 
-   
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  try {
-    const { salvarEmpresa } = useEmpresa();
-  } catch (e) {
-    console.error("Erro ao chamar useEmpresa():", e);
-  }
-  // resto do componente...
-}
+  const { salvarEmpresa } = useEmpresa();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
 
-    const data = await response.json();
-
-    if (data?.success) {
-      salvarEmpresa({
-        id_empresa: data.id_empresa,
-        nome: data.nome_empresa,
-        saudacao: data.saudacao,
+    try {
+      const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      localStorage.setItem("token", data.token);
-      navigate("/dashboard");
-    } else {
-      alert("Login inválido");
+      const data = await response.json();
+
+      if (data?.success) {
+        salvarEmpresa({
+          id_empresa: data.id_empresa,
+          nome: data.nome_empresa,
+          saudacao: data.saudacao,
+        });
+
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        alert("Login inválido");
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      alert("Erro ao conectar com o servidor.");
     }
   };
 
