@@ -2,6 +2,8 @@
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Pedidos from "./pages/Pedidos";
+import Cardapio from "./pages/Cardapio";
+
 
 function App() {
   return (
