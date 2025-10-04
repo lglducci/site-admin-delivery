@@ -1,7 +1,12 @@
  import React, { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import PedidoCard from "../components/PedidoCard";
 import { useEmpresa } from "../context/EmpresaContext";
+
+ const [open, setOpen] = useState(false);
+
+
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
@@ -96,20 +101,64 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-900 dark:text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">
-          {empresa?.nome
-            ? `Painel de ${empresa.nome}`
-            : "Painel de Pedidos"}
-        </h1>
-        <button
-          onClick={handleSair}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Sair
-        </button>
-      </div>
+ {/* 🔹 Cabeçalho com Menu Suspenso */}
+<div className="flex justify-between items-center mb-6 bg-white dark:bg-gray-800 shadow-sm rounded-xl p-4">
+  <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+    Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
+  </h1>
+
+  <div className="flex items-center gap-4">
+    {/* Menu Suspenso ⚙️ */}
+    <div className="relative">
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+      >
+        ⚙️ Configurações
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-2 border dark:border-gray-700 z-50">
+          <button
+            onClick={() =>
+              window.open("https://webhook.lglducci.com.br/webhook/config_empresa", "_blank")
+            }
+            className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          >
+            🏢 Dados da Empresa
+          </button>
+
+          <button
+            onClick={() =>
+              window.open("https://webhook.lglducci.com.br/webhook/mensagem_padrao", "_blank")
+            }
+            className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          >
+            💬 Mensagem Padrão
+          </button>
+
+          <button
+            onClick={() =>
+              window.open("https://webhook.lglducci.com.br/webhook/relatorios", "_blank")
+            }
+            className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          >
+            📈 Relatórios
+          </button>
+        </div>
+      )}
+    </div>
+
+    {/* Botão de Sair */}
+    <button
+      onClick={handleLogout}
+      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+    >
+      Sair
+    </button>
+  </div>
+</div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {colunas.map((coluna) => (
