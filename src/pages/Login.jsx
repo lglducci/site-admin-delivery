@@ -7,7 +7,13 @@ import { useEmpresa } from "../context/EmpresaContext";
 // debug
 console.log("Importou useEmpresa:", useEmpresa);
 
+ 
+   
+
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
   try {
     const { salvarEmpresa } = useEmpresa();
   } catch (e) {
@@ -15,13 +21,6 @@ export default function Login() {
   }
   // resto do componente...
 }
-
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-  const { salvarEmpresa } = useEmpresa();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
