@@ -4,13 +4,13 @@ import { useNavigate } from "react-router-dom";
 import PedidoCard from "../components/PedidoCard";
 import { useEmpresa } from "../context/EmpresaContext";
 
- const [open, setOpen] = useState(false);
-
+ 
 
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
   const navigate = useNavigate();
+   const [open, setOpen] = useState(false);
 
   // contexto seguro
   let empresa = null;
