@@ -72,11 +72,10 @@ export default function Cardapio() {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition"
             >
               <img
-                src={
-                  item.imagem && item.imagem !== ""
-                    ? item.imagem
-                    : "https://via.placeholder.com/400x250.png?text=Sem+Imagem"
-                }
+               
+                 src={item.imagem || "https://via.placeholder.com/400x250.png?text=Sem+Imagem"}
+               
+               
                 alt={item.nome}
                 className="w-full h-40 object-cover"
               />
