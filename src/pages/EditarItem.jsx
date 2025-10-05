@@ -1,11 +1,11 @@
  import React, { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-/** Lê id_empresa do localStorage com fallback */
 function getIdEmpresa() {
   try {
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
+
     const raw = localStorage.getItem("empresa");
     if (raw) {
       const obj = JSON.parse(raw);
@@ -13,42 +13,11 @@ function getIdEmpresa() {
       if (obj?.idEmpresa) return Number(obj.idEmpresa);
     }
   } catch (e) {
-    console.error("Erro lendo empresa do localStorage:", e);
+    console.error("Erro lendo empresa:", e);
   }
   return null;
 }
 
-/** Pega o numero do item de vários lugares (params, URL, query, localStorage) */
-function getNumeroRobusto(params, location) {
-  // 1) params do React Router (:numero ou :id)
-  let raw = params?.numero ?? params?.id ?? null;
-
-  // 2) último segmento do pathname (/editar-item/123)
-  if (!raw) {
-    const path = (location?.pathname || window.location.pathname || "").split("/").filter(Boolean);
-    const last = path[path.length - 1];
-    if (last && /^\d+$/.test(last)) raw = last;
-  }
-
-  // 3) query string (?numero=123)
-  if (!raw) {
-    const search = location?.search || window.location.search || "";
-    if (search) {
-      const qs = new URLSearchParams(search);
-      raw = qs.get("numero") || qs.get("id");
-    }
-  }
-
-  // 4) localStorage salvo pelo Cardápio
-  if (!raw) {
-    raw = localStorage.getItem("numero_item");
-  }
-
-  const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
-/** Normaliza retorno (array/objeto) */
 function pickFirstItem(data) {
   if (!data) return null;
   return Array.isArray(data) ? data[0] : data;
@@ -56,10 +25,7 @@ function pickFirstItem(data) {
 
 export default function EditarItem() {
   const params = useParams();
-  const location = useLocation();
-
-  // 🔐 numero robusto
-  const numero = getNumeroRobusto(params, location);
+  const numeroParam = params?.numero ?? params?.id ?? null;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -68,6 +34,7 @@ export default function EditarItem() {
   useEffect(() => {
     async function carregarItem() {
       const idEmpresa = getIdEmpresa();
+      const numero = Number(numeroParam);
 
       if (!idEmpresa || !numero) {
         setErro("Empresa ou número inválido.");
@@ -82,13 +49,7 @@ export default function EditarItem() {
         const data = await r.json();
         const obj = pickFirstItem(data);
         if (!obj) throw new Error("Item não encontrado.");
-
-        // garante que id_empresa/numero existam no objeto (alguns backends não retornam)
-        setItem({
-          id_empresa: obj.id_empresa ?? idEmpresa,
-          numero: obj.numero ?? numero,
-          ...obj,
-        });
+        setItem(obj);
       } catch (err) {
         console.error(err);
         setErro("Erro ao carregar item.");
@@ -98,7 +59,7 @@ export default function EditarItem() {
     }
 
     carregarItem();
-  }, [numero]);
+  }, [numeroParam]);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -113,19 +74,12 @@ export default function EditarItem() {
     setSalvando(true);
 
     try {
-      // injeta garantias antes de enviar
-      const payload = {
-        ...item,
-        id_empresa: item.id_empresa ?? getIdEmpresa(),
-        numero: item.numero ?? numero,
-      };
-
       const response = await fetch(
         "https://webhook.lglducci.com.br/webhook/update_item_cardapio",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(item),
         }
       );
 
@@ -143,97 +97,97 @@ export default function EditarItem() {
     }
   }
 
-  if (loading) return <p className="p-6 text-center">Carregando item...</p>;
+  if (loading)
+    return <p className="p-6 text-center">Carregando item...</p>;
   if (erro)
     return (
       <div className="p-6 text-center text-red-600">{erro}</div>
     );
-  if (!item) return <p className="p-6 text-center">Item não encontrado.</p>;
+  if (!item)
+    return <p className="p-6 text-center">Item não encontrado.</p>;
 
   return (
-     <div className="min-h-screen bg-[#F5F6FA] flex justify-center items-start py-10">
-       <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-4xl">
-         <h1 className="text-3xl font-bold mb-8 text-center text-[#1F2937] flex items-center justify-center gap-2">
-           <span className="text-[#FFB703]">✏️</span> Editar Item
-         </h1>
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center py-10 px-4">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-8 border border-gray-200">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+          ✏️ Editar Item
+        </h1>
 
-
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg space-y-5 border border-gray-200 dark:border-gray-700 transition-all duration-200">
-        {/* Campos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Campos principais */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Número
             </label>
             <input
               value={item.numero ?? ""}
               disabled
-              className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl bg-gray-100 text-gray-700"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               ID Empresa
             </label>
             <input
               value={item.id_empresa ?? ""}
               disabled
-              className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl bg-gray-100 text-gray-700"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Nome
             </label>
             <input
               name="nome"
               value={item.nome ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Descrição
             </label>
             <textarea
               name="descricao"
               value={item.descricao ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-blue-400"
               rows="3"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Tipo
             </label>
             <input
               name="tipo"
               value={item.tipo ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Categoria
             </label>
             <input
               name="categoria"
               value={item.categoria ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Preço Pequena
             </label>
             <input
@@ -241,12 +195,12 @@ export default function EditarItem() {
               name="preco_pequena"
               value={item.preco_pequena ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Preço Média
             </label>
             <input
@@ -254,12 +208,12 @@ export default function EditarItem() {
               name="preco_medio"
               value={item.preco_medio ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Preço Grande
             </label>
             <input
@@ -267,43 +221,43 @@ export default function EditarItem() {
               name="preco_grande"
               value={item.preco_grande ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Volume
             </label>
             <input
               name="volume"
               value={item.volume ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Código
             </label>
             <input
               name="codigo"
               value={item.codigo ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Palavras-chave
             </label>
             <input
               name="palavras_chav"
               value={item.palavras_chav ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
@@ -312,52 +266,46 @@ export default function EditarItem() {
               type="checkbox"
               name="disponivel"
               checked={!!item.disponivel}
-              onChange={(e) =>
-                setItem((prev) => ({ ...prev, disponivel: e.target.checked }))
-              }
-              className="w-5 h-5 rounded border-gray-400 accent-blue-500"
+              onChange={handleChange}
+              className="w-5 h-5 accent-blue-500"
             />
-            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            <label className="text-sm font-semibold text-gray-600">
               Disponível
             </label>
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
               Imagem (URL)
             </label>
             <input
               name="imagem"
               value={item.imagem ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
             />
           </div>
         </div>
 
-        {/* Botões */}
         <div className="flex justify-between pt-8">
-  <button
-    onClick={() => window.history.back()}
-    className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow-md transition-all"
-  >
-    🔙 Voltar
-  </button>
-  <button
-    onClick={handleSalvar}
-    disabled={salvando}
-    className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
-      salvando
-        ? "bg-blue-300 cursor-not-allowed"
-        : "bg-[#2563EB] hover:bg-[#1D4ED8]"
-    }`}
-  >
-    {salvando ? "Salvando..." : "💾 Salvar"}
-  </button>
-</div>
-
-
-       
+          <button
+            onClick={() => window.history.back()}
+            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow-md transition-all"
+          >
+            🔙 Voltar
+          </button>
+          <button
+            onClick={handleSalvar}
+            disabled={salvando}
+            className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
+              salvando
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {salvando ? "Salvando..." : "💾 Salvar"}
+          </button>
+        </div>
       </div>
     </div>
   );
