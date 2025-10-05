@@ -119,18 +119,13 @@ export default function Cardapio() {
                   </div>
                 ))}
               </div>
-
-              <button
-                onClick={() =>
-                  window.open(
-                    `https://webhook.lglducci.com.br/webhook/editar_item?id=${item.id}`,
-                    "_blank"
-                  )
-                }
-                className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
-              >
-                ✏️ Editar
-              </button>
+                     <button
+                      className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2"
+                      onClick={() => navigate(`/editar/${item.numero}`)}
+                    >
+                      ✏️ Editar
+                    </button>
+             
             </div>
           </div>
         ))}
