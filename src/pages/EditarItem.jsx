@@ -1,11 +1,11 @@
-  import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+ import React, { useEffect, useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
 
+/** Lê id_empresa do localStorage com fallback */
 function getIdEmpresa() {
   try {
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
-
     const raw = localStorage.getItem("empresa");
     if (raw) {
       const obj = JSON.parse(raw);
@@ -13,11 +13,42 @@ function getIdEmpresa() {
       if (obj?.idEmpresa) return Number(obj.idEmpresa);
     }
   } catch (e) {
-    console.error("Erro lendo empresa:", e);
+    console.error("Erro lendo empresa do localStorage:", e);
   }
   return null;
 }
 
+/** Pega o numero do item de vários lugares (params, URL, query, localStorage) */
+function getNumeroRobusto(params, location) {
+  // 1) params do React Router (:numero ou :id)
+  let raw = params?.numero ?? params?.id ?? null;
+
+  // 2) último segmento do pathname (/editar-item/123)
+  if (!raw) {
+    const path = (location?.pathname || window.location.pathname || "").split("/").filter(Boolean);
+    const last = path[path.length - 1];
+    if (last && /^\d+$/.test(last)) raw = last;
+  }
+
+  // 3) query string (?numero=123)
+  if (!raw) {
+    const search = location?.search || window.location.search || "";
+    if (search) {
+      const qs = new URLSearchParams(search);
+      raw = qs.get("numero") || qs.get("id");
+    }
+  }
+
+  // 4) localStorage salvo pelo Cardápio
+  if (!raw) {
+    raw = localStorage.getItem("numero_item");
+  }
+
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Normaliza retorno (array/objeto) */
 function pickFirstItem(data) {
   if (!data) return null;
   return Array.isArray(data) ? data[0] : data;
@@ -25,7 +56,10 @@ function pickFirstItem(data) {
 
 export default function EditarItem() {
   const params = useParams();
-  const numeroParam = params?.numero ?? params?.id ?? null;
+  const location = useLocation();
+
+  // 🔐 numero robusto
+  const numero = getNumeroRobusto(params, location);
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -34,7 +68,6 @@ export default function EditarItem() {
   useEffect(() => {
     async function carregarItem() {
       const idEmpresa = getIdEmpresa();
-      const numero = Number(numeroParam);
 
       if (!idEmpresa || !numero) {
         setErro("Empresa ou número inválido.");
@@ -49,7 +82,13 @@ export default function EditarItem() {
         const data = await r.json();
         const obj = pickFirstItem(data);
         if (!obj) throw new Error("Item não encontrado.");
-        setItem(obj);
+
+        // garante que id_empresa/numero existam no objeto (alguns backends não retornam)
+        setItem({
+          id_empresa: obj.id_empresa ?? idEmpresa,
+          numero: obj.numero ?? numero,
+          ...obj,
+        });
       } catch (err) {
         console.error(err);
         setErro("Erro ao carregar item.");
@@ -59,7 +98,7 @@ export default function EditarItem() {
     }
 
     carregarItem();
-  }, [numeroParam]);
+  }, [numero]);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -74,12 +113,19 @@ export default function EditarItem() {
     setSalvando(true);
 
     try {
+      // injeta garantias antes de enviar
+      const payload = {
+        ...item,
+        id_empresa: item.id_empresa ?? getIdEmpresa(),
+        numero: item.numero ?? numero,
+      };
+
       const response = await fetch(
         "https://webhook.lglducci.com.br/webhook/update_item_cardapio",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(item),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -97,14 +143,12 @@ export default function EditarItem() {
     }
   }
 
-  if (loading)
-    return <p className="p-6 text-center">Carregando item...</p>;
+  if (loading) return <p className="p-6 text-center">Carregando item...</p>;
   if (erro)
     return (
       <div className="p-6 text-center text-red-600">{erro}</div>
     );
-  if (!item)
-    return <p className="p-6 text-center">Item não encontrado.</p>;
+  if (!item) return <p className="p-6 text-center">Item não encontrado.</p>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -266,7 +310,9 @@ export default function EditarItem() {
               type="checkbox"
               name="disponivel"
               checked={!!item.disponivel}
-              onChange={handleChange}
+              onChange={(e) =>
+                setItem((prev) => ({ ...prev, disponivel: e.target.checked }))
+              }
               className="w-5 h-5 rounded border-gray-400 accent-blue-500"
             />
             <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
@@ -299,9 +345,7 @@ export default function EditarItem() {
             onClick={handleSalvar}
             disabled={salvando}
             className={`px-6 py-2 rounded-xl text-white shadow transition-all duration-200 ${
-              salvando
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+              salvando ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {salvando ? "Salvando..." : "💾 Salvar"}
