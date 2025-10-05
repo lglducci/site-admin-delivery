@@ -5,7 +5,7 @@ function getIdEmpresa() {
   try {
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
-   
+
     const raw = localStorage.getItem("empresa");
     if (raw) {
       const obj = JSON.parse(raw);
@@ -15,7 +15,7 @@ function getIdEmpresa() {
   } catch (e) {
     console.error("Erro lendo empresa:", e);
   }
-  return null; 
+  return null;
 }
 
 function pickFirstItem(data) {
@@ -107,162 +107,132 @@ export default function EditarItem() {
     return <p className="p-6 text-center">Item não encontrado.</p>;
 
   return (
-    
-     <div className="min-h-screen bg-[#FFF6E9] flex items-start justify-center py-10 px-4">
-
-       
-     <div className="w-full max-w-4xl bg-[#FFEACB] shadow-xl rounded-2xl p-8 border border-[#FFD89B]">
-
-       
-        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+    <div className="min-h-screen bg-[#FFF6E9] flex items-start justify-center py-10 px-4">
+      <div className="w-full max-w-4xl bg-[#F28C28] shadow-2xl rounded-2xl p-8 border border-[#E67E22] text-[#3C2F2F] transition-all duration-300">
+        <h1 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-2">
           ✏️ Editar Item
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Campos principais */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Número
-            </label>
+            <label className="block text-sm font-semibold mb-1">Número</label>
             <input
               value={item.numero ?? ""}
               disabled
-              className="w-full p-3 border rounded-xl bg-gray-100 text-gray-700"
+              className="w-full p-3 border rounded-xl bg-[#FFD89B] text-gray-800 shadow-inner"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              ID Empresa
-            </label>
+            <label className="block text-sm font-semibold mb-1">ID Empresa</label>
             <input
               value={item.id_empresa ?? ""}
               disabled
-              className="w-full p-3 border rounded-xl bg-gray-100 text-gray-700"
+              className="w-full p-3 border rounded-xl bg-[#FFD89B] text-gray-800 shadow-inner"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Nome
-            </label>
+            <label className="block text-sm font-semibold mb-1">Nome</label>
             <input
               name="nome"
               value={item.nome ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Descrição
-            </label>
+            <label className="block text-sm font-semibold mb-1">Descrição</label>
             <textarea
               name="descricao"
               value={item.descricao ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-[#E67E22] bg-white"
               rows="3"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Tipo
-            </label>
+            <label className="block text-sm font-semibold mb-1">Tipo</label>
             <input
               name="tipo"
               value={item.tipo ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Categoria
-            </label>
+            <label className="block text-sm font-semibold mb-1">Categoria</label>
             <input
               name="categoria"
               value={item.categoria ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Preço Pequena
-            </label>
+            <label className="block text-sm font-semibold mb-1">Preço Pequena</label>
             <input
               type="number"
               name="preco_pequena"
               value={item.preco_pequena ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Preço Média
-            </label>
+            <label className="block text-sm font-semibold mb-1">Preço Média</label>
             <input
               type="number"
               name="preco_medio"
               value={item.preco_medio ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Preço Grande
-            </label>
+            <label className="block text-sm font-semibold mb-1">Preço Grande</label>
             <input
               type="number"
               name="preco_grande"
               value={item.preco_grande ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Volume
-            </label>
+            <label className="block text-sm font-semibold mb-1">Volume</label>
             <input
               name="volume"
               value={item.volume ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Código
-            </label>
+            <label className="block text-sm font-semibold mb-1">Código</label>
             <input
               name="codigo"
               value={item.codigo ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Palavras-chave
-            </label>
+            <label className="block text-sm font-semibold mb-1">Palavras-chave</label>
             <input
               name="palavras_chav"
               value={item.palavras_chav ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
 
@@ -272,46 +242,37 @@ export default function EditarItem() {
               name="disponivel"
               checked={!!item.disponivel}
               onChange={handleChange}
-              className="w-5 h-5 accent-blue-500"
+              className="w-5 h-5 rounded border-gray-400 accent-[#E67E22]"
             />
-            <label className="text-sm font-semibold text-gray-600">
-              Disponível
-            </label>
+            <label className="text-sm font-semibold">Disponível</label>
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-600 mb-1">
-              Imagem (URL)
-            </label>
+            <label className="block text-sm font-semibold mb-1">Imagem (URL)</label>
             <input
               name="imagem"
               value={item.imagem ?? ""}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
           </div>
         </div>
 
-        <div className="flex justify-between pt-8">
+        <div className="flex justify-between pt-6">
           <button
             onClick={() => window.history.back()}
-           
-          
-            className="px-5 py-2 bg-[#E09E00] hover:bg-[#D08E00] text-white rounded-xl shadow-md transition-all"
-             className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
-             salvando
-               ? "bg-[#FFD89B] cursor-not-allowed"
-               : "bg-[#FFB703] hover:bg-[#E09E00]"
-           }`}
-  
+            className="px-5 py-2 bg-[#E67E22] hover:bg-[#C56E1A] text-white rounded-xl shadow-md transition-all"
           >
             🔙 Voltar
           </button>
           <button
             onClick={handleSalvar}
             disabled={salvando}
-           
-         
+            className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
+              salvando
+                ? "bg-[#FFD89B] cursor-not-allowed"
+                : "bg-[#FFB703] hover:bg-[#E09E00]"
+            }`}
           >
             {salvando ? "Salvando..." : "💾 Salvar"}
           </button>
