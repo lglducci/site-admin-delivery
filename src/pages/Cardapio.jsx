@@ -120,15 +120,22 @@ export default function Cardapio() {
                   </div>
                 ))}
               </div>
-                      
-
-                  <button
-                      
-                     onClick={() => navigate(`/editar-item/${item.id}`)}
-                     className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-                   >
-                     ✏️ Editar
-                   </button>
+                                     
+               <button
+                 onClick={() => {
+                   const empresaId = localStorage.getItem("id_empresa");
+                   console.log("🚀 Enviando:", { empresaId, numero: item.numero });
+                   if (!empresaId || !item.numero) {
+                     alert("Faltam dados da empresa ou número do item!");
+                     return;
+                   }
+                   window.location.href = `/editar-item/${item.numero}`;
+                 }}
+                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+               >
+                 Editar
+               </button>
+                 
              
             </div>
           </div>
