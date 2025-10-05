@@ -1,51 +1,59 @@
  import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export default function PedidoDetalhes() {
   const { numero } = useParams();
-  const navigate = useNavigate();
-  const [htmlPedido, setHtmlPedido] = useState("");
-  const [erro, setErro] = useState("");
+  const [pedido, setPedido] = useState(null);
+  const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    const empresaId = localStorage.getItem("id_empresa");
-    if (!empresaId || !numero) {
-      setErro("Pedido ou empresa não identificado.");
-      return;
-    }
+    const id_empresa =
+      localStorage.getItem("id_empresa") ||
+      JSON.parse(localStorage.getItem("empresa") || "{}")?.id_empresa ||
+      0;
 
-    fetch(`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${empresaId}`)
-      .then((r) => (r.ok ? r.text() : Promise.reject("Erro na resposta")))
-      .then((html) => setHtmlPedido(html))
-      .catch(() => setErro("Erro ao carregar detalhes do pedido."));
+    fetch(
+      `https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${id_empresa}`
+    )
+      .then((r) => r.json())
+      .then((dados) => {
+        if (dados && dados.length > 0) setPedido(dados[0]);
+        else setErro("Pedido não encontrado.");
+      })
+      .catch(() => setErro("Erro ao carregar pedido."));
   }, [numero]);
 
-  if (erro) {
+  if (erro)
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-black text-red-500">
-        <p>{erro}</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
-        >
-          Voltar
-        </button>
-      </div>
+      <div className="p-6 text-center text-red-500 font-semibold">{erro}</div>
     );
-  }
 
-  if (!htmlPedido) {
+  if (!pedido)
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Carregando detalhes do pedido nº {numero}...
-      </div>
+      <div className="p-6 text-center text-gray-400">Carregando pedido...</div>
     );
-  }
 
   return (
-    <div
-      className="min-h-screen bg-gray-900 text-white p-6"
-      dangerouslySetInnerHTML={{ __html: htmlPedido }}
-    />
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-900 dark:text-white">
+      <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-orange-500">
+        <h1 className="text-2xl font-bold text-orange-500 mb-4">
+          Pedido nº {numero}
+        </h1>
+        <p className="mb-2 text-sm text-gray-600">
+          <strong>Cliente:</strong> {pedido.nome}
+        </p>
+        <p className="mb-2 text-sm text-gray-600">
+          <strong>Bairro:</strong> {pedido.bairro}
+        </p>
+        <p className="mb-2 text-sm text-gray-600">
+          <strong>Endereço:</strong> {pedido.endereço}
+        </p>
+        <p className="mb-2 text-sm text-gray-600">
+          <strong>Forma de pagamento:</strong>{" "}
+          {pedido.tipo_cobranca || "—"}
+        </p>
+        <p className="mt-4 whitespace-pre-line">{pedido.resumo}</p>
+      </div>
+    </div>
   );
 }
