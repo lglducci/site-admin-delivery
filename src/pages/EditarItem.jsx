@@ -2,7 +2,7 @@
 import { useParams } from "react-router-dom";
 
 export default function EditarItem() {
-  const { id } = useParams(); // número do item vindo da rota
+  const { numero } = useParams(); // número do item vindo da rota
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
