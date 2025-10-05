@@ -23,7 +23,8 @@ export default function Cardapio() {
        
         if (!res.ok) throw new Error("Erro ao buscar cardápio");
         const data = await res.json();
-        setItens(Array.isArray(data) ? data : []);
+        setItens(Array.isArray(data) ? data : [data]);
+       
       } catch (err) {
         console.error("❌ Erro:", err);
         setErro("Erro ao carregar cardápio.");
