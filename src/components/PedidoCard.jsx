@@ -55,7 +55,7 @@ export default function PedidoCard({ pedido }) {
       <div className="flex-1">
         <span className="text-blue-900 dark:text-blue-300">
           <a
-            href={`/detalhes.html?numero=${pedido.numero}&id_empresa=${empresaId}`}
+            href={`/detalhes.html?numero=${pedido.numero}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline"
