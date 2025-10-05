@@ -10,7 +10,7 @@ export default function EditarItem() {
     async function carregarItem() {
       try {
         const id_empresa = localStorage.getItem("id_empresa");
-        if (!id_empresa || !id) {
+        if (!id_empresa || !numero) {
           alert("Empresa ou número do item inválido.");
           return;
         }
