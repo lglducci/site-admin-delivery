@@ -121,22 +121,32 @@ export default function Cardapio() {
                 ))}
               </div>
                                      
-               <button
-                 onClick={() => {
-                   const empresaId = localStorage.getItem("id_empresa");
-                   console.log("🚀 Enviando:", { empresaId, numero: item.numero });
-                   if (!empresaId || !item.numero) {
-                     alert("Faltam dados da empresa ou número do item!");
-                     return;
-                   }
-                    
-                  window.location.href = `/editar-item/${item.numero}?empresa=${empresa?.id_empresa}`;
+                <button
+              onClick={() => {
+                // 1) empresaId: contexto -> localStorage("empresa") -> localStorage("id_empresa")
+                const empresaId =
+                  (empresa && empresa.id_empresa) ||
+                  (JSON.parse(localStorage.getItem("empresa") || "{}").id_empresa) ||
+                  localStorage.getItem("id_empresa");
+            
+                // 2) numero do item: aceita numero ou id
+                const numero = item?.numero ?? item?.id;
+            
+                console.log("Editar ->", { empresaId, numero });
+            
+                if (!empresaId || !numero) {
+                  alert("Faltam dados da empresa ou número do item!");
+                  return;
+                }
+            
+                // 3) navega enviando ambos
+                navigate(`/editar-item/${numero}?empresa=${empresaId}`);
+              }}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            >
+              Editar
+            </button>
 
-                 }}
-                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-               >
-                 Editar
-               </button>
                  
              
             </div>
