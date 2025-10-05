@@ -1,56 +1,89 @@
  import React from "react";
 
-export default function PedidoCard({ pedido, onAvancar }) {
-  const { numero, nomeCliente, valor, data } = pedido;
+export default function PedidoCard({ pedido }) {
+  const dataPedido = new Date(pedido.data);
 
-  const dataFormatada = new Date(data).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
+  const hora = dataPedido.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   });
 
-  const abrirPedido = () => {
-    const url = `https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${numero}`;
-    window.open(url, "_blank");
+  const empresaId = localStorage.getItem("id_empresa"); // ✅ pega id_empresa salvo no login
+
+  // ▶️ Avançar pedido
+  const handleAvancar = async () => {
+    try {
+      const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/avancar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          numero: pedido.numero,
+          id_empresa: empresaId, // ✅ envia junto
+        }),
+      });
+
+      if (!resposta.ok) throw new Error("Erro ao avançar pedido");
+      alert(`Pedido nº ${pedido.numero} avançado com sucesso.`);
+      window.location.reload();
+    } catch (erro) {
+      alert("Erro ao avançar o pedido.");
+    }
   };
 
-  const avancar = () => {
-    if (typeof onAvancar === "function") onAvancar(numero);
+  // ❌ Cancelar pedido
+  const cancelarPedido = async (numero) => {
+    try {
+      const resposta = await fetch(`https://webhook.lglducci.com.br/webhook/cancelar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          numero,
+          id_empresa: empresaId,
+        }),
+      });
+
+      if (!resposta.ok) throw new Error("Erro ao cancelar pedido");
+      alert(`Pedido nº ${numero} cancelado com sucesso.`);
+      window.location.reload();
+    } catch (erro) {
+      alert("Erro ao cancelar o pedido.");
+    }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 mb-3 rounded-2xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.01]">
-      {/* Cabeçalho do pedido */}
-      <div className="flex justify-between items-center mb-2">
-        <h3
-          onClick={abrirPedido}
-          className="font-bold text-lg text-gray-800 dark:text-gray-100 cursor-pointer hover:text-orange-500 transition"
-        >
-          Pedido nº {numero}
-        </h3>
-        <span className="text-xs text-gray-500">{dataFormatada}</span>
+    <div className="flex justify-between items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 mb-2 text-sm font-medium text-gray-800 dark:text-white">
+      <div className="flex-1">
+        <span className="text-blue-900 dark:text-blue-300">
+          <a
+            href={`/detalhes.html?numero=${pedido.numero}&id_empresa=${empresaId}`} // ✅ chama detalhes.html com empresa
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            nº {pedido.numero}
+          </a>{" "}
+          - {pedido.nomeCliente}
+        </span>
       </div>
 
-      {/* Detalhes */}
-      <p className="text-gray-700 dark:text-gray-300">
-        🧍 <strong>{nomeCliente}</strong>
-      </p>
-      <p className="text-gray-600 dark:text-gray-400">
-        💰{" "}
-        {valor?.toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        })}
-      </p>
+      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">{hora}</div>
 
-      {/* Botão de avançar */}
-      <button
-        onClick={avancar}
-        className="mt-3 w-full bg-gradient-to-r from-orange-400 to-orange-600 text-white font-semibold py-2 rounded-xl hover:from-orange-500 hover:to-orange-700 transition-all shadow-md"
-      >
-        ▶️ Avançar Pedido
-      </button>
+      <div className="flex space-x-2 items-center">
+        <button
+          onClick={handleAvancar}
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
+          title="Avançar pedido"
+        >
+          ▶️
+        </button>
+        <button
+          onClick={() => cancelarPedido(pedido.numero)}
+          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
+          title="Cancelar pedido"
+        >
+          ❌
+        </button>
+      </div>
     </div>
   );
 }
