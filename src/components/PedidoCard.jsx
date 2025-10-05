@@ -29,30 +29,8 @@ export default function PedidoCard({ pedido }) {
       if (!resposta.ok) throw new Error("Erro ao avançar pedido");
       alert(`✅ Pedido nº ${pedido.numero} avançado com sucesso!`);
       window.location.reload();
-    } catch (erro) {
+    } catch {
       alert("❌ Erro ao avançar o pedido.");
-    }
-  };
-
-  const cancelarPedido = async (numero) => {
-    try {
-      const resposta = await fetch(
-        "https://webhook.lglducci.com.br/webhook/cancelar",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            numero,
-            id_empresa: empresaId,
-          }),
-        }
-      );
-
-      if (!resposta.ok) throw new Error("Erro ao cancelar pedido");
-      alert(`🚫 Pedido nº ${numero} cancelado com sucesso.`);
-      window.location.reload();
-    } catch (erro) {
-      alert("❌ Erro ao cancelar o pedido.");
     }
   };
 
@@ -71,27 +49,15 @@ export default function PedidoCard({ pedido }) {
           - {pedido.nomeCliente}
         </span>
       </div>
-
       <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">
         {hora}
       </div>
-
-      <div className="flex space-x-2 items-center">
-        <button
-          onClick={handleAvancar}
-          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
-          title="Avançar pedido"
-        >
-          ▶️
-        </button>
-        <button
-          onClick={() => cancelarPedido(pedido.numero)}
-          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
-          title="Cancelar pedido"
-        >
-          ❌
-        </button>
-      </div>
+      <button
+        onClick={handleAvancar}
+        className="text-orange-500 hover:text-orange-700 text-xs font-bold"
+      >
+        ▶️ Avançar
+      </button>
     </div>
   );
 }
