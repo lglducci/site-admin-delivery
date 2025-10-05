@@ -1,11 +1,11 @@
- import React, { useEffect, useState } from "react";
+  import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-/** Função para ler id_empresa */
 function getIdEmpresa() {
   try {
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
+
     const raw = localStorage.getItem("empresa");
     if (raw) {
       const obj = JSON.parse(raw);
@@ -13,238 +13,298 @@ function getIdEmpresa() {
       if (obj?.idEmpresa) return Number(obj.idEmpresa);
     }
   } catch (e) {
-    console.error("Erro lendo empresa do localStorage:", e);
+    console.error("Erro lendo empresa:", e);
   }
   return null;
 }
 
+function pickFirstItem(data) {
+  if (!data) return null;
+  return Array.isArray(data) ? data[0] : data;
+}
+
 export default function EditarItem() {
-  const { numero } = useParams();
-  const [form, setForm] = useState({});
+  const params = useParams();
+  const numeroParam = params?.numero ?? params?.id ?? null;
+  const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    async function carregar() {
-      const id_empresa = getIdEmpresa();
-      if (!id_empresa || !numero) {
+    async function carregarItem() {
+      const idEmpresa = getIdEmpresa();
+      const numero = Number(numeroParam);
+
+      if (!idEmpresa || !numero) {
         setErro("Empresa ou número inválido.");
         setLoading(false);
         return;
       }
+
       try {
-        const r = await fetch(
-          `https://webhook.lglducci.com.br/webhook/get_item_cardapio?id_empresa=${id_empresa}&numero=${numero}`
-        );
+        const url = `https://webhook.lglducci.com.br/webhook/get_item_cardapio?id_empresa=${idEmpresa}&numero=${numero}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`Erro HTTP ${r.status}`);
         const data = await r.json();
-        if (data) setForm(data);
-        else setErro("Item não encontrado.");
+        const obj = pickFirstItem(data);
+        if (!obj) throw new Error("Item não encontrado.");
+        setItem(obj);
       } catch (err) {
+        console.error(err);
         setErro("Erro ao carregar item.");
       } finally {
         setLoading(false);
       }
     }
-    carregar();
-  }, [numero]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
+    carregarItem();
+  }, [numeroParam]);
 
-  async function salvar() {
+  function handleChange(e) {
+    const { name, value, type, checked } = e.target;
+    setItem((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  }
+
+  async function handleSalvar() {
+    if (!item) return;
+    setSalvando(true);
+
     try {
-      const r = await fetch("https://webhook.lglducci.com.br/webhook/update_item_cardapio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await r.json();
-      if (data?.success) alert("✅ Item atualizado com sucesso!");
-      else alert("Erro ao atualizar o item.");
+      const response = await fetch(
+        "https://webhook.lglducci.com.br/webhook/update_item_cardapio",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && (result.success || result.ok || !result.error)) {
+        alert("✅ Item atualizado com sucesso!");
+      } else {
+        alert("❌ Falha ao atualizar item.");
+      }
     } catch (err) {
-      alert("Falha ao salvar.");
+      console.error("Erro ao salvar:", err);
+      alert("❌ Erro de conexão ao salvar item.");
+    } finally {
+      setSalvando(false);
     }
   }
 
   if (loading)
-    return <p className="p-6 text-center text-gray-500">Carregando...</p>;
+    return <p className="p-6 text-center">Carregando item...</p>;
   if (erro)
     return (
-      <div className="p-6 text-red-600 bg-red-50 text-center rounded-xl shadow">
-        {erro}
-      </div>
+      <div className="p-6 text-center text-red-600">{erro}</div>
     );
+  if (!item)
+    return <p className="p-6 text-center">Item não encontrado.</p>;
 
   return (
-    <div
-      className="min-h-screen p-6 flex flex-col items-center"
-      style={{ backgroundColor: "#FDF6EC" }}
-    >
-      <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-[#1A1F2B]">
-          ✏️ Editar Item
-        </h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">
+        ✏️ Editar Item
+      </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg space-y-5 border border-gray-200 dark:border-gray-700 transition-all duration-200">
+        {/* Campos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Número
             </label>
             <input
-              name="numero"
-              value={form.numero || ""}
-              readOnly
-              className="w-full p-2 border rounded-xl bg-gray-100"
+              value={item.numero ?? ""}
+              disabled
+              className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               ID Empresa
             </label>
             <input
-              name="id_empresa"
-              value={form.id_empresa || ""}
-              readOnly
-              className="w-full p-2 border rounded-xl bg-gray-100"
+              value={item.id_empresa ?? ""}
+              disabled
+              className="w-full p-3 border rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Nome
             </label>
             <input
               name="nome"
-              value={form.nome || ""}
+              value={item.nome ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Descrição
             </label>
             <textarea
               name="descricao"
-              value={form.descricao || ""}
+              value={item.descricao ?? ""}
               onChange={handleChange}
-              rows={2}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+              rows="3"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">Tipo</label>
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+              Tipo
+            </label>
             <input
               name="tipo"
-              value={form.tipo || ""}
+              value={item.tipo ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Categoria
             </label>
             <input
               name="categoria"
-              value={form.categoria || ""}
+              value={item.categoria ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Preço Pequena
             </label>
             <input
+              type="number"
               name="preco_pequena"
-              value={form.preco_pequena || ""}
+              value={item.preco_pequena ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Preço Média
             </label>
             <input
+              type="number"
               name="preco_medio"
-              value={form.preco_medio || ""}
+              value={item.preco_medio ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Preço Grande
             </label>
             <input
+              type="number"
               name="preco_grande"
-              value={form.preco_grande || ""}
+              value={item.preco_grande ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Volume
             </label>
             <input
               name="volume"
-              value={form.volume || ""}
+              value={item.volume ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Código
             </label>
             <input
               name="codigo"
-              value={form.codigo || ""}
+              value={item.codigo ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
               Palavras-chave
             </label>
             <input
               name="palavras_chav"
-              value={form.palavras_chav || ""}
+              value={item.palavras_chav ?? ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded-xl"
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="disponivel"
+              checked={!!item.disponivel}
+              onChange={handleChange}
+              className="w-5 h-5 rounded border-gray-400 accent-blue-500"
+            />
+            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+              Disponível
+            </label>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+              Imagem (URL)
+            </label>
+            <input
+              name="imagem"
+              value={item.imagem ?? ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
         </div>
 
-        <div className="flex justify-end mt-6 gap-3">
+        {/* Botões */}
+        <div className="flex justify-between pt-6">
           <button
             onClick={() => window.history.back()}
-            className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl transition-all"
+            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow"
           >
             🔙 Voltar
           </button>
-
           <button
-            onClick={salvar}
-            className="bg-[#2E8B57] hover:bg-[#237045] text-white font-semibold px-5 py-2 rounded-xl transition-all shadow-md"
+            onClick={handleSalvar}
+            disabled={salvando}
+            className={`px-6 py-2 rounded-xl text-white shadow transition-all duration-200 ${
+              salvando
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            💾 Salvar
+            {salvando ? "Salvando..." : "💾 Salvar"}
           </button>
         </div>
       </div>
