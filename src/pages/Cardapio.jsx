@@ -123,7 +123,8 @@ export default function Cardapio() {
                       
 
                   <button
-                     onClick={() => window.open(`/editar/${item.numero}`, "_blank")}
+                      
+                     onClick={() => navigate(`/editar-item/${item.id}`)}
                      className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
                    >
                      ✏️ Editar
