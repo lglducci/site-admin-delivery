@@ -21,11 +21,8 @@ export default function Cardapio() {
         );
         const data = await r.json();
 
-        if (Array.isArray(data)) {
-          setItens(data);
-        } else {
-          console.error("Formato inesperado:", data);
-        }
+        if (Array.isArray(data)) setItens(data);
+        else console.error("Formato inesperado:", data);
       } catch (err) {
         console.error("Erro ao carregar cardápio:", err);
       } finally {
@@ -41,51 +38,64 @@ export default function Cardapio() {
     i.descricao?.toLowerCase().includes(busca.toLowerCase())
   );
 
-  if (loading) return <p className="p-6 text-center">Carregando cardápio...</p>;
+  if (loading)
+    return <p className="p-6 text-center text-gray-500">Carregando cardápio...</p>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">📋 Cardápio</h1>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Topo com título e barra de busca */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
+        <h1 className="text-3xl font-bold flex items-center gap-2 text-[#1A1F2B]">
+          📋 Cardápio
+        </h1>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full md:w-auto">
           <input
             type="text"
-            placeholder="🔍 Procurar item..."
-            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            placeholder="🔍 Buscar item..."
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FFB703] transition-all"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
           />
           <button
             onClick={() => navigate("/novo-item")}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+            className="bg-[#FFB703] hover:bg-[#E09E00] text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-md"
           >
             ➕ Novo Item
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {itensFiltrados.map((item) => (
           <div
             key={item.numero}
-            className="bg-white shadow-md rounded-2xl p-4 dark:bg-gray-800"
+            className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-gray-100"
           >
             <img
               src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
               alt={item.nome}
-              className="w-full h-40 object-cover rounded-lg"
+              className="w-full h-48 object-cover"
             />
-            <h2 className="text-lg font-bold mt-2">{item.nome}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{item.descricao}</p>
-            <p className="mt-1 font-semibold">💰 R$ {item.preco_grande || item.preco || 0}</p>
+            <div className="p-4">
+              <h2 className="text-lg font-bold text-[#1A1F2B]">{item.nome}</h2>
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                {item.descricao}
+              </p>
+              <p className="mt-2 font-semibold text-[#FFB703]">
+                💰 R$ {item.preco_grande || item.preco || 0}
+              </p>
+            </div>
 
-            <button
-              onClick={() => navigate(`/editar-item/${item.numero}`)}
-              className="mt-3 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-            >
-              ✏️ Editar
-            </button>
+            <div className="bg-[#1A1F2B] text-white py-3 text-center cursor-pointer hover:bg-[#2C3240] transition-all">
+              <button
+                onClick={() => navigate(`/editar-item/${item.numero}`)}
+                className="flex items-center justify-center gap-2 font-medium w-full"
+              >
+                ✏️ Editar
+              </button>
+            </div>
           </div>
         ))}
       </div>
