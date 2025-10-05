@@ -7,13 +7,31 @@ export default function Cardapio() {
   useEffect(() => {
     async function carregarCardapio() {
       try {
-        const empresa = JSON.parse(localStorage.getItem("empresa"));
-        if (!empresa?.id_empresa) {
+        const raw = localStorage.getItem("empresa");
+        if (!raw) {
           alert("Nenhuma empresa encontrada. Faça login novamente.");
+          setLoading(false);
           return;
         }
 
-        const r = await fetch(`https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`);
+        let empresa;
+        try {
+          empresa = JSON.parse(raw);
+        } catch {
+          alert("Erro ao ler dados da empresa. Faça login novamente.");
+          setLoading(false);
+          return;
+        }
+
+        if (!empresa.id_empresa) {
+          alert("Campo id_empresa ausente. Faça login novamente.");
+          setLoading(false);
+          return;
+        }
+
+        const r = await fetch(
+          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`
+        );
         const data = await r.json();
 
         if (Array.isArray(data)) {
@@ -31,7 +49,8 @@ export default function Cardapio() {
     carregarCardapio();
   }, []);
 
-  if (loading) return <p className="p-6 text-center">Carregando cardápio...</p>;
+  if (loading)
+    return <p className="p-6 text-center">Carregando cardápio...</p>;
 
   return (
     <div className="p-6">
@@ -44,7 +63,10 @@ export default function Cardapio() {
             className="bg-white shadow-md rounded-lg p-4 dark:bg-gray-800"
           >
             <img
-              src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
+              src={
+                item.imagem ||
+                "https://placehold.co/400x250?text=Sem+Imagem"
+              }
               alt={item.nome}
               className="w-full h-40 object-cover rounded"
             />
@@ -58,17 +80,33 @@ export default function Cardapio() {
 
             <button
               onClick={() => {
-                const empresa = JSON.parse(localStorage.getItem("empresa"));
-                if (!empresa?.id_empresa || !item.numero) {
-                  alert("Dados insuficientes para editar o item!");
+                const raw = localStorage.getItem("empresa");
+                if (!raw) {
+                  alert("Empresa não encontrada. Faça login novamente.");
                   return;
                 }
 
-                // Salva os dados no localStorage para a tela de edição
+                let empresa;
+                try {
+                  empresa = JSON.parse(raw);
+                } catch {
+                  alert("Erro ao ler dados da empresa. Faça login novamente.");
+                  return;
+                }
+
+                if (!empresa.id_empresa) {
+                  alert("Campo id_empresa ausente. Faça login novamente.");
+                  return;
+                }
+
+                if (!item.numero) {
+                  alert("Número do item não encontrado.");
+                  return;
+                }
+
                 localStorage.setItem("id_empresa", empresa.id_empresa);
                 localStorage.setItem("numero_item", item.numero);
 
-                // Redireciona
                 window.location.href = `/editar-item/${item.numero}`;
               }}
               className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
