@@ -151,10 +151,12 @@ export default function EditarItem() {
   if (!item) return <p className="p-6 text-center">Item não encontrado.</p>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">
-        ✏️ Editar Item
-      </h1>
+     <div className="min-h-screen bg-[#F5F6FA] flex justify-center items-start py-10">
+       <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 w-full max-w-4xl">
+         <h1 className="text-3xl font-bold mb-8 text-center text-[#1F2937] flex items-center justify-center gap-2">
+           <span className="text-[#FFB703]">✏️</span> Editar Item
+         </h1>
+
 
       <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg space-y-5 border border-gray-200 dark:border-gray-700 transition-all duration-200">
         {/* Campos */}
@@ -334,23 +336,28 @@ export default function EditarItem() {
         </div>
 
         {/* Botões */}
-        <div className="flex justify-between pt-6">
-          <button
-            onClick={() => window.history.back()}
-            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow"
-          >
-            🔙 Voltar
-          </button>
-          <button
-            onClick={handleSalvar}
-            disabled={salvando}
-            className={`px-6 py-2 rounded-xl text-white shadow transition-all duration-200 ${
-              salvando ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {salvando ? "Salvando..." : "💾 Salvar"}
-          </button>
-        </div>
+        <div className="flex justify-between pt-8">
+  <button
+    onClick={() => window.history.back()}
+    className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow-md transition-all"
+  >
+    🔙 Voltar
+  </button>
+  <button
+    onClick={handleSalvar}
+    disabled={salvando}
+    className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
+      salvando
+        ? "bg-blue-300 cursor-not-allowed"
+        : "bg-[#2563EB] hover:bg-[#1D4ED8]"
+    }`}
+  >
+    {salvando ? "Salvando..." : "💾 Salvar"}
+  </button>
+</div>
+
+
+       
       </div>
     </div>
   );
