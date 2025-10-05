@@ -12,10 +12,12 @@ export default function EditarItem() {
     async function fetchItem() {
       try {
      
+ // 🔹 Primeiro tenta pegar da URL, depois do localStorage
+const params = new URLSearchParams(window.location.search);
+const empresaId =
+  params.get("empresa") ||
+  JSON.parse(localStorage.getItem("empresa") || "{}").id_empresa;
 
-       const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
-  
-const empresaId = empresaData.id_empresa;
 
 if (!empresaId || !id) {
 
