@@ -61,14 +61,21 @@ export default function Dashboard() {
     fetchPedidos();
   }, [empresa, carregado]);
 
-  const avancarPedido = async (numero) => {
-    await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+ const avancarPedido = async (numero) => {
+  try {
+    const response = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ numero }),
     });
+    const data = await response.json();
+    console.log("✅ Avançado:", data);
     window.location.reload();
-  };
+  } catch (err) {
+    console.error("❌ Erro ao avançar pedido:", err);
+  }
+};
+
 
   const handleSair = () => {
     localStorage.removeItem("token");
@@ -168,30 +175,25 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold mb-3 border-b border-orange-400 pb-1">
               {coluna.titulo}
             </h2>
-
-            {pedidos
-              .filter((p) => p.status === coluna.status)
-              .map((p) => (
-                <div
-                  key={p.numero}
-                  onClick={() => avancarPedido(p.numero)}
-                  onTouchEnd={() => avancarPedido(p.numero)}
-                  className="cursor-pointer bg-white hover:bg-orange-100 p-3 rounded-xl shadow-sm mb-3 border border-gray-200 transition-all duration-150"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-800">
-                      nº {p.numero}
-                    </span>
-                    <span className="text-orange-500 font-bold">
-                      R$ {p.valor.toFixed(2)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{p.nomeCliente}</p>
-                </div>
-              ))}
-          </div>
-        ))}
+{pedidos
+  .filter((p) => p.status === coluna.status)
+  .map((p) => (
+    <div
+      key={p.numero}
+      onClick={() => avancarPedido(p.numero)}
+      onTouchEnd={() => avancarPedido(p.numero)}
+      className="cursor-pointer bg-white hover:bg-orange-100 p-3 rounded-xl shadow-sm mb-3 border border-gray-200 transition-all duration-150"
+    >
+      <div className="flex justify-between items-center">
+        <span className="font-semibold text-gray-800">
+          nº {p.numero}
+        </span>
+        <span className="text-orange-500 font-bold">
+          R$ {p.valor.toFixed(2)}
+        </span>
       </div>
+      <p className="text-sm text-gray-600 mt-1">{p.nomeCliente}</p>
     </div>
-  );
-}
+  ))}
+
+          
