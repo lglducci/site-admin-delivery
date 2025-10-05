@@ -3,7 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
-import EditarItem from "./pages/EditarItem";  // 👈 ADICIONE ESSA LINHA
+import EditarItem from "./pages/EditarItem";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/cardapio" element={<Cardapio />} />
-        <Route path="/editar-item/:id" element={<EditarItem />} /> {/* 👈 ESSA ROTA */}
+        <Route path="/editar-item/:id" element={<EditarItem />} />
       </Routes>
     </BrowserRouter>
   );
