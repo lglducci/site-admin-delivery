@@ -11,7 +11,11 @@ export default function EditarItem() {
   useEffect(() => {
     async function fetchItem() {
       try {
-        const empresaId = localStorage.getItem("id_empresa");
+     
+
+       const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
+          const empresaId = empresaData.id_empresa;
+       
         if (!empresaId || !id) {
           setErro("Empresa ou número do item inválido.");
           setLoading(false);
