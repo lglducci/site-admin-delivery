@@ -175,7 +175,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold mb-3 border-b border-orange-400 pb-1">
               {coluna.titulo}
             </h2>
-{pedidos
+ {pedidos
   .filter((p) => p.status === coluna.status)
   .map((p) => (
     <div
@@ -193,7 +193,24 @@ export default function Dashboard() {
         </span>
       </div>
       <p className="text-sm text-gray-600 mt-1">{p.nomeCliente}</p>
+
+      {/* ✅ Botão Avançar visível */}
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            avancarPedido(p.numero);
+          }}
+          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
+        >
+          ▶️ Avançar
+        </button>
+      </div>
     </div>
   ))}
-
-          
+          </div> {/* fecha coluna */}
+        ))}
+      </div> {/* fecha grid */}
+    </div> {/* fecha container principal */}
+  );
+}
