@@ -95,8 +95,7 @@ export default function Cardapio() {
 
 <div className="bg-[#FFB703] hover:bg-[#E09E00] text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-md">
 
-"> 
-
+ 
               <button
                 onClick={() => navigate(`/editar-item/${item.numero}`)}
                 className="flex items-center justify-center gap-2 font-medium w-full"
