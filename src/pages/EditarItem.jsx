@@ -15,7 +15,7 @@ function getIdEmpresa() {
   } catch (e) {
     console.error("Erro lendo empresa:", e);
   }
-  return null;
+  return null; 
 }
 
 function pickFirstItem(data) {
