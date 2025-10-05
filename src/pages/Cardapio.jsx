@@ -1,164 +1,118 @@
  import React, { useEffect, useState } from "react";
-import { useEmpresa } from "../context/EmpresaContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Cardapio() {
-  const { empresa, carregado } = useEmpresa();
   const [itens, setItens] = useState([]);
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState("TODOS");
-  const [erro, setErro] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const categoriasFixas = ["TODOS", "PIZZA", "ESFIRRA", "REFRIGERANTE", "ÁGUA", "ALCOÓLICA", "BORDA"];
 
   useEffect(() => {
-    if (!carregado || !empresa?.id_empresa) return;
-
-    const carregarCardapio = async () => {
+    async function fetchCardapio() {
       try {
-        const res = await 
-         
-        
+        // Pega a empresa do localStorage (salva no login)
+        const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
+        const empresaId = empresaData.id_empresa;
 
-         fetch(`/api/webhook?rota=cardapio&id_empresa=${empresa.id_empresa}`);
+        if (!empresaId) {
+          alert("Nenhuma empresa selecionada!");
+          return;
+        }
 
-       
-        if (!res.ok) throw new Error("Erro ao buscar cardápio");
-        const data = await res.json();
-        setItens(Array.isArray(data) ? data : [data]);
-       
-      } catch (err) {
-        console.error("❌ Erro:", err);
-        setErro("Erro ao carregar cardápio.");
-      }
-    };
+        console.log("🔍 Buscando cardápio da empresa:", empresaId);
 
-    carregarCardapio();
-  }, [empresa, carregado]);
-
-  const itensFiltrados =
-    categoriaSelecionada === "TODOS"
-      ? itens
-      : itens.filter(
-          (i) => i.categoria?.toUpperCase() === categoriaSelecionada
+        const response = await fetch(
+          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresaId}`
         );
 
-  if (!carregado)
-    return (
-      <div className="flex justify-center items-center h-screen text-gray-500">
-        Carregando empresa...
-      </div>
-    );
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Retorno inválido do webhook");
 
-  if (erro)
+        setItens(data);
+      } catch (err) {
+        console.error("Erro ao carregar cardápio:", err);
+        alert("Erro ao carregar cardápio. Veja o console.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCardapio();
+  }, []);
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
-        {erro}
+      <div className="flex justify-center items-center h-screen text-lg">
+        Carregando cardápio...
       </div>
     );
+  }
+
+  if (!itens.length) {
+    return (
+      <div className="flex justify-center items-center h-screen text-lg">
+        Nenhum item encontrado.
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 p-6">
-      {/* Cabeçalho */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          🍕 Cardápio
-        </h1>
-        <span className="text-sm text-gray-500">
-          Itens: {itensFiltrados.length}
-        </span>
-      </div>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">
+        📋 Cardápio ({itens.length} itens)
+      </h1>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {categoriasFixas.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setCategoriaSelecionada(cat)}
-            className={`px-4 py-2 rounded-full font-semibold text-sm transition ${
-              categoriaSelecionada === cat
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid de produtos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-        {itensFiltrados.map((item) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {itens.map((item) => (
           <div
-            key={item.id}
-            className="bg-white rounded-lg shadow hover:shadow-lg transition duration-300 overflow-hidden border border-gray-100"
+            key={item.numero}
+            className="bg-white shadow-md rounded-xl overflow-hidden border hover:shadow-lg transition"
           >
             <img
               src={
                 item.imagem ||
-                "https://placehold.co/400x250?text=Sem+Imagem"
+                "https://placehold.co/400x250/EEE/AAA?text=Sem+Imagem"
               }
               alt={item.nome}
-              className="w-full h-48 object-cover"
+              className="w-full h-40 object-cover"
             />
             <div className="p-4">
-              <h2 className="font-bold text-lg">{item.nome}</h2>
-              <p className="text-sm text-gray-600 mb-3">
+              <h2 className="text-xl font-semibold mb-1 text-gray-900">
+                {item.nome}
+              </h2>
+              <p className="text-gray-600 mb-2 text-sm">
                 {item.descricao || "Sem descrição"}
               </p>
+              <p className="font-bold text-green-600">
+                R$ {item.preco_grande?.toFixed(2) || "0,00"}
+              </p>
 
-              {/* Tamanhos */}
-              <div className="flex flex-col gap-2 text-sm">
-                {item.tamanhos?.map((t) => (
-                  <div
-                    key={t.nome}
-                    className="bg-blue-50 border border-blue-200 rounded px-3 py-1 flex justify-between items-center"
-                  >
-                    <span>{t.nome === "M" ? "Média" : t.nome === "G" ? "Grande" : t.nome}</span>
-                    <span className="font-bold text-blue-700">
-                      R$ {t.preco?.toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-                                     
-                <button
-              onClick={() => {
-                // 1) empresaId: contexto -> localStorage("empresa") -> localStorage("id_empresa")
-                const empresaId =
-                  (empresa && empresa.id_empresa) ||
-                  (JSON.parse(localStorage.getItem("empresa") || "{}").id_empresa) ||
-                  localStorage.getItem("id_empresa");
-            
-                // 2) numero do item: aceita numero ou id
-                const numero = item?.numero ?? item?.id;
-            
-                console.log("Editar ->", { empresaId, numero });
-            
-                if (!empresaId || !numero) {
-                  alert("Faltam dados da empresa ou número do item!");
-                  return;
-                }
-            
-                // 3) navega enviando ambos
-                navigate(`/editar-item/${numero}?empresa=${empresaId}`);
-              }}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-            >
-              Editar
-            </button>
+              <button
+                onClick={() => {
+                  const empresaData = JSON.parse(
+                    localStorage.getItem("empresa") || "{}"
+                  );
+                  const empresaId = empresaData.id_empresa;
 
-                 
-             
+                  if (!empresaId || !item.numero) {
+                    alert("Faltam dados da empresa ou número do item!");
+                    return;
+                  }
+
+                  console.log("➡️ Editar item:", {
+                    empresaId,
+                    numero: item.numero,
+                  });
+
+                  navigate(`/editar-item/${item.numero}`);
+                }}
+                className="bg-blue-500 text-white mt-3 px-3 py-1 rounded hover:bg-blue-600 w-full"
+              >
+                ✏️ Editar
+              </button>
             </div>
           </div>
         ))}
       </div>
-
-      {itensFiltrados.length === 0 && (
-        <div className="text-center text-gray-500 mt-10">
-          Nenhum item encontrado
-        </div>
-      )}
     </div>
   );
 }
