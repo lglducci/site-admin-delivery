@@ -245,7 +245,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-1">
                     {/* Link para ver o pedido (abre em nova aba) */}
                     <a
-                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`}
+                      href={`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
