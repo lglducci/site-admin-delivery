@@ -129,7 +129,9 @@ export default function Cardapio() {
                      alert("Faltam dados da empresa ou número do item!");
                      return;
                    }
-                   window.location.href = `/editar-item/${item.numero}`;
+                    
+                  window.location.href = `/editar-item/${item.numero}?empresa=${empresa?.id_empresa}`;
+
                  }}
                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                >
