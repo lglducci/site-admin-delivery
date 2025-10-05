@@ -39,7 +39,8 @@ export default function PedidoCard({ pedido }) {
       <div className="flex-1">
         <span className="text-blue-900 dark:text-blue-300">
           <a
-            href={`/pedido-detalhes?numero=${pedido.numero}`}
+            
+           href={`/detalhes?numero=${pedido.numero}&id_empresa=${empresaId}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline"
@@ -61,3 +62,4 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
