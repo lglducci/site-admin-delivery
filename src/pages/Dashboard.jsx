@@ -1,6 +1,6 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PedidoCard from "../components/PedidoCard"; // ok manter, mesmo sem usar
+import PedidoCard from "../components/PedidoCard"; // pode manter
 import { useEmpresa } from "../context/EmpresaContext";
 
 export default function Dashboard() {
@@ -21,6 +21,29 @@ export default function Dashboard() {
   } catch (e) {
     console.warn("Contexto ainda não carregado (seguro)");
   }
+
+  // ---------------------------
+  // helper para pegar id_empresa
+  // ---------------------------
+  const getIdEmpresaSafe = () => {
+    try {
+      if (empresa?.id_empresa) return Number(empresa.id_empresa);
+      if (empresa?.idEmpresa) return Number(empresa.idEmpresa);
+
+      const direto = localStorage.getItem("id_empresa");
+      if (direto && !Number.isNaN(Number(direto))) return Number(direto);
+
+      const raw = localStorage.getItem("empresa");
+      if (raw) {
+        const obj = JSON.parse(raw);
+        const n = Number(obj?.id_empresa ?? obj?.idEmpresa);
+        if (!Number.isNaN(n)) return n;
+      }
+    } catch (e) {
+      console.warn("getIdEmpresaSafe erro:", e);
+    }
+    return null;
+  };
 
   useEffect(() => {
     const fetchPedidos = async () => {
@@ -46,7 +69,7 @@ export default function Dashboard() {
         const lista = Array.isArray(data) ? data : [];
         const pedidosAdaptados = lista.map((p) => ({
           numero: p.numero ?? p.pedido_id,
-          status: p.status?.toLowerCase() ?? "recebido",
+          status: (p.status ?? "").toString().toLowerCase() || "recebido",
           nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
           valor: Number(p.valor ?? 0),
           data: p.data ?? p.create_at ?? new Date().toISOString(),
@@ -61,40 +84,47 @@ export default function Dashboard() {
     fetchPedidos();
   }, [empresa, carregado]);
 
- 
-const avancarPedido = async (numero) => {
-  const id_empresa = getIdEmpresaSafe();
-  if (!id_empresa) {
-    alert("Empresa não identificada. Abra o cardápio/logue novamente para registrar a empresa.");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ numero, id_empresa }),
-    });
-
-    let data = null;
-    try { data = await response.json(); } catch {}
-    if (!response.ok) {
-      console.error("❌ Falha ao avançar:", response.status, data);
-      alert("Não foi possível avançar o pedido.");
+  // ---------------------------------------
+  // Avançar pedido: envia numero + id_empresa
+  // ---------------------------------------
+  const avancarPedido = async (numero) => {
+    const id_empresa = getIdEmpresaSafe();
+    if (!id_empresa) {
+      alert("Empresa não identificada. Abra o cardápio/logue novamente.");
       return;
     }
 
-    console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
-    window.location.reload();
-  } catch (err) {
-    console.error("❌ Erro ao avançar pedido:", err);
-    alert("Erro ao avançar pedido!");
-  }
-};
+    try {
+      const response = await fetch(
+        "https://webhook.lglducci.com.br/webhook/avancar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero, id_empresa }),
+        }
+      );
 
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
+      if (!response.ok) {
+        console.error("Falha ao avançar (status):", response.status, data);
+        alert("Falha ao avançar o pedido.");
+        return;
+      }
 
-
+      console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
+      // recarrega os pedidos (pode substituir por atualização mais fina se quiser)
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao avançar pedido:", err);
+      alert("Erro ao avançar pedido!");
+    }
+  };
 
   const handleSair = () => {
     localStorage.removeItem("token");
@@ -117,16 +147,18 @@ const avancarPedido = async (numero) => {
     );
   }
 
+  // ---------------------------------------
+  // RENDER
+  // ---------------------------------------
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white p-6">
-      {/* 🔸 Cabeçalho */}
+      {/* Cabeçalho */}
       <div className="flex justify-between items-center mb-6 bg-gray-950 shadow-lg rounded-xl p-4 border border-orange-500">
         <h1 className="text-2xl font-bold text-orange-400">
           Painel de {empresa?.nome || "Minha Pizzaria"}
         </h1>
 
         <div className="flex items-center gap-4">
-          {/* ⚙️ Menu Suspenso */}
           <div className="relative">
             <button
               onClick={() => setOpen((prev) => !prev)}
@@ -183,7 +215,6 @@ const avancarPedido = async (numero) => {
             )}
           </div>
 
-          {/* 🔴 Botão de Sair */}
           <button
             onClick={handleSair}
             className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition"
@@ -193,7 +224,7 @@ const avancarPedido = async (numero) => {
         </div>
       </div>
 
-      {/* 🔸 Colunas de Pedidos */}
+      {/* Colunas de pedidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {colunas.map((coluna) => (
           <div
@@ -212,11 +243,9 @@ const avancarPedido = async (numero) => {
                   className="bg-white p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
                 >
                   <div className="flex justify-between items-center mb-1">
-                    {/* 🔗 Link para ver o pedido (abre em nova aba) */}
-                    const idEmpresaUI = getIdEmpresaSafe();
-                    // ...
+                    {/* Link para ver o pedido (abre em nova aba) */}
                     <a
-                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}&id_empresa=${idEmpresaUI}`}
+                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
