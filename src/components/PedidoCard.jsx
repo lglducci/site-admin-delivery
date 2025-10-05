@@ -1,4 +1,4 @@
- import React from "react";
+import React from "react";
 
 export default function PedidoCard({ pedido }) {
   const dataPedido = new Date(pedido.data);
@@ -55,10 +55,10 @@ export default function PedidoCard({ pedido }) {
       <div className="flex-1">
         <span className="text-blue-900 dark:text-blue-300">
           <a
-            href={`/detalhes.html?numero=${pedido.numero}`}
+            href={`/pedido/${pedido.numero}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline"
+            className="hover:underline text-blue-600"
           >
             nº {pedido.numero}
           </a>{" "}
@@ -66,9 +66,7 @@ export default function PedidoCard({ pedido }) {
         </span>
       </div>
 
-      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">
-        {hora}
-      </div>
+      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">{hora}</div>
 
       <div className="flex space-x-2 items-center">
         <button
