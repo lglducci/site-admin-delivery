@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function EditarItem() {
-  const { id } = useParams(); // número do item vindo da URL
+  const { id } = useParams(); // número/id do item vindo da URL
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,16 +11,13 @@ export default function EditarItem() {
   useEffect(() => {
     async function fetchItem() {
       try {
-     
- // 🔹 Primeiro tenta pegar da URL, depois do localStorage
-const params = new URLSearchParams(window.location.search);
-const empresaId =
-  params.get("empresa") ||
-  JSON.parse(localStorage.getItem("empresa") || "{}").id_empresa;
+        // 🔹 Pega empresa da URL, depois do localStorage
+        const params = new URLSearchParams(window.location.search);
+        const empresaId =
+          params.get("empresa") ||
+          JSON.parse(localStorage.getItem("empresa") || "{}").id_empresa;
 
-
-if (!empresaId || !id) {
-
+        if (!empresaId || !id) {
           setErro("Empresa ou número do item inválido.");
           setLoading(false);
           return;
@@ -31,7 +28,6 @@ if (!empresaId || !id) {
 
         const resp = await fetch(url);
         const text = await resp.text();
-
         if (!text) {
           setErro("Nenhum dado retornado do servidor.");
           setLoading(false);
@@ -59,12 +55,14 @@ if (!empresaId || !id) {
     fetchItem();
   }, [id]);
 
-  // Função para salvar alterações
+  // ✅ Função para salvar alterações
   async function handleSalvar(e) {
     e.preventDefault();
 
-    const empresaId = localStorage.getItem("id_empresa");
-    if (!empresaId || !item?.numero) {
+    const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
+    const empresaId = empresaData.id_empresa;
+
+    if (!empresaId || !(item?.numero ?? item?.id)) {
       alert("Erro: Empresa ou número inválido.");
       return;
     }
@@ -75,7 +73,7 @@ if (!empresaId || !id) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_empresa: empresaId,
-          numero: item.numero,
+          numero: item.numero ?? item.id,
           nome: item.nome,
           descricao: item.descricao,
           preco_grande: item.preco_grande,
@@ -99,7 +97,7 @@ if (!empresaId || !id) {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-900 dark:text-white">
-      <h1 className="text-2xl font-bold mb-6">Editar Item #{item.numero}</h1>
+      <h1 className="text-2xl font-bold mb-6">Editar Item #{item.numero ?? item.id}</h1>
 
       <form onSubmit={handleSalvar} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md max-w-lg mx-auto">
         <div className="mb-4">
