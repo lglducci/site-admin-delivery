@@ -5,7 +5,6 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
-
  
 
 
