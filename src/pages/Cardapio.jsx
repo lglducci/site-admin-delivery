@@ -91,7 +91,10 @@ export default function Cardapio() {
               </p>
             </div>
 
-            <div className="bg-[#FFB703] hover:bg-[#E09E00] text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-md"
+          
+
+<div className="bg-[#FFB703] hover:bg-[#E09E00] text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-md">
+
 "> 
 
               <button
