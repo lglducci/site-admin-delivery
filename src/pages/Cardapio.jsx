@@ -1,115 +1,80 @@
  import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function Cardapio() {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchCardapio() {
+    async function carregarCardapio() {
       try {
-        // Pega a empresa do localStorage (salva no login)
-        const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
-        const empresaId = empresaData.id_empresa;
-
-        if (!empresaId) {
-          alert("Nenhuma empresa selecionada!");
+        const empresa = JSON.parse(localStorage.getItem("empresa"));
+        if (!empresa?.id_empresa) {
+          alert("Nenhuma empresa encontrada. Faça login novamente.");
           return;
         }
 
-        console.log("🔍 Buscando cardápio da empresa:", empresaId);
+        const r = await fetch(`https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`);
+        const data = await r.json();
 
-        const response = await fetch(
-          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresaId}`
-        );
-
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error("Retorno inválido do webhook");
-
-        setItens(data);
+        if (Array.isArray(data)) {
+          setItens(data);
+        } else {
+          console.error("Formato inesperado:", data);
+        }
       } catch (err) {
         console.error("Erro ao carregar cardápio:", err);
-        alert("Erro ao carregar cardápio. Veja o console.");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchCardapio();
+    carregarCardapio();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-lg">
-        Carregando cardápio...
-      </div>
-    );
-  }
-
-  if (!itens.length) {
-    return (
-      <div className="flex justify-center items-center h-screen text-lg">
-        Nenhum item encontrado.
-      </div>
-    );
-  }
+  if (loading) return <p className="p-6 text-center">Carregando cardápio...</p>;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        📋 Cardápio ({itens.length} itens)
-      </h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">📋 Cardápio</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {itens.map((item) => (
           <div
             key={item.numero}
-            className="bg-white shadow-md rounded-xl overflow-hidden border hover:shadow-lg transition"
+            className="bg-white shadow-md rounded-lg p-4 dark:bg-gray-800"
           >
             <img
-              src={
-                item.imagem ||
-                "https://placehold.co/400x250/EEE/AAA?text=Sem+Imagem"
-              }
+              src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
               alt={item.nome}
-              className="w-full h-40 object-cover"
+              className="w-full h-40 object-cover rounded"
             />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-1 text-gray-900">
-                {item.nome}
-              </h2>
-              <p className="text-gray-600 mb-2 text-sm">
-                {item.descricao || "Sem descrição"}
-              </p>
-              <p className="font-bold text-green-600">
-                R$ {item.preco_grande?.toFixed(2) || "0,00"}
-              </p>
+            <h2 className="text-lg font-bold mt-2">{item.nome}</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {item.descricao}
+            </p>
+            <p className="mt-1 font-semibold">
+              💰 R$ {item.preco_grande || item.preco || 0}
+            </p>
 
-              <button
-                onClick={() => {
-                  const empresaData = JSON.parse(
-                    localStorage.getItem("empresa") || "{}"
-                  );
-                  const empresaId = empresaData.id_empresa;
+            <button
+              onClick={() => {
+                const empresa = JSON.parse(localStorage.getItem("empresa"));
+                if (!empresa?.id_empresa || !item.numero) {
+                  alert("Dados insuficientes para editar o item!");
+                  return;
+                }
 
-                  if (!empresaId || !item.numero) {
-                    alert("Faltam dados da empresa ou número do item!");
-                    return;
-                  }
+                // Salva os dados no localStorage para a tela de edição
+                localStorage.setItem("id_empresa", empresa.id_empresa);
+                localStorage.setItem("numero_item", item.numero);
 
-                  console.log("➡️ Editar item:", {
-                    empresaId,
-                    numero: item.numero,
-                  });
-
-                  navigate(`/editar-item/${item.numero}`);
-                }}
-                className="bg-blue-500 text-white mt-3 px-3 py-1 rounded hover:bg-blue-600 w-full"
-              >
-                ✏️ Editar
-              </button>
-            </div>
+                // Redireciona
+                window.location.href = `/editar-item/${item.numero}`;
+              }}
+              className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+            >
+              ✏️ Editar
+            </button>
           </div>
         ))}
       </div>
