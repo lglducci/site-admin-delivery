@@ -5,33 +5,36 @@ export default function EditarItem() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
+  const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchItem() {
-      const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
-      const empresaId = empresaData.id_empresa;
-      const numero = id || localStorage.getItem("ultimo_item_editado"); // fallback
-
-      if (!empresaId || !numero) {
-        alert("Empresa ou número do item inválido.");
-        return;
-      }
-
-      console.log("🔎 Buscando item:", { empresaId, numero });
-
       try {
-        const r = await fetch(
-          `https://webhook.lglducci.com.br/webhook/get_item_cardapio?id_empresa=${empresaId}&numero=${numero}`
-        );
-        const text = await r.text();
+        const empresa = JSON.parse(localStorage.getItem("empresa") || "{}");
+        const empresaId = empresa.id_empresa;
+        const numero = id && id !== "undefined" ? id : localStorage.getItem("ultimo_item_editado");
 
-        if (!text) throw new Error("Resposta vazia do servidor.");
-        const data = JSON.parse(text);
+        if (!empresaId || !numero) {
+          setErro("Empresa ou número inválido");
+          setLoading(false);
+          return;
+        }
+
+        const url = `https://webhook.lglducci.com.br/webhook/get_item_cardapio?id_empresa=${empresaId}&numero=${numero}`;
+        console.log("🔍 Buscando:", url);
+
+        const res = await fetch(url);
+        const txt = await res.text();
+        if (!txt) throw new Error("Resposta vazia do servidor");
+
+        const data = JSON.parse(txt);
+        console.log("✅ Dados recebidos:", data);
+
         setItem(data);
-      } catch (err) {
-        console.error("Erro ao buscar item:", err);
-        alert("Erro ao buscar o item.");
+      } catch (e) {
+        console.error(e);
+        setErro("Erro ao carregar o item");
       } finally {
         setLoading(false);
       }
@@ -40,26 +43,35 @@ export default function EditarItem() {
     fetchItem();
   }, [id]);
 
-  if (loading) return <div className="p-6 text-lg">Carregando...</div>;
-  if (!item) return <div className="p-6 text-lg">Item não encontrado.</div>;
+  if (loading) return <div className="p-6">Carregando...</div>;
+  if (erro) return <div className="p-6 text-red-600">{erro}</div>;
+  if (!item) return <div className="p-6">Item não encontrado.</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-xl mx-auto">
       <button
         onClick={() => navigate("/cardapio")}
-        className="mb-4 bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
+        className="mb-4 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
       >
         ← Voltar
       </button>
 
-      <h1 className="text-2xl font-bold mb-4">Editar Item #{id}</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">
+        Editar Item #{id}
+      </h1>
 
-      <div className="space-y-3">
+      <div className="bg-white shadow p-4 rounded">
         <p><strong>Nome:</strong> {item.nome}</p>
         <p><strong>Descrição:</strong> {item.descricao}</p>
         <p><strong>Preço grande:</strong> R$ {item.preco_grande}</p>
         <p><strong>Categoria:</strong> {item.categoria}</p>
-        <p><strong>Imagem:</strong> {item.imagem}</p>
+        {item.imagem && (
+          <img
+            src={item.imagem}
+            alt={item.nome}
+            className="mt-3 w-full rounded-lg shadow"
+          />
+        )}
       </div>
     </div>
   );
