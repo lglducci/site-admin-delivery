@@ -1,6 +1,5 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PedidoCard from "../components/PedidoCard";
 import { useEmpresa } from "../context/EmpresaContext";
 
 export default function Dashboard() {
@@ -61,21 +60,23 @@ export default function Dashboard() {
     fetchPedidos();
   }, [empresa, carregado]);
 
- const avancarPedido = async (numero) => {
-  try {
-    const response = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero }),
-    });
-    const data = await response.json();
-    console.log("✅ Avançado:", data);
-    window.location.reload();
-  } catch (err) {
-    console.error("❌ Erro ao avançar pedido:", err);
-  }
-};
-
+  const avancarPedido = async (numero) => {
+    try {
+      const response = await fetch(
+        "https://webhook.lglducci.com.br/webhook/avancar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero }),
+        }
+      );
+      const data = await response.json();
+      console.log("✅ Avançado:", data);
+      window.location.reload();
+    } catch (err) {
+      console.error("❌ Erro ao avançar pedido:", err);
+    }
+  };
 
   const handleSair = () => {
     localStorage.removeItem("token");
@@ -120,7 +121,10 @@ export default function Dashboard() {
               <div className="absolute right-0 mt-2 w-52 bg-gray-900 border border-orange-500 shadow-lg rounded-lg p-2 z-50">
                 <button
                   onClick={() =>
-                    window.open("https://webhook.lglducci.com.br/webhook/config_empresa", "_blank")
+                    window.open(
+                      "https://webhook.lglducci.com.br/webhook/config_empresa",
+                      "_blank"
+                    )
                   }
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
@@ -129,7 +133,10 @@ export default function Dashboard() {
 
                 <button
                   onClick={() =>
-                    window.open("https://webhook.lglducci.com.br/webhook/mensagem_padrao", "_blank")
+                    window.open(
+                      "https://webhook.lglducci.com.br/webhook/mensagem_padrao",
+                      "_blank"
+                    )
                   }
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
@@ -138,7 +145,10 @@ export default function Dashboard() {
 
                 <button
                   onClick={() =>
-                    window.open("https://webhook.lglducci.com.br/webhook/relatorios", "_blank")
+                    window.open(
+                      "https://webhook.lglducci.com.br/webhook/relatorios",
+                      "_blank"
+                    )
                   }
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
@@ -175,42 +185,39 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold mb-3 border-b border-orange-400 pb-1">
               {coluna.titulo}
             </h2>
- {pedidos
-  .filter((p) => p.status === coluna.status)
-  .map((p) => (
-    <div
-      key={p.numero}
-      onClick={() => avancarPedido(p.numero)}
-      onTouchEnd={() => avancarPedido(p.numero)}
-      className="cursor-pointer bg-white hover:bg-orange-100 p-3 rounded-xl shadow-sm mb-3 border border-gray-200 transition-all duration-150"
-    >
-      <div className="flex justify-between items-center">
-        <span className="font-semibold text-gray-800">
-          nº {p.numero}
-        </span>
-        <span className="text-orange-500 font-bold">
-          R$ {p.valor.toFixed(2)}
-        </span>
-      </div>
-      <p className="text-sm text-gray-600 mt-1">{p.nomeCliente}</p>
 
-      {/* ✅ Botão Avançar visível */}
-      <div className="flex justify-end mt-2">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            avancarPedido(p.numero);
-          }}
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
-        >
-          ▶️ Avançar
-        </button>
+            {pedidos
+              .filter((p) => p.status === coluna.status)
+              .map((p) => (
+                <div
+                  key={p.numero}
+                  className="bg-white p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-gray-800">
+                      nº {p.numero}
+                    </span>
+                    <span className="text-orange-500 font-bold">
+                      R$ {p.valor.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-600 mb-2">{p.nomeCliente}</p>
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => avancarPedido(p.numero)}
+                      onTouchEnd={() => avancarPedido(p.numero)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
+                    >
+                      ▶️ Avançar
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ))}
       </div>
     </div>
-  ))}
-          </div> {/* fecha coluna */}
-        ))}
-      </div> {/* fecha grid */}
-    </div> {/* fecha container principal */}
   );
 }
