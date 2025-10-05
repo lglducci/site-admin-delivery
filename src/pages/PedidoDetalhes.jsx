@@ -1,91 +1,51 @@
-import React from "react";
+ import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-export default function PedidoCard({ pedido }) {
-  const dataPedido = new Date(pedido.data);
-  const hora = dataPedido.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+export default function PedidoDetalhes() {
+  const { numero } = useParams();
+  const navigate = useNavigate();
+  const [htmlPedido, setHtmlPedido] = useState("");
+  const [erro, setErro] = useState("");
 
-  const empresaId =
-    localStorage.getItem("id_empresa") ||
-    JSON.parse(localStorage.getItem("empresa") || "{}")?.id_empresa ||
-    0;
-
-  const handleAvancar = async () => {
-    try {
-      const resposta = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numero: pedido.numero,
-          id_empresa: empresaId,
-        }),
-      });
-
-      if (!resposta.ok) throw new Error("Erro ao avançar pedido");
-      alert(`✅ Pedido nº ${pedido.numero} avançado com sucesso!`);
-      window.location.reload();
-    } catch (erro) {
-      alert("❌ Erro ao avançar o pedido.");
+  useEffect(() => {
+    const empresaId = localStorage.getItem("id_empresa");
+    if (!empresaId || !numero) {
+      setErro("Pedido ou empresa não identificado.");
+      return;
     }
-  };
 
-  const cancelarPedido = async (numero) => {
-    try {
-      const resposta = await fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numero,
-          id_empresa: empresaId,
-        }),
-      });
+    fetch(`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${empresaId}`)
+      .then((r) => (r.ok ? r.text() : Promise.reject("Erro na resposta")))
+      .then((html) => setHtmlPedido(html))
+      .catch(() => setErro("Erro ao carregar detalhes do pedido."));
+  }, [numero]);
 
-      if (!resposta.ok) throw new Error("Erro ao cancelar pedido");
-      alert(`🚫 Pedido nº ${numero} cancelado com sucesso.`);
-      window.location.reload();
-    } catch (erro) {
-      alert("❌ Erro ao cancelar o pedido.");
-    }
-  };
+  if (erro) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-red-500">
+        <p>{erro}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+        >
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
+  if (!htmlPedido) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        Carregando detalhes do pedido nº {numero}...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex justify-between items-center px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 mb-2 text-sm font-medium text-gray-800 dark:text-white">
-      <div className="flex-1">
-        <span className="text-blue-900 dark:text-blue-300">
-          <a
-            href={`/detalhes.html?numero=${pedido.numero}&id_empresa=${empresaId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
-            nº {pedido.numero}
-          </a>{" "}
-          - {pedido.nomeCliente}
-        </span>
-      </div>
-
-      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">
-        {hora}
-      </div>
-
-      <div className="flex space-x-2 items-center">
-        <button
-          onClick={handleAvancar}
-          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-white text-xs"
-          title="Avançar pedido"
-        >
-          ▶️
-        </button>
-        <button
-          onClick={() => cancelarPedido(pedido.numero)}
-          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-white text-xs"
-          title="Cancelar pedido"
-        >
-          ❌
-        </button>
-      </div>
-    </div>
+    <div
+      className="min-h-screen bg-gray-900 text-white p-6"
+      dangerouslySetInnerHTML={{ __html: htmlPedido }}
+    />
   );
 }
