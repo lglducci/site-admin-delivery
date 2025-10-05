@@ -3,7 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
-
+import EditarCardapio from "./pages/EditarCardapio"; // ✅ nova página de edição
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/cardapio" element={<Cardapio />} />
+        <Route path="/editar/:id" element={<EditarCardapio />} /> {/* ✅ nova rota */}
       </Routes>
     </BrowserRouter>
   );
