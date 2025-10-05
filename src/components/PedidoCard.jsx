@@ -1,4 +1,4 @@
-import React from "react";
+ import React from "react";
 
 export default function PedidoCard({ pedido }) {
   const dataPedido = new Date(pedido.data);
@@ -14,14 +14,17 @@ export default function PedidoCard({ pedido }) {
 
   const handleAvancar = async () => {
     try {
-      const resposta = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numero: pedido.numero,
-          id_empresa: empresaId,
-        }),
-      });
+      const resposta = await fetch(
+        "https://webhook.lglducci.com.br/webhook/avancar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            numero: pedido.numero,
+            id_empresa: empresaId,
+          }),
+        }
+      );
 
       if (!resposta.ok) throw new Error("Erro ao avançar pedido");
       alert(`✅ Pedido nº ${pedido.numero} avançado com sucesso!`);
@@ -33,14 +36,17 @@ export default function PedidoCard({ pedido }) {
 
   const cancelarPedido = async (numero) => {
     try {
-      const resposta = await fetch("https://webhook.lglducci.com.br/webhook/cancelar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numero,
-          id_empresa: empresaId,
-        }),
-      });
+      const resposta = await fetch(
+        "https://webhook.lglducci.com.br/webhook/cancelar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            numero,
+            id_empresa: empresaId,
+          }),
+        }
+      );
 
       if (!resposta.ok) throw new Error("Erro ao cancelar pedido");
       alert(`🚫 Pedido nº ${numero} cancelado com sucesso.`);
@@ -55,10 +61,10 @@ export default function PedidoCard({ pedido }) {
       <div className="flex-1">
         <span className="text-blue-900 dark:text-blue-300">
           <a
-            href={`/pedido/${pedido.numero}`}
+            href={`/pedido-detalhes?numero=${pedido.numero}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline text-blue-600"
+            className="hover:underline"
           >
             nº {pedido.numero}
           </a>{" "}
@@ -66,7 +72,9 @@ export default function PedidoCard({ pedido }) {
         </span>
       </div>
 
-      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">{hora}</div>
+      <div className="text-gray-500 dark:text-gray-300 text-xs mx-2">
+        {hora}
+      </div>
 
       <div className="flex space-x-2 items-center">
         <button
