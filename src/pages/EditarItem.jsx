@@ -33,7 +33,7 @@ export default function EditarItem() {
     }
 
     carregarItem();
-  }, [id]);
+  }, [numero]);
 
   if (loading) return <p className="p-6 text-center">Carregando...</p>;
   if (!item) return <p className="p-6 text-center">Item não encontrado.</p>;
