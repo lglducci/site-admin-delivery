@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -7,25 +7,25 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #333;
+      background: #1a1a1a;
+      color: #f3f3f3;
       margin: 0;
       padding: 0;
     }
     .container {
       max-width: 600px;
       margin: 40px auto;
-      background: white;
+      background: #2a2a2a;
       padding: 20px 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(255, 122, 0, 0.4);
     }
     h1 {
       color: #ff7a00;
       text-align: center;
     }
     .info {
-      background: #fff6ef;
+      background: #333;
       padding: 15px;
       border-radius: 10px;
       margin-bottom: 15px;
@@ -33,7 +33,7 @@
     .resumo {
       white-space: pre-wrap;
       font-family: monospace;
-      background: #fafafa;
+      background: #222;
       border-left: 4px solid #ff7a00;
       padding: 15px;
       border-radius: 8px;
@@ -42,22 +42,22 @@
       text-align: center;
       margin-top: 15px;
       font-size: 13px;
-      color: gray;
+      color: #999;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Detalhes do Pedido</h1>
+    <h1>📋 Detalhes do Pedido</h1>
     <div id="conteudo"></div>
-    <div class="footer">📦 Sistema AdminDelivery</div>
+    <div class="footer">AdminDelivery 🍕</div>
   </div>
 
   <script>
     async function carregarPedido() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const numero = urlParams.get("numero");
-      const id_empresa = urlParams.get("id_empresa");
+      const params = new URLSearchParams(window.location.search);
+      const numero = params.get("numero");
+      const id_empresa = params.get("id_empresa");
 
       if (!numero || !id_empresa) {
         document.getElementById("conteudo").innerHTML =
@@ -80,18 +80,16 @@
         const p = dados[0];
         document.getElementById("conteudo").innerHTML = `
           <div class="info">
-            <strong>👤 Cliente:</strong> ${p.nome || "-"} <br>
-            <strong>🏠 Endereço:</strong> ${p.endereço || "-"} <br>
-            <strong>📍 Bairro:</strong> ${p.bairro || "-"} <br>
-            <strong>💳 Pagamento:</strong> ${p.tipo_cobranca || "não informado"} <br>
+            <strong>👤 Cliente:</strong> ${p.nome || "-"}<br>
+            <strong>🏠 Endereço:</strong> ${p.endereço || "-"}<br>
+            <strong>📍 Bairro:</strong> ${p.bairro || "-"}<br>
+            <strong>💳 Pagamento:</strong> ${p.tipo_cobranca || "não informado"}<br>
           </div>
-
           <div class="resumo">${p.resumo || "Sem resumo disponível"}</div>
         `;
       } catch (e) {
         document.getElementById("conteudo").innerHTML =
           "<p>❌ Erro ao carregar o pedido.</p>";
-        console.error(e);
       }
     }
 
