@@ -1,5 +1,6 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PedidoCard from "../components/PedidoCard"; // ok manter, mesmo sem usar
 import { useEmpresa } from "../context/EmpresaContext";
 
 export default function Dashboard() {
@@ -70,11 +71,14 @@ export default function Dashboard() {
           body: JSON.stringify({ numero }),
         }
       );
-      const data = await response.json();
-      console.log("✅ Avançado:", data);
+      // Mesmo se o backend não retornar JSON válido, não quebra:
+      let data = null;
+      try { data = await response.json(); } catch {}
+      console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
       window.location.reload();
     } catch (err) {
       console.error("❌ Erro ao avançar pedido:", err);
+      alert("Erro ao avançar pedido!");
     }
   };
 
@@ -194,11 +198,19 @@ export default function Dashboard() {
                   className="bg-white p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-semibold text-gray-800">
+                    {/* 🔗 Link para ver o pedido (abre em nova aba) */}
+                    <a
+                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-semibold text-gray-800 hover:text-orange-600 underline"
+                    >
                       nº {p.numero}
-                    </span>
+                    </a>
+
                     <span className="text-orange-500 font-bold">
-                      R$ {p.valor.toFixed(2)}
+                      R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
 
@@ -206,8 +218,10 @@ export default function Dashboard() {
 
                   <div className="flex justify-end">
                     <button
-                      onClick={() => avancarPedido(p.numero)}
-                      onTouchEnd={() => avancarPedido(p.numero)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        avancarPedido(p.numero);
+                      }}
                       className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
                     >
                       ▶️ Avançar
