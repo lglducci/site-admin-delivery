@@ -2,18 +2,32 @@
 import { useParams, useSearchParams } from "react-router-dom";
 
 export default function PedidoDetalhes() {
-  const { numero } = useParams();
+  const { numero: numeroParam } = useParams();
   const [searchParams] = useSearchParams();
-  const id_empresa = searchParams.get("id_empresa");
 
-  const [pedido, setPedido] = useState(null);
+  // Tenta pegar o número e id_empresa de várias fontes
+  const numero =
+    numeroParam || searchParams.get("numero") || localStorage.getItem("numero_pedido");
+  const id_empresa =
+    searchParams.get("id_empresa") ||
+    localStorage.getItem("id_empresa") ||
+    JSON.parse(localStorage.getItem("empresa") || "{}")?.id_empresa;
+
+  const [pedidoHtml, setPedidoHtml] = useState("");
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     const fetchDetalhes = async () => {
-      try {
-        if (!numero || !id_empresa) return;
+      if (!numero || !id_empresa) {
+        console.warn("🚫 Dados insuficientes para buscar o pedido:", {
+          numero,
+          id_empresa,
+        });
+        setCarregando(false);
+        return;
+      }
 
+      try {
         const url = `https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${id_empresa}`;
         console.log("🔎 Buscando:", url);
 
@@ -21,10 +35,10 @@ export default function PedidoDetalhes() {
         if (!resp.ok) throw new Error(`Erro HTTP ${resp.status}`);
         const data = await resp.text();
 
-        setPedido(data);
+        setPedidoHtml(data);
       } catch (err) {
-        console.error("Erro ao buscar pedido:", err);
-        setPedido(`<p style="color:red;">Erro ao carregar o pedido.</p>`);
+        console.error("❌ Erro ao buscar pedido:", err);
+        setPedidoHtml("<p style='color:red;'>Erro ao carregar o pedido.</p>");
       } finally {
         setCarregando(false);
       }
@@ -33,25 +47,30 @@ export default function PedidoDetalhes() {
     fetchDetalhes();
   }, [numero, id_empresa]);
 
-  if (carregando) {
+  if (carregando)
     return (
-      <div className="flex justify-center items-center h-screen text-white bg-black">
-        <h2>Carregando pedido nº {numero}...</h2>
+      <div className="flex justify-center items-center h-screen bg-black text-white">
+        <h2>Carregando pedido...</h2>
       </div>
     );
-  }
+
+  if (!pedidoHtml)
+    return (
+      <div className="flex justify-center items-center h-screen bg-black text-white">
+        <h2>Nenhum pedido encontrado.</h2>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl shadow-lg p-6">
+      <div className="max-w-4xl mx-auto bg-gray-800 p-6 rounded-xl shadow-xl">
         <h1 className="text-2xl font-bold text-orange-400 mb-4">
           Pedido nº {numero}
         </h1>
 
-        {/* 🔥 Exibe o HTML que veio do webhook */}
         <div
-          className="bg-white text-black p-4 rounded-lg"
-          dangerouslySetInnerHTML={{ __html: pedido }}
+          className="bg-white text-black p-4 rounded-lg shadow"
+          dangerouslySetInnerHTML={{ __html: pedidoHtml }}
         />
 
         <div className="mt-6 flex justify-end">
