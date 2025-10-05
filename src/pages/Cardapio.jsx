@@ -1,12 +1,13 @@
  import React, { useEffect, useState } from "react";
 import { useEmpresa } from "../context/EmpresaContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Cardapio() {
   const { empresa, carregado } = useEmpresa();
   const [itens, setItens] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("TODOS");
   const [erro, setErro] = useState(null);
-
+  const navigate = useNavigate();
   const categoriasFixas = ["TODOS", "PIZZA", "ESFIRRA", "REFRIGERANTE", "ÁGUA", "ALCOÓLICA", "BORDA"];
 
   useEffect(() => {
