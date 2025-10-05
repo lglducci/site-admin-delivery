@@ -244,15 +244,20 @@ export default function Dashboard() {
                 >
                   <div className="flex justify-between items-center mb-1">
                     {/* Link para ver o pedido (abre em nova aba) */}
-                    <a
-                      href={`https://webhook.lglducci.com.br/webhook/pedido-html?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="font-semibold text-gray-800 hover:text-orange-600 underline"
-                    >
-                      nº {p.numero}
-                    </a>
+
+
+                <a
+                  href={`/detalhes/${p.numero}?id_empresa=${getIdEmpresaSafe()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-semibold text-gray-800 hover:text-orange-600 underline"
+                >
+                  nº {p.numero}
+                </a>
+                                  
+
+ 
 
                     <span className="text-orange-500 font-bold">
                       R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
