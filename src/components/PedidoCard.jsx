@@ -6,7 +6,7 @@ export default function PedidoCard({ pedido }) {
     hour: "2-digit",
     minute: "2-digit",
   });
-
+    
   const empresaId =
     localStorage.getItem("id_empresa") ||
     JSON.parse(localStorage.getItem("empresa") || "{}")?.id_empresa ||
@@ -62,4 +62,5 @@ export default function PedidoCard({ pedido }) {
     </div>
   );
 }
+
 
