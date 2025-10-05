@@ -14,9 +14,13 @@ export default function Cardapio() {
 
     const carregarCardapio = async () => {
       try {
-        const res = await fetch(
-          `https://webhook.lglducci.com.br/webhook/cardapio?id_empresa=${empresa.id_empresa}`
-        );
+        const res = await 
+         
+        
+
+         fetch(`/api/webhook?rota=cardapio&id_empresa=${empresa.id_empresa}`);
+
+       
         if (!res.ok) throw new Error("Erro ao buscar cardápio");
         const data = await res.json();
         setItens(Array.isArray(data) ? data : []);
