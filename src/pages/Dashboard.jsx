@@ -246,19 +246,16 @@ export default function Dashboard() {
                     {/* Link para ver o pedido (abre em nova aba) */}
 
 
-                <a
-                  href={`/detalhes/${p.numero}?id_empresa=${getIdEmpresaSafe()}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-semibold text-gray-800 hover:text-orange-600 underline"
-                >
-                  nº {p.numero}
-                </a>
-                                  
+                   <button
+                    onClick={() =>
+                      navigate(`/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`)
+                    }
+                    className="font-semibold text-gray-800 hover:text-orange-600 underline"
+                  >
+                    nº {p.numero}
+                  </button>
 
- 
-
+                  
                     <span className="text-orange-500 font-bold">
                       R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
