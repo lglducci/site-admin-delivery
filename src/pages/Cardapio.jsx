@@ -42,7 +42,8 @@ export default function Cardapio() {
     return <p className="p-6 text-center text-gray-500">Carregando cardápio...</p>;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+  
+     <div className="p-6" style={{ backgroundColor: "#FDF6EC", minHeight: "100vh" }}>
       {/* Topo com título e barra de busca */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
         <h1 className="text-3xl font-bold flex items-center gap-2 text-[#1A1F2B]">
@@ -90,7 +91,9 @@ export default function Cardapio() {
               </p>
             </div>
 
-            <div className="bg-[#1A1F2B] text-white py-3 text-center cursor-pointer hover:bg-[#2C3240] transition-all">
+            <div className="bg-[#FFB703] hover:bg-[#E09E00] text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-md"
+"> 
+
               <button
                 onClick={() => navigate(`/editar-item/${item.numero}`)}
                 className="flex items-center justify-center gap-2 font-medium w-full"
