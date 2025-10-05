@@ -5,7 +5,7 @@ function getIdEmpresa() {
   try {
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
-
+   
     const raw = localStorage.getItem("empresa");
     if (raw) {
       const obj = JSON.parse(raw);
