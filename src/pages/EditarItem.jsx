@@ -295,18 +295,23 @@ export default function EditarItem() {
         <div className="flex justify-between pt-8">
           <button
             onClick={() => window.history.back()}
-            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow-md transition-all"
+           
+          
+            className="px-5 py-2 bg-[#E09E00] hover:bg-[#D08E00] text-white rounded-xl shadow-md transition-all"
+             className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
+             salvando
+               ? "bg-[#FFD89B] cursor-not-allowed"
+               : "bg-[#FFB703] hover:bg-[#E09E00]"
+           }`}
+  
           >
             🔙 Voltar
           </button>
           <button
             onClick={handleSalvar}
             disabled={salvando}
-            className={`px-6 py-2 rounded-xl text-white shadow-md transition-all ${
-              salvando
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+           
+         
           >
             {salvando ? "Salvando..." : "💾 Salvar"}
           </button>
