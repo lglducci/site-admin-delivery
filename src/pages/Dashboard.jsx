@@ -61,26 +61,40 @@ export default function Dashboard() {
     fetchPedidos();
   }, [empresa, carregado]);
 
-  const avancarPedido = async (numero) => {
-    try {
-      const response = await fetch(
-        "https://webhook.lglducci.com.br/webhook/avancar",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ numero }),
-        }
-      );
-      // Mesmo se o backend não retornar JSON válido, não quebra:
-      let data = null;
-      try { data = await response.json(); } catch {}
-      console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
-      window.location.reload();
-    } catch (err) {
-      console.error("❌ Erro ao avançar pedido:", err);
-      alert("Erro ao avançar pedido!");
+ 
+const avancarPedido = async (numero) => {
+  const id_empresa = getIdEmpresaSafe();
+  if (!id_empresa) {
+    alert("Empresa não identificada. Abra o cardápio/logue novamente para registrar a empresa.");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ numero, id_empresa }),
+    });
+
+    let data = null;
+    try { data = await response.json(); } catch {}
+    if (!response.ok) {
+      console.error("❌ Falha ao avançar:", response.status, data);
+      alert("Não foi possível avançar o pedido.");
+      return;
     }
-  };
+
+    console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
+    window.location.reload();
+  } catch (err) {
+    console.error("❌ Erro ao avançar pedido:", err);
+    alert("Erro ao avançar pedido!");
+  }
+};
+
+
+
+
 
   const handleSair = () => {
     localStorage.removeItem("token");
@@ -199,8 +213,10 @@ export default function Dashboard() {
                 >
                   <div className="flex justify-between items-center mb-1">
                     {/* 🔗 Link para ver o pedido (abre em nova aba) */}
+                    const idEmpresaUI = getIdEmpresaSafe();
+                    // ...
                     <a
-                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}`}
+                      href={`https://webhook.lglducci.com.br/webhook/pedido_detalhe?numero=${p.numero}&id_empresa=${idEmpresaUI}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
