@@ -14,9 +14,11 @@ export default function EditarItem() {
      
 
        const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
-          const empresaId = empresaData.id_empresa;
-       
-        if (!empresaId || !id) {
+  
+const empresaId = empresaData.id_empresa;
+
+if (!empresaId || !id) {
+
           setErro("Empresa ou número do item inválido.");
           setLoading(false);
           return;
