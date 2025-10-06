@@ -6,6 +6,7 @@ import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
+ 
 // ⚠️ use um nome diferente e extensão explícita:
 import ModelosCustoPage from "./pages/ModelosCustoPage.jsx"; 
 
@@ -28,7 +29,18 @@ function App() {
 }
 
  
+ 
+ 
 
-export default function App()  ;
+export default function App() {
+  return <ModelosCusto />;
+}
+
+
+
+
+
+
+
 
  
