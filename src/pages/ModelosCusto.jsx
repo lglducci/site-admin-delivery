@@ -1,15 +1,25 @@
- // src/pages/ModelosCusto.jsx
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 
 export default function ModelosCusto() {
   const [log, setLog] = useState("🟢 Tela montou. Carregando...");
   const [modelos, setModelos] = useState([]);
-  const [err, setErr] = useState("");
+  const [erro, setErro] = useState("");
+
+  const isHtml = (ct, raw) =>
+    (ct || "").includes("text/html") || raw.startsWith("<!DOCTYPE html");
+
+  const fetchJson = async (url) => {
+    setLog((m) => m + `\n📡 GET ${url}`);
+    const r = await fetch(url);
+    const ct = r.headers.get("content-type") || "";
+    const raw = await r.text();
+    setLog((m) => m + `\n✅ Status ${r.status} • CT=${ct}`);
+    return { r, ct, raw };
+  };
 
   useEffect(() => {
     (async () => {
       try {
-        // garante empresa local
         let empresa = null;
         try { empresa = JSON.parse(localStorage.getItem("empresa")); } catch {}
         if (!empresa?.id_empresa) {
@@ -17,28 +27,30 @@ export default function ModelosCusto() {
           localStorage.setItem("empresa", JSON.stringify(empresa));
         }
 
-        const url = `/api/n8n/modelos_custo?id_empresa=${empresa.id_empresa}`;
-        setLog((m) => m + `\n📡 GET ${url}`);
+        // 1) Tenta PRODUÇÃO
+        const prodUrl = `/api/webhook/modelos_custo?id_empresa=${empresa.id_empresa}`;
+        let { ct, raw } = await fetchJson(prodUrl);
 
-        const r = await fetch(url);
-        const ct = r.headers.get("content-type") || "";
-        const raw = await r.text();
+        // 2) Se veio HTML, tenta TESTE (n8n)
+        if (isHtml(ct, raw)) {
+          setLog((m) => m + `\n⚠️ HTML detectado no PROD. Tentando TESTE...`);
+          const testUrl = `/api/n8n/modelos_custo?id_empresa=${empresa.id_empresa}`;
+          const res2 = await fetchJson(testUrl);
+          ct = res2.ct; raw = res2.raw;
+        }
 
-        setLog((m) => m + `\n✅ Status ${r.status} • CT=${ct}`);
-
-        // Se veio HTML, é SPA → proxy/host errado
-        if (ct.includes("text/html") || raw.startsWith("<!DOCTYPE html")) {
-          setErr("❌ O host respondeu HTML (SPA). Proxy/endpoint incorreto. Usei /api/n8n → n8n.webhook-test.");
-          setLog((m) => m + `\n⚠️ Detectado HTML (primeiros 200):\n${raw.slice(0,200)}`);
+        // 3) Se ainda for HTML → proxy não pegou o host (ou endpoint não existe)
+        if (isHtml(ct, raw)) {
+          setErro("❌ Resposta veio como HTML (SPA). Proxy/endpoint incorreto ou dev server não foi reiniciado.");
+          setLog((m) => m + `\n🔎 Trecho:\n${raw.slice(0, 200)}`);
           setModelos([]);
           return;
         }
 
-        // Tenta parsear JSON
         let data = [];
-        try { data = JSON.parse(raw); } catch (e) {
-          setErr("❌ Resposta não é JSON válido.");
-          setLog((m) => m + `\n⚠️ Parse JSON falhou. Trecho:\n${raw.slice(0,200)}`);
+        try { data = JSON.parse(raw); } catch {
+          setErro("❌ Resposta não é JSON válido.");
+          setLog((m) => m + `\n🔎 Trecho:\n${raw.slice(0, 200)}`);
           return;
         }
 
@@ -46,10 +58,10 @@ export default function ModelosCusto() {
           setModelos(data);
           setLog((m) => m + `\n📦 itens=${data.length}`);
         } else {
-          setErr("❌ JSON não é array.");
+          setErro("❌ JSON não é um array.");
         }
       } catch (e) {
-        setErr("❌ Erro ao carregar: " + e.message);
+        setErro("❌ Erro ao carregar: " + e.message);
       }
     })();
   }, []);
@@ -60,7 +72,8 @@ export default function ModelosCusto() {
       try { empresa = JSON.parse(localStorage.getItem("empresa")); } catch {}
       if (!empresa?.id_empresa) empresa = { id_empresa: 2 };
 
-      const url = `/api/n8n/modelos_custo`; // usa o proxy novo
+      // use produção por padrão
+      const url = `/api/webhook/modelos_custo`;
       setLog((m) => m + `\n📡 POST ${url}`);
       const r = await fetch(url, {
         method: "POST",
@@ -82,7 +95,9 @@ export default function ModelosCusto() {
           <button onClick={() => window.location.reload()} style={{background:"#374151",border:0,padding:"8px 12px",borderRadius:10,color:"#fff",cursor:"pointer"}}>🔄 Recarregar</button>
         </div>
 
-        <pre style={{background:"#111827",padding:12,border:"1px solid #374151",borderRadius:10,whiteSpace:"pre-wrap",maxHeight:240,overflow:"auto"}}>{log}{err ? `\n${err}` : ""}</pre>
+        <pre style={{background:"#111827",padding:12,border:"1px solid #374151",borderRadius:10,whiteSpace:"pre-wrap",maxHeight:240,overflow:"auto"}}>
+{log}{erro ? `\n${erro}` : ""}
+        </pre>
 
         <div style={{overflowX:"auto", marginTop:12}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
