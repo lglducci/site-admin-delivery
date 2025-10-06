@@ -1,142 +1,151 @@
- import React, { useEffect, useState } from "react";
+ // src/pages/ModelosCusto.jsx
+import React, { useEffect, useState } from "react";
+
+const MOCK = [
+  { id_referencia: 1, nome_grupo: "Tradicional", descricao: "Clássicas com bom giro", margem_min: 0.45, margem_max: 0.55 },
+  { id_referencia: 2, nome_grupo: "Premium", descricao: "Ingredientes nobres/importados", margem_min: 0.35, margem_max: 0.50 },
+  { id_referencia: 3, nome_grupo: "Promo", descricao: "Ofertas da semana", margem_min: 0.30, margem_max: 0.40 },
+];
+
+const detectHTML = (ct, raw) => (ct || "").includes("text/html") || raw?.startsWith("<!DOCTYPE html");
 
 export default function ModelosCusto() {
-  const [log, setLog] = useState("🟢 Tela montou. Carregando...");
-  const [modelos, setModelos] = useState([]);
-  const [erro, setErro] = useState("");
-
-  const isHtml = (ct, raw) =>
-    (ct || "").includes("text/html") || raw.startsWith("<!DOCTYPE html");
-
-  const fetchJson = async (url) => {
-    setLog((m) => m + `\n📡 GET ${url}`);
-    const r = await fetch(url);
-    const ct = r.headers.get("content-type") || "";
-    const raw = await r.text();
-    setLog((m) => m + `\n✅ Status ${r.status} • CT=${ct}`);
-    return { r, ct, raw };
-  };
+  const [modelos, setModelos] = useState(MOCK);
+  const [status, setStatus] = useState("offline"); // offline | online
+  const [msg, setMsg] = useState("Trabalhando com dados locais.");
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
     (async () => {
+      // garante empresa
+      let empresa;
+      try { empresa = JSON.parse(localStorage.getItem("empresa")); } catch {}
+      if (!empresa?.id_empresa) {
+        empresa = { id_empresa: 2 };
+        localStorage.setItem("empresa", JSON.stringify(empresa));
+      }
+
+      // tenta PROD -> TESTE; se vier HTML, fica offline (usa MOCK)
       try {
-        let empresa = null;
-        try { empresa = JSON.parse(localStorage.getItem("empresa")); } catch {}
-        if (!empresa?.id_empresa) {
-          empresa = { id_empresa: 2 };
-          localStorage.setItem("empresa", JSON.stringify(empresa));
-        }
+        const tryFetch = async (url) => {
+          const r = await fetch(url);
+          const ct = r.headers.get("content-type") || "";
+          const raw = await r.text();
+          if (detectHTML(ct, raw)) return null;
+          try { return JSON.parse(raw); } catch { return null; }
+        };
 
-        // 1) Tenta PRODUÇÃO
-        const prodUrl = `/api/webhook/modelos_custo?id_empresa=${empresa.id_empresa}`;
-        let { ct, raw } = await fetchJson(prodUrl);
+        let data =
+          (await tryFetch(`/api/webhook/modelos_custo?id_empresa=${empresa.id_empresa}`)) ||
+          (await tryFetch(`/api/n8n/modelos_custo?id_empresa=${empresa.id_empresa}`));
 
-        // 2) Se veio HTML, tenta TESTE (n8n)
-        if (isHtml(ct, raw)) {
-          setLog((m) => m + `\n⚠️ HTML detectado no PROD. Tentando TESTE...`);
-          const testUrl = `/api/n8n/modelos_custo?id_empresa=${empresa.id_empresa}`;
-          const res2 = await fetchJson(testUrl);
-          ct = res2.ct; raw = res2.raw;
-        }
-
-        // 3) Se ainda for HTML → proxy não pegou o host (ou endpoint não existe)
-        if (isHtml(ct, raw)) {
-          setErro("❌ Resposta veio como HTML (SPA). Proxy/endpoint incorreto ou dev server não foi reiniciado.");
-          setLog((m) => m + `\n🔎 Trecho:\n${raw.slice(0, 200)}`);
-          setModelos([]);
-          return;
-        }
-
-        let data = [];
-        try { data = JSON.parse(raw); } catch {
-          setErro("❌ Resposta não é JSON válido.");
-          setLog((m) => m + `\n🔎 Trecho:\n${raw.slice(0, 200)}`);
-          return;
-        }
-
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length) {
           setModelos(data);
-          setLog((m) => m + `\n📦 itens=${data.length}`);
+          setStatus("online");
+          setMsg("Conectado ao servidor.");
         } else {
-          setErro("❌ JSON não é um array.");
+          setStatus("offline");
+          setMsg("Servidor indisponível. Usando dados locais.");
         }
-      } catch (e) {
-        setErro("❌ Erro ao carregar: " + e.message);
+      } catch {
+        setStatus("offline");
+        setMsg("Servidor indisponível. Usando dados locais.");
       }
     })();
   }, []);
 
   const salvar = async () => {
+    setSalvando(true);
     try {
-      let empresa = null;
+      let empresa;
       try { empresa = JSON.parse(localStorage.getItem("empresa")); } catch {}
       if (!empresa?.id_empresa) empresa = { id_empresa: 2 };
 
-      // use produção por padrão
-      const url = `/api/webhook/modelos_custo`;
-      setLog((m) => m + `\n📡 POST ${url}`);
-      const r = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_empresa: empresa.id_empresa, modelos }),
-      });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      alert("✅ Modelos salvos com sucesso!");
-    } catch (e) {
-      alert("❌ Falha ao salvar: " + e.message);
+      // tenta enviar ao servidor (PROD → TESTE)
+      const tryPost = async (url) => {
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_empresa: empresa.id_empresa, modelos }),
+        });
+        const ct = r.headers.get("content-type") || "";
+        const raw = await r.text();
+        if (!r.ok || detectHTML(ct, raw)) throw new Error("Servidor não aceitou");
+      };
+
+      await tryPost("/api/webhook/modelos_custo").catch(() => tryPost("/api/n8n/modelos_custo"));
+      alert("✅ Modelos salvos no servidor!");
+    } catch {
+      // fallback local
+      localStorage.setItem("modelos_custo_draft", JSON.stringify(modelos));
+      alert("⚠️ Sem conexão. Alterações salvas LOCALMENTE. (modelos_custo_draft)");
+    } finally {
+      setSalvando(false);
     }
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(#0b0b0b,#000)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
-      <div style={{width:"100%",maxWidth:1000,background:"#1f2937",border:"1px solid #f97316",borderRadius:16,padding:20,boxShadow:"0 10px 30px rgba(0,0,0,.5)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <h1 style={{color:"#fb923c",fontSize:22,fontWeight:800}}>💰 Modelos de Custo</h1>
-          <button onClick={() => window.location.reload()} style={{background:"#374151",border:0,padding:"8px 12px",borderRadius:10,color:"#fff",cursor:"pointer"}}>🔄 Recarregar</button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl border border-orange-500 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-orange-400">💰 Modelos de Custo</h1>
+          <span
+            className={`px-3 py-1 rounded-lg text-sm ${
+              status === "online" ? "bg-green-700/40 text-green-300" : "bg-yellow-700/40 text-yellow-300"
+            }`}
+            title={msg}
+          >
+            {status === "online" ? "ONLINE" : "OFFLINE"}
+          </span>
         </div>
 
-        <pre style={{background:"#111827",padding:12,border:"1px solid #374151",borderRadius:10,whiteSpace:"pre-wrap",maxHeight:240,overflow:"auto"}}>
-{log}{erro ? `\n${erro}` : ""}
-        </pre>
+        <p className="text-sm text-gray-300 mb-4">{msg}</p>
 
-        <div style={{overflowX:"auto", marginTop:12}}>
-          <table style={{width:"100%",borderCollapse:"collapse"}}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr style={{color:"#fb923c",borderBottom:"1px solid #f97316"}}>
-                <th style={{padding:8,textAlign:"left"}}>Grupo</th>
-                <th style={{padding:8,textAlign:"left"}}>Descrição</th>
-                <th style={{padding:8,textAlign:"center"}}>Margem Mínima</th>
-                <th style={{padding:8,textAlign:"center"}}>Margem Máxima</th>
+              <tr className="text-orange-400 border-b border-orange-500">
+                <th className="p-2">Grupo</th>
+                <th className="p-2">Descrição</th>
+                <th className="p-2 text-center">Margem Mínima</th>
+                <th className="p-2 text-center">Margem Máxima</th>
               </tr>
             </thead>
             <tbody>
-              {modelos.map((m,i)=>(
-                <tr key={m.id_referencia ?? i} style={{borderBottom:"1px solid #374151"}}>
-                  <td style={{padding:8,color:"#fdba74",fontWeight:600}}>{m.nome_grupo}</td>
-                  <td style={{padding:8,color:"#d1d5db",fontSize:14}}>{m.descricao}</td>
-                  <td style={{padding:8,textAlign:"center"}}>
-                    <input type="number" value={m.margem_min} step="0.01"
-                      style={{width:90,background:"#0f172a",color:"#fff",border:"1px solid #4b5563",borderRadius:8,padding:6,textAlign:"center"}}
-                      onChange={(e)=>{
+              {modelos.map((m, i) => (
+                <tr key={m.id_referencia ?? i} className="border-b border-gray-700 hover:bg-gray-700/40 transition">
+                  <td className="p-2 font-semibold text-orange-300">{m.nome_grupo}</td>
+                  <td className="p-2 text-sm text-gray-300">{m.descricao}</td>
+                  <td className="p-2 text-center">
+                    <input
+                      type="number"
+                      value={m.margem_min ?? 0}
+                      step="0.01"
+                      className="w-24 bg-gray-900 text-center border border-gray-600 rounded p-1 focus:outline-none"
+                      onChange={(e) => {
                         const val = Number(e.target.value);
-                        setModelos(prev => prev.map((x,j)=> j===i ? {...x,margem_min:val} : x));
+                        setModelos((prev) => prev.map((x, j) => (j === i ? { ...x, margem_min: val } : x)));
                       }}
                     />
                   </td>
-                  <td style={{padding:8,textAlign:"center"}}>
-                    <input type="number" value={m.margem_max} step="0.01"
-                      style={{width:90,background:"#0f172a",color:"#fff",border:"1px solid #4b5563",borderRadius:8,padding:6,textAlign:"center"}}
-                      onChange={(e)=>{
+                  <td className="p-2 text-center">
+                    <input
+                      type="number"
+                      value={m.margem_max ?? 0}
+                      step="0.01"
+                      className="w-24 bg-gray-900 text-center border border-gray-600 rounded p-1 focus:outline-none"
+                      onChange={(e) => {
                         const val = Number(e.target.value);
-                        setModelos(prev => prev.map((x,j)=> j===i ? {...x,margem_max:val} : x));
+                        setModelos((prev) => prev.map((x, j) => (j === i ? { ...x, margem_max: val } : x)));
                       }}
                     />
                   </td>
                 </tr>
               ))}
+
               {modelos.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{padding:16,textAlign:"center",color:"#9ca3af"}}>
+                  <td colSpan={4} className="p-6 text-center text-gray-400">
                     ⚠️ Nenhum modelo carregado.
                   </td>
                 </tr>
@@ -145,9 +154,21 @@ export default function ModelosCusto() {
           </table>
         </div>
 
-        <div style={{display:"flex",justifyContent:"flex-end",gap:12,marginTop:16}}>
-          <button onClick={salvar} style={{background:"#ea580c",border:0,padding:"10px 16px",borderRadius:10,color:"#fff",cursor:"pointer",fontWeight:700}}>
-            💾 Salvar e Sair
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg"
+          >
+            🔄 Recarregar
+          </button>
+          <button
+            onClick={salvar}
+            disabled={salvando}
+            className={`px-6 py-2 rounded-lg font-semibold text-white shadow-lg transition ${
+              salvando ? "bg-orange-400" : "bg-orange-600 hover:bg-orange-700"
+            }`}
+          >
+            {salvando ? "Salvando..." : "💾 Salvar e Sair"}
           </button>
         </div>
       </div>
