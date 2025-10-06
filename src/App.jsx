@@ -6,7 +6,8 @@ import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
- 
+// ⚠️ use um nome diferente e extensão explícita:
+import ModelosCustoPage from "./pages/ModelosCustoPage.jsx";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       
        <Route path="/detalhes" element={<PedidoDetalhes />} />
          <Route path="/modelos-custo" element={<ModelosCusto />} />
+               <Route path="/modelos-custo" element={<ModelosCustoPage />} />
       </Routes>
     </BrowserRouter>
   );
