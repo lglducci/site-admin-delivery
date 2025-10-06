@@ -20,7 +20,7 @@ export default function App() {
         <Route path="/cardapio" element={<Cardapio />} />
         <Route path="/editar-item/:id" element={<EditarItem />} />
         <Route path="/detalhes" element={<PedidoDetalhes />} />
-        <Route path="/detalhes" element={<PizzaModelo />} />
+        <Route path="/PizzaModelo" element={<PizzaModelo />} />
         
       </Routes>
     </Router>
