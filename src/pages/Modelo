@@ -1,4 +1,4 @@
- // src/pages/Modelo.jsx
+ // src/pages/modelo.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
