@@ -7,7 +7,7 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes"; 
-import Batata from "./pages/ModeloCusto";
+import ModeloCusto from "./pages/ModeloCusto";
 
 export default function App() {
   return (
