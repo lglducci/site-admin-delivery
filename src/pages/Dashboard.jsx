@@ -211,6 +211,15 @@ export default function Dashboard() {
                 >
                   🍕 Cardápio
                 </button>
+
+                {/* 👉 NOVO ITEM - Modelo de Custo */}
+                <button
+                  onClick={() => window.open("/modelo-custo", "_self")}
+                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
+                >
+                  💰 Modelo de Custo
+                </button>
+               
               </div>
             )}
           </div>
