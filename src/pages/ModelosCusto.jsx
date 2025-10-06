@@ -10,10 +10,12 @@ export default function ModelosCusto() {
     async function carregarModelos() {
       try {
         const empresa = JSON.parse(localStorage.getItem("empresa"));
+        console.log("🔍 Carregando modelos para empresa:", empresa);
         const r = await fetch(
           `https://webhook.lglducci.com.br/webhook/modelos_custo?id_empresa=${empresa.id_empresa}`
         );
         const data = await r.json();
+        console.log("📦 Dados recebidos:", data);
         if (Array.isArray(data)) setModelos(data);
       } catch (err) {
         console.error("Erro ao carregar modelos:", err);
@@ -28,6 +30,7 @@ export default function ModelosCusto() {
   const salvarAlteracoes = async () => {
     try {
       const empresa = JSON.parse(localStorage.getItem("empresa"));
+      console.log("💾 Salvando modelos:", modelos);
       const r = await fetch(
         "https://webhook.lglducci.com.br/webhook/modelos_custo",
         {
@@ -40,7 +43,8 @@ export default function ModelosCusto() {
         }
       );
       if (!r.ok) throw new Error("Erro ao salvar");
-      alert("💾 Modelos salvos com sucesso!");
+      alert("✅ Modelos salvos com sucesso!");
+      navigate(-1);
     } catch (err) {
       console.error("Erro ao salvar:", err);
       alert("❌ Falha ao salvar alterações");
@@ -112,4 +116,19 @@ export default function ModelosCusto() {
         <div className="flex justify-end gap-4 mt-6">
           <button
             onClick={() => navigate(-1)}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded
+            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+          >
+            ⬅️ Voltar
+          </button>
+
+          <button
+            onClick={salvarAlteracoes}
+            className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg transition"
+          >
+            💾 Salvar e Sair
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
