@@ -224,7 +224,7 @@ export default function Dashboard() {
                   onClick={() => window.open("/pizza-modelo", "_self")}
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
-                  🍕 ddddd
+                  ✨  Modelo de Custo
                 </button>
 
 
