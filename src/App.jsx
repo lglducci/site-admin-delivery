@@ -20,7 +20,7 @@ function App() {
         <Route path="/editar-item/:id" element={<EditarItem />} />
       
        <Route path="/detalhes" element={<PedidoDetalhes />} />
-         <Route path="/modelos-custo" element={<ModelosCusto />} />
+         
                <Route path="/modelos-custo" element={<ModelosCustoPage />} />
       </Routes>
     </BrowserRouter>
