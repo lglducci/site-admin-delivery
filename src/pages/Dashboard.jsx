@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import PedidoCard from "../components/PedidoCard"; // pode manter
 import { useEmpresa } from "../context/EmpresaContext";
+import { NavLink } from "react-router-dom";
 
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
@@ -213,12 +214,14 @@ export default function Dashboard() {
                 </button>
 
                 {/* 👉 NOVO ITEM - Modelo de Custo */}
-                <button
-                  onClick={() => window.open("/modelo-custo", "_self")}
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
+             <li>
+                <NavLink
+                  to="/modelos-custo"
+                  className="block px-3 py-2 rounded hover:bg-orange-600/20 text-orange-300"
                 >
-                  💰 Modelo de Custo
-                </button>
+                  💰 Modelos de Custo
+                </NavLink>
+              </li>
                
               </div>
             )}
