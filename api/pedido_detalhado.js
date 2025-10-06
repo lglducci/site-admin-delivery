@@ -1,6 +1,4 @@
- // /api/pedido_detalhado.js
-
-export default async function handler(req, res) {
+ export default async function handler(req, res) {
   const { numero, id_empresa } = req.query;
 
   if (!numero || !id_empresa) {
@@ -12,19 +10,16 @@ export default async function handler(req, res) {
     const resposta = await fetch(url);
 
     if (!resposta.ok) {
-      return res.status(resposta.status).json({ error: "Falha ao buscar pedido" });
+      return res
+        .status(resposta.status)
+        .json({ error: "Falha ao buscar pedido" });
     }
 
-    const data = await resposta.json();
+    const dados = await resposta.json();
+    return res.status(200).json(dados);
 
-    // Libera acesso de qualquer origem (CORS resolvido)
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-    return res.status(200).json(data);
   } catch (error) {
     console.error("Erro no proxy pedido_detalhado:", error);
-    return res.status(500).json({ error: "Erro interno do proxy" });
+    return res.status(500).json({ error: "Erro interno no servidor" });
   }
 }
