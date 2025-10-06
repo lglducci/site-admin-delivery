@@ -14,8 +14,8 @@ useEffect(() => {
 
   const fetchPedido = async () => {
     try {
-      const resp = await fetch(
-        `https://webhook.lglducci.com.br/webhook/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}`,
+      const resp = await   fetch(`/api/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}` ,
+ 
         {
           method: "GET",
           headers: {
