@@ -20,10 +20,17 @@ useEffect(() => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
           },
         }
       );
+
+ 
+
+
+
+
+
+     
 
       if (!resp.ok) throw new Error("Falha ao carregar pedido");
       const data = await resp.json();
