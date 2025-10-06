@@ -9,32 +9,27 @@ export default function PedidoDetalhes() {
   const numero = searchParams.get("numero");
   const id_empresa = searchParams.get("id_empresa");
 
-useEffect(() => {
+ useEffect(() => {
   if (!numero || !id_empresa) return;
 
   const fetchPedido = async () => {
     try {
-      const resp = await   fetch(`/api/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}` ,
- 
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const resp = await fetch(
+        `/api/webhook/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}`
       );
 
- 
-
-
-
-
-
-     
-
       if (!resp.ok) throw new Error("Falha ao carregar pedido");
+
       const data = await resp.json();
-      setPedido(data);
+
+      // 👇 aqui o segredo — acessar o campo correto
+      const pedidoData = data[0]?.pedido_detalhado || null;
+
+      if (!pedidoData) {
+        console.warn("⚠️ Nenhum pedido retornado:", data);
+      }
+
+      setPedido(pedidoData);
     } catch (e) {
       console.error("Erro ao buscar pedido:", e);
     } finally {
@@ -44,6 +39,7 @@ useEffect(() => {
 
   fetchPedido();
 }, [numero, id_empresa]);
+
 
 
   if (loading)
