@@ -247,13 +247,17 @@ export default function Dashboard() {
 
 
                    <button
-                    onClick={() =>
-                      navigate(`/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`)
-                    }
-                    className="font-semibold text-gray-800 hover:text-orange-600 underline"
-                  >
-                    nº {p.numero}
-                  </button>
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`);
+                      }}
+                      className="font-semibold text-gray-800 hover:text-orange-600 underline"
+                    >
+                      nº {p.numero}
+                    </button>
+
+
+                    
 
                   
                     <span className="text-orange-500 font-bold">
