@@ -11,87 +11,80 @@ import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
 
 /**
- * HARD GUARD: bloqueia qualquer navegação que tente usar reload
- * (anchors, location.href/assign/replace, history.pushState/replaceState)
- * e redireciona para navegação por HASH (#/rota) — não "sai do sistema".
+ * Bloqueia full reload ao clicar em links do menu legado.
+ * Converte qualquer navegação interna ("/rota") para hash ("#/rota").
+ * Funciona mesmo com inline onclick/JS, porque intercepta no capture e corta a propagação.
  */
-function HardNavigationGuard() {
+function StopFullReloads() {
   useEffect(() => {
-    const toHashNav = (url) => {
+    const toHash = (url) => {
       try {
         const u = new URL(url, window.location.origin);
-        if (u.origin !== window.location.origin) return false; // externo
-        const path = u.pathname + u.search + u.hash;
-        if (path.startsWith("/")) {
-          const next = `#${path}`;
-          if (window.location.hash !== next) window.location.hash = next;
-          return true;
-        }
-        return false;
+        if (u.origin !== window.location.origin) return null;        // externo
+        return `#${u.pathname}${u.search}${u.hash}`;                 // "#/rota?x#y"
       } catch {
-        if (typeof url === "string" && url.startsWith("/")) {
-          const next = `#${url}`;
-          if (window.location.hash !== next) window.location.hash = next;
-          return true;
-        }
-        return false;
+        if (typeof url === "string" && url.startsWith("/")) return `#${url}`;
+        return null;
       }
     };
 
-    // 1) Intercepta links antes de qq handler do menu
-    const onClick = (e) => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-      const a = e.target.closest?.("a");
+    const intercept = (e) => {
+      // só clique primário, sem modificadores
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+
+      // acha o <a> mais próximo
+      const a = e.target?.closest?.("a");
       if (!a) return;
-      let href = a.getAttribute("href") || "";
-      if (!href || href.startsWith("#") || a.target === "_blank" || a.hasAttribute("download")) return;
-      if (/^(https?:)?\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
-      if (href.startsWith("/")) href = `#${href}`;
-      if (href.startsWith("#/")) {
-        if (window.location.hash !== href) window.location.hash = href;
+
+      // pega href do atributo (prioriza o que o HTML declarou)
+      const raw = a.getAttribute("href") || a.href || "";
+      if (!raw) return;
+
+      // ignora externos e protocolos especiais
+      if (/^(https?:)?\/\//i.test(raw) || raw.startsWith("mailto:") || raw.startsWith("tel:")) return;
+      if (a.hasAttribute("download") || a.target === "_blank") return;
+
+      const dest = toHash(raw);
+      if (!dest) return;
+
+      // mata o clique ANTES de qq handler do menu
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation?.();
+
+      // navega via hash (HashRouter)
+      if (window.location.hash !== dest) {
+        window.location.hash = dest;
       }
     };
-    document.addEventListener("click", onClick, true);
 
-    // 2) Monkey-patch location.* (href/assign/replace)
-    const desc = Object.getOwnPropertyDescriptor(window.Location.prototype, "href");
-    const origAssign = window.location.assign.bind(window.location);
-    const origReplace = window.location.replace.bind(window.location);
-    const restore = [];
+    // intercepta antes dos handlers do menu
+    document.addEventListener("mousedown", intercept, true);
+    document.addEventListener("touchstart", intercept, true);
+    document.addEventListener("click", intercept, true);
 
-    restore.push(() => {
-      try { Object.defineProperty(window.location, "href", desc); } catch {}
-      window.location.assign = origAssign;
-      window.location.replace = origReplace;
-      history.pushState = origPush;
-      history.replaceState = origRep;
-      document.removeEventListener("click", onClick, true);
-    });
-
-    Object.defineProperty(window.location, "href", {
-      configurable: true,
-      get() { return desc.get.call(window.location); },
-      set(value) { if (!toHashNav(value)) desc.set.call(window.location, value); }
-    });
-    window.location.assign = (value) => { if (!toHashNav(value)) origAssign(value); };
-    window.location.replace = (value) => { if (!toHashNav(value)) origReplace(value); };
-
-    // 3) Monkey-patch history.* (pushState/replaceState)
-    const origPush = history.pushState.bind(history);
-    const origRep = history.replaceState.bind(history);
-    const origPush = history.pushState.bind(history);
-    const origRep = history.replaceState.bind(history);
-    history.pushState = (state, title, url) => {
-      if (typeof url === "string" && toHashNav(url)) return;
-      return origPush(state, title, url);
+    // também reescreve anchors já renderizados e futuros
+    const rewrite = (root = document) => {
+      root.querySelectorAll('a[href^="/"]:not([data-no-fix])').forEach((el) => {
+        const href = el.getAttribute("href");
+        if (href && !href.startsWith("#/")) el.setAttribute("href", `#${href}`);
+      });
     };
-    history.replaceState = (state, title, url) => {
-      if (typeof url === "string" && toHashNav(url)) return;
-      return origRep(state, title, url);
-    };
+    rewrite();
 
-    return () => restore.forEach((fn) => fn());
+    const mo = new MutationObserver((muts) => {
+      for (const m of muts) {
+        m.addedNodes.forEach((n) => n.nodeType === 1 && rewrite(n));
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      document.removeEventListener("mousedown", intercept, true);
+      document.removeEventListener("touchstart", intercept, true);
+      document.removeEventListener("click", intercept, true);
+      mo.disconnect();
+    };
   }, []);
 
   return null;
@@ -100,8 +93,8 @@ function HardNavigationGuard() {
 export default function App() {
   return (
     <Router>
-      {/* Guard global: impede sair do sistema */}
-      <HardNavigationGuard />
+      {/* Guard global: impede sair do sistema ao clicar no menu */}
+      <StopFullReloads />
 
       <Routes>
         <Route path="/" element={<Login />} />
@@ -114,10 +107,16 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div style={{
-              background:"#000",color:"#fff",height:"100vh",
-              display:"flex",alignItems:"center",justifyContent:"center"
-            }}>
+            <div
+              style={{
+                background: "#000",
+                color: "#fff",
+                height: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               404 — rota não encontrada
             </div>
           }
