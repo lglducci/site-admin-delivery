@@ -1,41 +1,43 @@
  import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function PedidoDetalhes() {
-  const { numero } = useParams();
   const [searchParams] = useSearchParams();
-  const id_empresa =
-    searchParams.get("id_empresa") ||
-    localStorage.getItem("id_empresa") ||
-    JSON.parse(localStorage.getItem("empresa") || "{}")?.id_empresa ||
-    0;
-
-  const [html, setHtml] = useState("<p>Carregando...</p>");
+  const numero = searchParams.get("numero");
+  const id_empresa = searchParams.get("id_empresa");
+  const [pedido, setPedido] = useState(null);
 
   useEffect(() => {
     if (!numero || !id_empresa) return;
 
-    const url = `https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${id_empresa}`;
-    console.log("🔗 Buscando:", url);
+    const carregar = async () => {
+      try {
+        const r = await fetch(
+          `https://webhook.lglducci.com.br/webhook/pedido-html?numero=${numero}&id_empresa=${id_empresa}`
+        );
+        const data = await r.json();
+        console.log("🔎 Detalhes do pedido:", data);
+        setPedido(data[0]);
+      } catch (err) {
+        console.error("❌ Erro ao buscar detalhes:", err);
+      }
+    };
 
-    fetch(url)
-      .then((r) => r.text())
-      .then((txt) => setHtml(txt))
-      .catch((err) => {
-        console.error("Erro:", err);
-        setHtml("<p>Erro ao carregar pedido.</p>");
-      });
+    carregar();
   }, [numero, id_empresa]);
 
+  if (!pedido) return <p className="text-white p-6">Carregando pedido...</p>;
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
-      <h1 className="text-2xl font-bold text-orange-400 mb-4">
-        Pedido nº {numero}
+    <div className="p-6 text-gray-900 bg-white min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">
+        Pedido nº {numero} — Empresa {id_empresa}
       </h1>
-      <div
-        className="bg-white text-black p-4 rounded-lg shadow-xl"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <p><strong>Cliente:</strong> {pedido.nome}</p>
+      <p><strong>Endereço:</strong> {pedido.endereço}</p>
+      <p><strong>Bairro:</strong> {pedido.bairro}</p>
+      <p><strong>Resumo:</strong></p>
+      <pre className="bg-gray-100 p-3 rounded">{pedido.resumo}</pre>
     </div>
   );
 }
