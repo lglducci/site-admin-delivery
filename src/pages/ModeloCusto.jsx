@@ -1,4 +1,4 @@
- // src/pages/Batata.jsx
+ // src/pages/ModeloCusto.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
    
@@ -11,7 +11,7 @@ const API_BASE =
 const isHTML = (ct, raw) =>
   (ct || "").includes("text/html") || (raw || "").startsWith("<!DOCTYPE");
 
-export default function Batata() {
+export default function ModeloCusto() {
   const navigate = useNavigate();
   const [modelos, setModelos] = useState([]);
   const [loading, setLoading] = useState(true);
