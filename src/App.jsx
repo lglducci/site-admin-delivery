@@ -1,13 +1,9 @@
  // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
-import Pedidos from "./pages/Pedidos";
+import Dashboard from "./pages/Dashboard";
 import Cardapio from "./pages/Cardapio";
-import EditarItem from "./pages/EditarItem";
-import PedidoDetalhes from "./pages/PedidoDetalhes"; 
-import Modelo  from "./pages/Modelo";
+// (NADA de Modelo aqui por enquanto)
 
 export default function App() {
   return (
@@ -15,13 +11,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/cardapio" element={<Cardapio />} />
-        <Route path="/editar-item/:id" element={<EditarItem />} />
-        <Route path="/detalhes" element={<PedidoDetalhes />} />
-        <Route path="/Modelo" element={<Modelo />} />
       </Routes>
     </Router>
   );
 }
- 
