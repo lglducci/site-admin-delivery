@@ -220,12 +220,13 @@ export default function Dashboard() {
 
                 {/* 👉 NOVO ITEM - Modelo de Custo */}
  
-              <button
-                   onClick={() => window.open("/pizza-modelo", "_self")}
-                   className="w-full text-left px-4 py-2 hover:bg-orange-600 rounded transition"
-                 >
-                   💰 Modelo de Custo
-                 </button>
+                    <button
+                  onClick={() => window.open("/pizza-modelo", "_self")}
+                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
+                >
+                  🍕 ddddd
+                </button>
+
 
                
               </div>
