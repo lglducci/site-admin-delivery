@@ -1,6 +1,7 @@
  // src/App.jsx
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Pedidos from "./pages/Pedidos";
@@ -9,35 +10,40 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
 
-// Reescreve QUALQUER <a href="/x"> para <a href="#/x"> em todo o app
-function HashLinkFixer() {
+/**
+ * Intercepta QUALQUER clique em <a href="/..."> e converte para navegação por hash,
+ * evitando reload e logout. Funciona com qualquer menu legado.
+ */
+function LinkInterceptor() {
   useEffect(() => {
-    const fix = (root = document) => {
-      const anchors = root.querySelectorAll('a[href^="/"]:not([data-no-fix])');
-      anchors.forEach((a) => {
-        const href = a.getAttribute("href");
-        // ignora //dominio e externas
-        if (!href || href.startsWith("//")) return;
-        // já está com hash? então deixa
-        if (href.startsWith("#/")) return;
-        a.setAttribute("href", `#${href}`);
-      });
+    const onClick = (e) => {
+      // só botão esquerdo, sem ctrl/cmd/alt/shift, sem já prevenido
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+
+      const a = e.target.closest && e.target.closest("a");
+      if (!a) return;
+
+      const href = a.getAttribute("href");
+      if (!href) return;
+
+      // ignora externos, âncoras locais, download e _blank
+      const isExternal = /^https?:\/\//i.test(href) || href.startsWith("//");
+      if (isExternal || href.startsWith("#") || a.hasAttribute("download") || a.target === "_blank") return;
+
+      // só tratamos rotas absolutas da app: "/algo"
+      if (href.startsWith("/")) {
+        e.preventDefault();
+        // HashRouter: navega sem recarregar a página
+        const next = href.startsWith("#/") ? href : `#${href}`;
+        if (window.location.hash !== next) {
+          window.location.hash = next;
+        }
+      }
     };
 
-    // 1) corrige o que já está na página
-    fix();
-
-    // 2) observa mudanças futuras (menus que rendem depois)
-    const mo = new MutationObserver((muts) => {
-      for (const m of muts) {
-        m.addedNodes.forEach((n) => {
-          if (n.nodeType === 1) fix(n);
-        });
-      }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
-
-    return () => mo.disconnect();
+    // captura no CAPTURE para ganhar de handlers do menu
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
   }, []);
 
   return null;
@@ -46,8 +52,8 @@ function HashLinkFixer() {
 export default function App() {
   return (
     <Router>
-      {/* patch global: evita sair do app ao clicar em <a href="/..."> */}
-      <HashLinkFixer />
+      {/* Patch global: impede "sair do sistema" ao clicar no menu */}
+      <LinkInterceptor />
 
       <Routes>
         <Route path="/" element={<Login />} />
