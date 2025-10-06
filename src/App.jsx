@@ -7,7 +7,7 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
-import Modelo from "./pages/modelo.jsx"; // <- igual ao nome do arquivo (minúsculo)
+import Modelo from "./pages/Modelo.jsx"; // <- igual ao nome do arquivo (minúsculo)
 
 export default function App() {
   return (
