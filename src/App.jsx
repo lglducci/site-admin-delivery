@@ -8,6 +8,7 @@ import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
+import Batata from "./pages/Batata";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/editar-item/:id" element={<EditarItem />} />
         <Route path="/detalhes" element={<PedidoDetalhes />} />
         <Route path="/modelos-custo" element={<ModelosCusto />} />
+        <Route path="/Batata" element={<Batata />} />
       </Routes>
     </Router>
   );
