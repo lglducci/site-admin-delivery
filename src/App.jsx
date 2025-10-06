@@ -8,7 +8,7 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import PedidoDetalhes from "./pages/PizzaModelo";
 
- 
+     
 
 export default function App() {
   return (
