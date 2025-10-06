@@ -11,76 +11,87 @@ import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
 
 /**
- * Guardião de navegação:
- * 1) Reescreve todo <a href="/..."> para "#/..."
- * 2) Intercepta cliques (click, mousedown, touchstart) EM CAPTURA,
- *    dá preventDefault + stopImmediatePropagation, e navega via hash.
- * => Resultado: não recarrega, não "sai do sistema".
+ * HARD GUARD: bloqueia qualquer navegação que tente usar reload
+ * (anchors, location.href/assign/replace, history.pushState/replaceState)
+ * e redireciona para navegação por HASH (#/rota) — não "sai do sistema".
  */
-function NavigationGuard() {
+function HardNavigationGuard() {
   useEffect(() => {
-    const rewriteAnchors = (root = document) => {
-      const as = root.querySelectorAll('a[href^="/"]:not([data-no-fix])');
-      as.forEach((a) => {
-        const href = a.getAttribute("href");
-        if (!href || href.startsWith("//") || href.startsWith("#/")) return;
-        a.setAttribute("href", `#${href}`);
-      });
-    };
-
-    const handle = (e) => {
-      // só botão esquerdo, sem modificadores
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-
-      const a = e.target.closest && e.target.closest("a");
-      if (!a) return;
-
-      let href = a.getAttribute("href") || "";
-      if (!href) return;
-
-      // externos / mailto / tel / download / _blank: deixa passar
-      if (/^(https?:)?\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-      if (a.hasAttribute("download") || a.target === "_blank") return;
-
-      // normaliza para "#/rota"
-      if (href.startsWith("/")) href = `#${href}`;
-
-      // só tratamos navegações internas da SPA por hash
-      if (href.startsWith("#/")) {
-        // BLOQUEIA QUALQUER handler do menu (inclusive inline onclick)
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-        // navega sem recarregar
-        if (window.location.hash !== href) {
-          window.location.hash = href;
+    const toHashNav = (url) => {
+      try {
+        const u = new URL(url, window.location.origin);
+        if (u.origin !== window.location.origin) return false; // externo
+        const path = u.pathname + u.search + u.hash;
+        if (path.startsWith("/")) {
+          const next = `#${path}`;
+          if (window.location.hash !== next) window.location.hash = next;
+          return true;
         }
+        return false;
+      } catch {
+        if (typeof url === "string" && url.startsWith("/")) {
+          const next = `#${url}`;
+          if (window.location.hash !== next) window.location.hash = next;
+          return true;
+        }
+        return false;
       }
     };
 
-    // 1) reescreve os links existentes
-    rewriteAnchors();
-
-    // 2) observa novos nós adicionados (menus que rendem depois)
-    const mo = new MutationObserver((muts) => {
-      for (const m of muts) {
-        m.addedNodes.forEach((n) => n.nodeType === 1 && rewriteAnchors(n));
+    // 1) Intercepta links antes de qq handler do menu
+    const onClick = (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      const a = e.target.closest?.("a");
+      if (!a) return;
+      let href = a.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || a.target === "_blank" || a.hasAttribute("download")) return;
+      if (/^(https?:)?\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
+      if (href.startsWith("/")) href = `#${href}`;
+      if (href.startsWith("#/")) {
+        if (window.location.hash !== href) window.location.hash = href;
       }
+    };
+    document.addEventListener("click", onClick, true);
+
+    // 2) Monkey-patch location.* (href/assign/replace)
+    const desc = Object.getOwnPropertyDescriptor(window.Location.prototype, "href");
+    const origAssign = window.location.assign.bind(window.location);
+    const origReplace = window.location.replace.bind(window.location);
+    const restore = [];
+
+    restore.push(() => {
+      try { Object.defineProperty(window.location, "href", desc); } catch {}
+      window.location.assign = origAssign;
+      window.location.replace = origReplace;
+      history.pushState = origPush;
+      history.replaceState = origRep;
+      document.removeEventListener("click", onClick, true);
     });
-    mo.observe(document.body, { childList: true, subtree: true });
 
-    // 3) intercepta eventos antes dos handlers do menu
-    document.addEventListener("mousedown", handle, true);
-    document.addEventListener("touchstart", handle, true);
-    document.addEventListener("click", handle, true);
+    Object.defineProperty(window.location, "href", {
+      configurable: true,
+      get() { return desc.get.call(window.location); },
+      set(value) { if (!toHashNav(value)) desc.set.call(window.location, value); }
+    });
+    window.location.assign = (value) => { if (!toHashNav(value)) origAssign(value); };
+    window.location.replace = (value) => { if (!toHashNav(value)) origReplace(value); };
 
-    return () => {
-      mo.disconnect();
-      document.removeEventListener("mousedown", handle, true);
-      document.removeEventListener("touchstart", handle, true);
-      document.removeEventListener("click", handle, true);
+    // 3) Monkey-patch history.* (pushState/replaceState)
+    const origPush = history.pushState.bind(history);
+    const origRep = history.replaceState.bind(history);
+    const origPush = history.pushState.bind(history);
+    const origRep = history.replaceState.bind(history);
+    history.pushState = (state, title, url) => {
+      if (typeof url === "string" && toHashNav(url)) return;
+      return origPush(state, title, url);
     };
+    history.replaceState = (state, title, url) => {
+      if (typeof url === "string" && toHashNav(url)) return;
+      return origRep(state, title, url);
+    };
+
+    return () => restore.forEach((fn) => fn());
   }, []);
 
   return null;
@@ -89,7 +100,8 @@ function NavigationGuard() {
 export default function App() {
   return (
     <Router>
-      <NavigationGuard />
+      {/* Guard global: impede sair do sistema */}
+      <HardNavigationGuard />
 
       <Routes>
         <Route path="/" element={<Login />} />
