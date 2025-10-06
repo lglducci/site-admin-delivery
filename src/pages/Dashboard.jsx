@@ -222,7 +222,7 @@ export default function Dashboard() {
  
               <button
                    onClick={() => window.open("/pizza-modelo", "_self")}
-                   className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg"
+                   className="w-full text-left px-4 py-2 hover:bg-orange-600 rounded transition"
                  >
                    💰 Modelo de Custo
                  </button>
