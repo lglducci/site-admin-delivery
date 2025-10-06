@@ -7,7 +7,7 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
 // ⚠️ use um nome diferente e extensão explícita:
-import ModelosCustoPage from "./pages/ModelosCustoPage.jsx";
+import ModelosCustoPage from "./pages/ModelosCustoPage.jsx"; 
 
 function App() {
   return (
@@ -28,5 +28,11 @@ function App() {
 }
 
 export default App;
+
+export default function App() {
+  return <ModelosCusto />;
+}
+
+
 
  
