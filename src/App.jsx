@@ -1,9 +1,13 @@
  // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
-// (NADA de Modelo aqui por enquanto)
+import EditarItem from "./pages/EditarItem";
+import PedidoDetalhes from "./pages/PedidoDetalhes";
+import Modelo from "./pages/Modelo"; // <- AQUI
 
 export default function App() {
   return (
@@ -11,7 +15,11 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/cardapio" element={<Cardapio />} />
+        <Route path="/editar-item/:id" element={<EditarItem />} />
+        <Route path="/detalhes" element={<PedidoDetalhes />} />
+        <Route path="/modelo" element={<Modelo />} /> {/* <- ROTA OFICIAL */}
       </Routes>
     </Router>
   );
