@@ -1,7 +1,7 @@
  // src/pages/modelo.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+ddd
 // Detecta base da API (proxy no dev, domínio no prod)
 const API_BASE =
   location.hostname === "localhost" || location.hostname.startsWith("127.")
