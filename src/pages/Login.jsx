@@ -1,6 +1,6 @@
  import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEmpresa } from "../context/EmpresaContext";
+import { useEmpresa } from "../context/EmpresaContext"; 
 
 export default function Login() {
   const [email, setEmail] = useState("");
