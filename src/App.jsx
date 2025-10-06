@@ -7,7 +7,7 @@ import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import PizzaModelo from "./pages/PizzaModelo.jsx"; // + import
-     
+import Relatorios from "./pages/Relatorios.jsx";
 
 export default function App() {
   return (
@@ -20,6 +20,7 @@ export default function App() {
         <Route path="/editar-item/:id" element={<EditarItem />} />
         <Route path="/detalhes" element={<PedidoDetalhes />} />
        <Route path="/pizza-modelo" element={<PizzaModelo />} />
+       <Route path="/relatorios" element={<Relatorios />} />
       </Routes>
     </Router>
   );
