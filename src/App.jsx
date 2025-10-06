@@ -7,7 +7,6 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
  
 
-
 function App() {
   return (
     <BrowserRouter>
@@ -17,7 +16,9 @@ function App() {
         <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/cardapio" element={<Cardapio />} />
         <Route path="/editar-item/:id" element={<EditarItem />} />
-       <Route path="/pedido/:numero" element={<PedidoDetalhes />} />
+      
+       <Route path="/detalhes" element={<PedidoDetalhes />} />
+
       </Routes>
     </BrowserRouter>
   );
