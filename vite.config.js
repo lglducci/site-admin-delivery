@@ -1,33 +1,24 @@
-  import { defineConfig } from 'vite'
+ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // >>> NOVO: usa n8n de TESTE (webhook-test)
-      '/api/n8n': {
-        target: 'https://n8n.lglducci.com.br',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api\/n8n/, '/webhook-test'),
-      },
-
-      // já existia (produção)
+      // Produção
       '/api/webhook': {
-        target: 'https://webhook.lglducci.com.br',
+        target: 'https://webhook.lglducci.com.br/webhook',
         changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api\/webhook/, '/webhook'),
+        secure: false,
+        rewrite: (p) => p.replace(/^\/api\/webhook/, ''), // -> /modelos_custo...
       },
 
-      // já existia (detalhes)
-      '/api/pedido_detalhado': {
-        target: 'https://webhook.lglducci.com.br',
+      // Teste (n8n webhook-test)
+      '/api/n8n': {
+        target: 'https://n8n.lglducci.com.br/webhook-test',
         changeOrigin: true,
-        secure: true,
-        rewrite: (path) =>
-          path.replace(/^\/api\/pedido_detalhado/, '/webhook/pedido_detalhado'),
+        secure: false,
+        rewrite: (p) => p.replace(/^\/api\/n8n/, ''), // -> /modelos_custo...
       },
     },
   },
