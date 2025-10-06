@@ -9,25 +9,35 @@ export default function PedidoDetalhes() {
   const numero = searchParams.get("numero");
   const id_empresa = searchParams.get("id_empresa");
 
-  useEffect(() => {
-    if (!numero || !id_empresa) return;
+useEffect(() => {
+  if (!numero || !id_empresa) return;
 
-    const fetchPedido = async () => {
-      try {
-        const resp = await fetch(
-          `https://webhook.lglducci.com.br/webhook/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}`
-        );
-        const data = await resp.json();
-        setPedido(data);
-      } catch (e) {
-        console.error("Erro ao buscar pedido:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPedido = async () => {
+    try {
+      const resp = await fetch(
+        `https://webhook.lglducci.com.br/webhook/pedido_detalhado?numero=${numero}&id_empresa=${id_empresa}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
 
-    fetchPedido();
-  }, [numero, id_empresa]);
+      if (!resp.ok) throw new Error("Falha ao carregar pedido");
+      const data = await resp.json();
+      setPedido(data);
+    } catch (e) {
+      console.error("Erro ao buscar pedido:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPedido();
+}, [numero, id_empresa]);
+
 
   if (loading)
     return (
