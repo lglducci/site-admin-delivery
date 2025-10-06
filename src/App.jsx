@@ -7,7 +7,7 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
-import Modelo from "./pages/Modelo"; // <- AQUI
+import Modelo from "./pages/modelo.jsx"; // <- igual ao nome do arquivo (minúsculo)
 
 export default function App() {
   return (
@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/cardapio" element={<Cardapio />} />
         <Route path="/editar-item/:id" element={<EditarItem />} />
         <Route path="/detalhes" element={<PedidoDetalhes />} />
-        <Route path="/modelo" element={<Modelo />} /> {/* <- ROTA OFICIAL */}
+        <Route path="/modelo" element={<Modelo />} /> {/* rota oficial */}
       </Routes>
     </Router>
   );
