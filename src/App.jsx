@@ -7,7 +7,7 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes"; 
-import ModeloCusto from "./pages/ModeloCusto";
+import Modelo  from "./pages/Modelo";
 
 export default function App() {
   return (
@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/cardapio" element={<Cardapio />} />
         <Route path="/editar-item/:id" element={<EditarItem />} />
         <Route path="/detalhes" element={<PedidoDetalhes />} />
-        <Route path="/ModeloCusto" element={<ModeloCusto />} />
+        <Route path="/Modelo" element={<Modelo />} />
       </Routes>
     </Router>
   );
