@@ -32,9 +32,8 @@ function App() {
  
  
 
-export default function App() {
-  return <ModelosCusto />;
-}
+export default function App()  ;
+ 
 
 
 
