@@ -5,6 +5,7 @@ import Pedidos from "./pages/Pedidos";
 import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
+import ModelosCusto from "./pages/ModelosCusto";
  
 
 function App() {
@@ -18,10 +19,12 @@ function App() {
         <Route path="/editar-item/:id" element={<EditarItem />} />
       
        <Route path="/detalhes" element={<PedidoDetalhes />} />
-
+         <Route path="/modelos-custo" element={<ModelosCusto />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+
+ 
