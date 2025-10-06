@@ -1,8 +1,15 @@
  import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+
+
+
+
+
+
 function getIdEmpresa() {
   try {
+    const [modelos, setModelos] = useState([]);
     const direto = localStorage.getItem("id_empresa");
     if (direto && Number(direto)) return Number(direto);
 
@@ -36,6 +43,19 @@ export default function EditarItem() {
       const idEmpresa = getIdEmpresa();
       const numero = Number(numeroParam);
 
+              // ...depois de setItem(obj);
+         try {
+           const rMod = await fetch(
+             `https://webhook.lglducci.com.br/webhook/modelos_custo?id_empresa=${idEmpresa}`,
+             { cache: "no-store" }
+           );
+           const mods = await rMod.json().catch(() => []);
+           setModelos(Array.isArray(mods) ? mods : []);
+         } catch {
+           setModelos([]);
+         }
+
+     
       if (!idEmpresa || !numero) {
         setErro("Empresa ou número inválido.");
         setLoading(false);
@@ -173,6 +193,35 @@ export default function EditarItem() {
             />
           </div>
 
+           <div>
+             <label className="block text-sm font-semibold mb-1">Modelo de Custo</label>
+             <select
+               value={item.id_referencia ?? ""}
+               onChange={(e) =>
+                 setItem((prev) => ({
+                   ...prev,
+                   id_referencia: e.target.value ? Number(e.target.value) : null,
+                 }))
+               }
+               className="w-full p-3 border rounded-xl bg-white focus:ring-2 focus:ring-[#E67E22]"
+             >
+               <option value="">— selecione —</option>
+               {modelos.map((m) => (
+                 <option key={m.id_referencia} value={m.id_referencia}>
+                   {m.nome_grupo} · mín {Number(m.margem_min ?? 0).toFixed(2)} / máx{" "}
+                   {Number(m.margem_max ?? 0).toFixed(2)}
+                 </option>
+               ))}
+             </select>
+           </div>
+
+
+         
+
+
+
+
+         
           <div>
             <label className="block text-sm font-semibold mb-1">Preço Pequena</label>
             <input
@@ -229,8 +278,8 @@ export default function EditarItem() {
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold mb-1">Palavras-chave</label>
             <input
-              name="palavras_chav"
-              value={item.palavras_chav ?? ""}
+              name="palavras_chave"
+              value={item.palavras_chave ?? ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#E67E22] bg-white"
             />
