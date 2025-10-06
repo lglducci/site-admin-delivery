@@ -11,39 +11,76 @@ import PedidoDetalhes from "./pages/PedidoDetalhes";
 import ModelosCusto from "./pages/ModelosCusto";
 
 /**
- * Intercepta QUALQUER clique em <a href="/..."> e converte para navegação por hash,
- * evitando reload e logout. Funciona com qualquer menu legado.
+ * Guardião de navegação:
+ * 1) Reescreve todo <a href="/..."> para "#/..."
+ * 2) Intercepta cliques (click, mousedown, touchstart) EM CAPTURA,
+ *    dá preventDefault + stopImmediatePropagation, e navega via hash.
+ * => Resultado: não recarrega, não "sai do sistema".
  */
-function LinkInterceptor() {
+function NavigationGuard() {
   useEffect(() => {
-    const onClick = (e) => {
-      // só botão esquerdo, sem ctrl/cmd/alt/shift, sem já prevenido
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+    const rewriteAnchors = (root = document) => {
+      const as = root.querySelectorAll('a[href^="/"]:not([data-no-fix])');
+      as.forEach((a) => {
+        const href = a.getAttribute("href");
+        if (!href || href.startsWith("//") || href.startsWith("#/")) return;
+        a.setAttribute("href", `#${href}`);
+      });
+    };
+
+    const handle = (e) => {
+      // só botão esquerdo, sem modificadores
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
 
       const a = e.target.closest && e.target.closest("a");
       if (!a) return;
 
-      const href = a.getAttribute("href");
+      let href = a.getAttribute("href") || "";
       if (!href) return;
 
-      // ignora externos, âncoras locais, download e _blank
-      const isExternal = /^https?:\/\//i.test(href) || href.startsWith("//");
-      if (isExternal || href.startsWith("#") || a.hasAttribute("download") || a.target === "_blank") return;
+      // externos / mailto / tel / download / _blank: deixa passar
+      if (/^(https?:)?\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      if (a.hasAttribute("download") || a.target === "_blank") return;
 
-      // só tratamos rotas absolutas da app: "/algo"
-      if (href.startsWith("/")) {
+      // normaliza para "#/rota"
+      if (href.startsWith("/")) href = `#${href}`;
+
+      // só tratamos navegações internas da SPA por hash
+      if (href.startsWith("#/")) {
+        // BLOQUEIA QUALQUER handler do menu (inclusive inline onclick)
         e.preventDefault();
-        // HashRouter: navega sem recarregar a página
-        const next = href.startsWith("#/") ? href : `#${href}`;
-        if (window.location.hash !== next) {
-          window.location.hash = next;
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+        // navega sem recarregar
+        if (window.location.hash !== href) {
+          window.location.hash = href;
         }
       }
     };
 
-    // captura no CAPTURE para ganhar de handlers do menu
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    // 1) reescreve os links existentes
+    rewriteAnchors();
+
+    // 2) observa novos nós adicionados (menus que rendem depois)
+    const mo = new MutationObserver((muts) => {
+      for (const m of muts) {
+        m.addedNodes.forEach((n) => n.nodeType === 1 && rewriteAnchors(n));
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    // 3) intercepta eventos antes dos handlers do menu
+    document.addEventListener("mousedown", handle, true);
+    document.addEventListener("touchstart", handle, true);
+    document.addEventListener("click", handle, true);
+
+    return () => {
+      mo.disconnect();
+      document.removeEventListener("mousedown", handle, true);
+      document.removeEventListener("touchstart", handle, true);
+      document.removeEventListener("click", handle, true);
+    };
   }, []);
 
   return null;
@@ -52,8 +89,7 @@ function LinkInterceptor() {
 export default function App() {
   return (
     <Router>
-      {/* Patch global: impede "sair do sistema" ao clicar no menu */}
-      <LinkInterceptor />
+      <NavigationGuard />
 
       <Routes>
         <Route path="/" element={<Login />} />
@@ -66,16 +102,10 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div
-              style={{
-                background: "#000",
-                color: "#fff",
-                height: "100vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div style={{
+              background:"#000",color:"#fff",height:"100vh",
+              display:"flex",alignItems:"center",justifyContent:"center"
+            }}>
               404 — rota não encontrada
             </div>
           }
