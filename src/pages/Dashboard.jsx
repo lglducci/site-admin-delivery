@@ -225,6 +225,13 @@ export default function Dashboard() {
                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg"
                  >
                    💰 Modelos de Custo
+                 
+                 </button>
+              <button
+                   onClick={() => navigate("/Batata")}
+                   className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg"
+                 >
+                   Batata
                  </button>
 
                
