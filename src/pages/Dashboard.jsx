@@ -221,10 +221,10 @@ export default function Dashboard() {
                 {/* 👉 NOVO ITEM - Modelo de Custo */}
  
               <button
-                   onClick={() => navigate("/Batata")}
+                   onClick={() => navigate("/ModeloCusto")}
                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg"
                  >
-                   💰 ModeloCusto
+                   💰 Modelo de Custo
                  </button>
 
                
