@@ -7,7 +7,7 @@ const API_BASE =
   location.hostname === "localhost" || location.hostname.startsWith("127.")
     ? "/api/webhook"
     : "https://webhook.lglducci.com.br/webhook";
-
+   
 const isHTML = (ct, raw) =>
   (ct || "").includes("text/html") || (raw || "").startsWith("<!DOCTYPE");
 
