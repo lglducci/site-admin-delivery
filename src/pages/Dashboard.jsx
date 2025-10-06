@@ -199,17 +199,17 @@ export default function Dashboard() {
                   💬 Mensagem Padrão
                 </button>
 
-                <button
-                  onClick={() =>
-                    window.open(
-                      "https://webhook.lglducci.com.br/webhook/relatorios",
-                      "_blank"
-                    )
-                  }
+                 
+
+                  <button
+                  onClick={() => window.open("/relatorios", "_self")}
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
-                  📈 Relatórios
+                   📈 Relatórios
                 </button>
+
+
+               
 
                 <button
                   onClick={() => window.open("/cardapio", "_self")}
