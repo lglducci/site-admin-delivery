@@ -8,7 +8,7 @@ import Cardapio from "./pages/Cardapio";
 import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import Modelo from "./pages/Modelo"; // <- igual ao nome do arquivo (minúsculo)
-            
+                 
 export default function App() {
   return (
     <Router>
