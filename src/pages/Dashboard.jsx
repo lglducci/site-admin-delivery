@@ -231,7 +231,7 @@ export default function Dashboard() {
                    onClick={() => navigate("/Batata")}
                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg"
                  >
-                   Batata
+                   ModeloCusto
                  </button>
 
                
