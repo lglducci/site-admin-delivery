@@ -264,13 +264,12 @@ const colunas = [
       {/* Colunas de pedidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {colunas.map((coluna) => (
-          <div
-            key={coluna.status}
-            {/*className={`rounded-2xl shadow-lg p-4 ${coluna.cor} text-orange-900`}*/}
-            className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
+         <div
+                 key={coluna.status}
+                 className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
+               >   {/* <-- faltava esse > aqui */}
+            </div>
 
-              
-          >
               <h2 className="text-lg font-bold mb-3 pb-1 text-amber-300 border-b border-amber-500">
               {coluna.titulo}
             </h2>
