@@ -266,7 +266,7 @@ const colunas = [
         {colunas.map((coluna) => (
           <div
             key={coluna.status}
-            className={`rounded-2xl shadow-lg p-4 ${coluna.cor} text-gray-900`}
+            className={`rounded-2xl shadow-lg p-4 ${coluna.cor} text-orange-900`}
           >
             <h2 className="text-lg font-bold mb-3 border-b border-orange-400 pb-1">
               {coluna.titulo}
