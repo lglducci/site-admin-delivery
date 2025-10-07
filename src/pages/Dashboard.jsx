@@ -138,12 +138,13 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const colunas = [
-    { status: "recebido", titulo: "Recebido", cor: "bg-orange-50" },
-    { status: "producao", titulo: "Produção", cor: "bg-orange-100" },
-    { status: "entrega", titulo: "Entrega", cor: "bg-orange-200" },
-    { status: "concluido", titulo: "Concluído", cor: "bg-gray-200" },
-  ];
+ // mais claro → mais escuro
+const colunas = [
+  { status: "recebido", titulo: "Recebido",  bg: "bg-[#8b4a22]", text: "text-white" },
+  { status: "producao", titulo: "Produção",  bg: "bg-[#6b3b1f]", text: "text-white" },
+  { status: "entrega",  titulo: "Entrega",   bg: "bg-[#4a2f1a]", text: "text-white" },
+  { status: "concluido",titulo: "Concluído", bg: "bg-[#2b1e12]", text: "text-white" },
+];
 
   if (!carregado) {
     return (
@@ -278,7 +279,7 @@ export default function Dashboard() {
                     
 
                   
-                    <span className="text-orange-500 font-bold">
+                    <span className="text-amber-400 font-bold">
                       R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
