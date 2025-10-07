@@ -4,6 +4,20 @@ import PedidoCard from "../components/PedidoCard"; // pode manter
 import { useEmpresa } from "../context/EmpresaContext";
  
  
+function AvancarButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
+    >
+      {/* play (SVG) – fica branco, sem quadrado azul do emoji */}
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+      Avançar
+    </button>
+  );
+}
 
  
 
@@ -138,14 +152,13 @@ export default function Dashboard() {
     navigate("/");
   };
 
- // mais claro → mais escuro
-const colunas = [
-  { status: "recebido", titulo: "Recebido",  bg: "bg-[#8b4a22]", text: "text-white" },
-  { status: "producao", titulo: "Produção",  bg: "bg-[#6b3b1f]", text: "text-white" },
-  { status: "entrega",  titulo: "Entrega",   bg: "bg-[#4a2f1a]", text: "text-white" },
-  { status: "concluido",titulo: "Concluído", bg: "bg-[#2b1e12]", text: "text-white" },
+ const colunas = [
+  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#8b4a22] text-white" },
+  { status: "producao",  titulo: "Produção",  cls: "bg-[#6b3b1f] text-white" },
+  { status: "entrega",   titulo: "Entrega",   cls: "bg-[#4a2f1a] text-white" },
+  { status: "concluido", titulo: "Concluído", cls: "bg-[#2b1e12] text-white" },
 ];
-
+ 
   if (!carregado) {
     return (
       <div className="flex justify-center items-center h-screen bg-black text-white">
