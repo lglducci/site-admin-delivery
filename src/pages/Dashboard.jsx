@@ -266,9 +266,12 @@ const colunas = [
         {colunas.map((coluna) => (
           <div
             key={coluna.status}
-            className={`rounded-2xl shadow-lg p-4 ${coluna.cor} text-orange-900`}
+            {/*className={`rounded-2xl shadow-lg p-4 ${coluna.cor} text-orange-900`}*/}
+            className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
+
+              
           >
-            <h2 className="text-lg font-bold mb-3 border-b border-orange-400 pb-1">
+              <h2 className="text-lg font-bold mb-3 pb-1 text-amber-300 border-b border-amber-500">
               {coluna.titulo}
             </h2>
 
@@ -294,7 +297,11 @@ const colunas = [
                     </button>
 
 
-                    
+
+
+                   <div className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40">
+                 <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
+                 <span className="text-amber-400 font-bold">R$ ...</span>
 
                   
                     <span className="text-amber-400 font-bold">
@@ -302,7 +309,9 @@ const colunas = [
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-2">{p.nomeCliente}</p>
+                    <div className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40">
+                 <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
+                 <span className="text-amber-400 font-bold">R$ ...</span>
 
                   <div className="flex justify-end">
                     <button
