@@ -267,7 +267,7 @@ const colunas = [
          <div
                  key={coluna.status}
                  className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
-               >   {/* <-- faltava esse > aqui */}
+       {/* <-- faltava esse > aqui */}
             </div>
 
               <h2 className="text-lg font-bold mb-3 pb-1 text-amber-300 border-b border-amber-500">
