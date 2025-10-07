@@ -277,7 +277,7 @@ const colunas = [
               .map((p) => (
                 <div
                   key={p.numero}
-                  className="bg-NavajoWhite p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
+                  className="bg-Bisque p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
                 >
                   <div className="flex justify-between items-center mb-1">
                     {/* Link para ver o pedido (abre em nova aba) */}
