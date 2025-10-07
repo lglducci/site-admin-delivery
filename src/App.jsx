@@ -8,7 +8,7 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import PizzaModelo from "./pages/PizzaModelo.jsx"; // + import
 import Relatorios from "./pages/Relatorios.jsx";
-import Relatorios from "./pages/KpiTermometroDia.jsx;
+import Relatorios from "./pages/KpiTermometroDia;
 
 export default function App() {
   return (
@@ -22,7 +22,7 @@ export default function App() {
         <Route path="/detalhes" element={<PedidoDetalhes />} />
        <Route path="/pizza-modelo" element={<PizzaModelo />} />
        <Route path="/relatorios" element={<Relatorios />} />
-       <Route path="/kpitermometrodia" element={<KpiTermometroDia />} />
+       <Route path="/kpi" element={<KpiTermometroDia />} />
       </Routes>
     </Router>
   );
