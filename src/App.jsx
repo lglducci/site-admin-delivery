@@ -8,7 +8,7 @@ import EditarItem from "./pages/EditarItem";
 import PedidoDetalhes from "./pages/PedidoDetalhes";
 import PizzaModelo from "./pages/PizzaModelo.jsx"; // + import
 import Relatorios from "./pages/Relatorios.jsx";
-import Relatorios from "./pages/KpiTermometroDia;
+ import KpiTermometroDia from "./pages/KpiTermometroDia";
 
 export default function App() {
   return (
