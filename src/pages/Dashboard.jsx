@@ -152,12 +152,17 @@ export default function Dashboard() {
     navigate("/");
   };
 
- const colunas = [
-  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#8b4a22] text-white" },
-  { status: "producao",  titulo: "Produção",  cls: "bg-[#6b3b1f] text-white" },
-  { status: "entrega",   titulo: "Entrega",   cls: "bg-[#4a2f1a] text-white" },
-  { status: "concluido", titulo: "Concluído", cls: "bg-[#2b1e12] text-white" },
+ 
+
+const colunas = [
+  { status: "recebido", titulo: "Recebido", cor: "bg-[#2b1f19] text-[#f7e2c5]" },
+  { status: "producao", titulo: "Produção", cor: "bg-[#3a261c] text-[#f7e2c5]" },
+  { status: "entrega",  titulo: "Entrega",  cor: "bg-[#4a2f20] text-[#f7e2c5]" },
+  { status: "concluido",titulo: "Concluído",cor: "bg-[#1a1410] text-[#f7e2c5]" },
 ];
+
+
+ 
  
   if (!carregado) {
     return (
