@@ -155,10 +155,10 @@ export default function Dashboard() {
  
 
 const colunas = [
-  { status: "recebido", titulo: "Recebido", cor: "bg-[#2b1f19] text-[#7007ED]" },
-  { status: "producao", titulo: "Produção", cor: "bg-[#3a261c] text-[#7007ED]" },
-  { status: "entrega",  titulo: "Entrega",  cor: "bg-[#4a2f20] text-[#7007ED]" },
-  { status: "concluido",titulo: "Concluído",cor: "bg-[#1a1410] text-[#7007ED]" },
+  { status: "recebido", titulo: "Recebido", cor: "bg-[#2b1f19] text-[#FF5C00]" },
+  { status: "producao", titulo: "Produção", cor: "bg-[#3a261c] text-[#FF5C00]" },
+  { status: "entrega",  titulo: "Entrega",  cor: "bg-[#4a2f20] text-[#FF5C00]" },
+  { status: "concluido",titulo: "Concluído",cor: "bg-[#1a1410] text-[#FF5C00]" },
 ];
 
 
