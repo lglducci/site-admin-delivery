@@ -180,7 +180,7 @@ const colunas = [
       {/* Cabeçalho */}
       <div className="flex justify-between items-center mb-6 bg-gray-950 shadow-lg rounded-xl p-4 border border-orange-500">
         <h1 className="text-2xl font-bold text-orange-400">
-          Painel de {empresa?.nome || "Minha Pizzaria"}
+          Painel de {empresa?.nome || "Painel Minha Pizzaria"}
         </h1>
 
         <div className="flex items-center gap-4">
@@ -277,7 +277,7 @@ const colunas = [
               .map((p) => (
                 <div
                   key={p.numero}
-                  className="bg-white p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
+                  className="bg-orange p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
                 >
                   <div className="flex justify-between items-center mb-1">
                     {/* Link para ver o pedido (abre em nova aba) */}
