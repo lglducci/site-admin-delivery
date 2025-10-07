@@ -1,16 +1,15 @@
- import React, { useEffect, useState } from "react";
+ // src/pages/Dashboard.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PedidoCard from "../components/PedidoCard"; // pode manter
+import PedidoCard from "../components/PedidoCard"; // ok manter, mesmo sem uso
 import { useEmpresa } from "../context/EmpresaContext";
- 
- 
+
 function AvancarButton({ onClick }) {
   return (
     <button
       onClick={onClick}
       className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
     >
-      {/* play (SVG) – fica branco, sem quadrado azul do emoji */}
       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
         <path d="M8 5v14l11-7z" />
       </svg>
@@ -19,16 +18,12 @@ function AvancarButton({ onClick }) {
   );
 }
 
- 
-
-
-
 export default function Dashboard() {
   const [pedidos, setPedidos] = useState([]);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  // Contexto seguro (multiempresa preservado)
+  // Contexto seguro
   let empresa = null;
   let limparEmpresaSafe = () => {};
   let carregado = false;
@@ -38,30 +33,23 @@ export default function Dashboard() {
     if (ctx?.empresa) empresa = ctx.empresa;
     if (ctx?.limparEmpresa) limparEmpresaSafe = ctx.limparEmpresa;
     if (ctx?.carregado) carregado = ctx.carregado;
-  } catch (e) {
-    console.warn("Contexto ainda não carregado (seguro)");
+  } catch {
+    /* safe */
   }
 
-  // ---------------------------
-  // helper para pegar id_empresa
-  // ---------------------------
   const getIdEmpresaSafe = () => {
     try {
       if (empresa?.id_empresa) return Number(empresa.id_empresa);
       if (empresa?.idEmpresa) return Number(empresa.idEmpresa);
-
       const direto = localStorage.getItem("id_empresa");
       if (direto && !Number.isNaN(Number(direto))) return Number(direto);
-
       const raw = localStorage.getItem("empresa");
       if (raw) {
         const obj = JSON.parse(raw);
         const n = Number(obj?.id_empresa ?? obj?.idEmpresa);
         if (!Number.isNaN(n)) return n;
       }
-    } catch (e) {
-      console.warn("getIdEmpresaSafe erro:", e);
-    }
+    } catch {}
     return null;
   };
 
@@ -69,23 +57,15 @@ export default function Dashboard() {
     const fetchPedidos = async () => {
       try {
         if (!carregado) return;
-
         const empresaId =
           (empresa && empresa.id_empresa) ||
           localStorage.getItem("id_empresa");
-
-        if (!empresaId) {
-          console.warn("Nenhum id_empresa disponível ainda");
-          return;
-        }
-
-        console.log("🔎 Buscando pedidos da empresa:", empresaId);
+        if (!empresaId) return;
 
         const response = await fetch(
           `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${empresaId}`
         );
         const data = await response.json();
-
         const lista = Array.isArray(data) ? data : [];
         const pedidosAdaptados = lista.map((p) => ({
           numero: p.numero ?? p.pedido_id,
@@ -94,26 +74,20 @@ export default function Dashboard() {
           valor: Number(p.valor ?? 0),
           data: p.data ?? p.create_at ?? new Date().toISOString(),
         }));
-
         setPedidos(pedidosAdaptados);
       } catch (error) {
         console.error("Erro ao buscar pedidos:", error);
       }
     };
-
     fetchPedidos();
   }, [empresa, carregado]);
 
-  // ---------------------------------------
-  // Avançar pedido: envia numero + id_empresa
-  // ---------------------------------------
   const avancarPedido = async (numero) => {
     const id_empresa = getIdEmpresaSafe();
     if (!id_empresa) {
       alert("Empresa não identificada. Abra o cardápio/logue novamente.");
       return;
     }
-
     try {
       const response = await fetch(
         "https://webhook.lglducci.com.br/webhook/avancar",
@@ -123,22 +97,15 @@ export default function Dashboard() {
           body: JSON.stringify({ numero, id_empresa }),
         }
       );
-
       let data = null;
       try {
         data = await response.json();
-      } catch {
-        data = null;
-      }
-
+      } catch {}
       if (!response.ok) {
-        console.error("Falha ao avançar (status):", response.status, data);
+        console.error("Falha ao avançar:", response.status, data);
         alert("Falha ao avançar o pedido.");
         return;
       }
-
-      console.log("✅ Avançado:", data || { ok: response.ok, status: response.status });
-      // recarrega os pedidos (pode substituir por atualização mais fina se quiser)
       window.location.reload();
     } catch (err) {
       console.error("Erro ao avançar pedido:", err);
@@ -152,18 +119,14 @@ export default function Dashboard() {
     navigate("/");
   };
 
- 
+  // Cores por coluna (marrom → mais escuro)
+  const colunas = [
+    { status: "recebido",  titulo: "Recebido",  cls: "bg-[#2b1f19] text-amber-300" },
+    { status: "producao",  titulo: "Produção",  cls: "bg-[#3a261c] text-amber-300" },
+    { status: "entrega",   titulo: "Entrega",   cls: "bg-[#4a2f20] text-amber-300" },
+    { status: "concluido", titulo: "Concluído", cls: "bg-[#1a1410] text-amber-300" },
+  ];
 
-const colunas = [
-  { status: "recebido", titulo: "Recebido", cor: "bg-[#2b1f19] text-[#FF5C00]" },
-  { status: "producao", titulo: "Produção", cor: "bg-[#3a261c] text-[#FF5C00]" },
-  { status: "entrega",  titulo: "Entrega",  cor: "bg-[#4a2f20] text-[#FF5C00]" },
-  { status: "concluido",titulo: "Concluído",cor: "bg-[#1a1410] text-[#FF5C00]" },
-];
-
-
- 
- 
   if (!carregado) {
     return (
       <div className="flex justify-center items-center h-screen bg-black text-white">
@@ -172,9 +135,6 @@ const colunas = [
     );
   }
 
-  // ---------------------------------------
-  // RENDER
-  // ---------------------------------------
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white p-6">
       {/* Cabeçalho */}
@@ -218,17 +178,12 @@ const colunas = [
                   💬 Mensagem Padrão
                 </button>
 
-                 
-
-                  <button
+                <button
                   onClick={() => window.open("/relatorios", "_self")}
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
-                   📈 Relatórios
+                  📈 Relatórios
                 </button>
-
-
-               
 
                 <button
                   onClick={() => window.open("/cardapio", "_self")}
@@ -237,17 +192,12 @@ const colunas = [
                   🍕 Cardápio
                 </button>
 
-                {/* 👉 NOVO ITEM - Modelo de Custo */}
- 
-                    <button
+                <button
                   onClick={() => window.open("/pizza-modelo", "_self")}
                   className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
                 >
-                  ✨  Modelo de Custo
+                  ✨ Modelo de Custo
                 </button>
-
-
-               
               </div>
             )}
           </div>
@@ -264,13 +214,11 @@ const colunas = [
       {/* Colunas de pedidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {colunas.map((coluna) => (
-         <div
-                 key={coluna.status}
-                 className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
-       {/* <-- faltava esse > aqui */}
-            </div>
-
-              <h2 className="text-lg font-bold mb-3 pb-1 text-amber-300 border-b border-amber-500">
+          <div
+            key={coluna.status}
+            className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
+          >
+            <h2 className="text-lg font-bold mb-3 pb-1 border-b border-amber-500/60">
               {coluna.titulo}
             </h2>
 
@@ -279,49 +227,30 @@ const colunas = [
               .map((p) => (
                 <div
                   key={p.numero}
-                  className="bg-white p-3 rounded-xl shadow-md mb-3 border border-gray-300 transition-all hover:shadow-lg hover:border-orange-400"
+                  className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40 hover:border-amber-500 transition-all"
                 >
                   <div className="flex justify-between items-center mb-1">
-                    {/* Link para ver o pedido (abre em nova aba) */}
-
-
-                   <button
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`);
+                        navigate(
+                          `/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`
+                        );
                       }}
-                      className="font-semibold text-gray-800 hover:text-orange-600 underline"
+                      className="font-semibold hover:text-amber-300 underline"
                     >
                       nº {p.numero}
                     </button>
 
-
-
-
-                   <div className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40">
-                 <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
-                 <span className="text-amber-400 font-bold">R$ ...</span>
-
-                  
                     <span className="text-amber-400 font-bold">
                       R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
 
-                    <div className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40">
-                 <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
-                 <span className="text-amber-400 font-bold">R$ ...</span>
+                  <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
 
                   <div className="flex justify-end">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        avancarPedido(p.numero);
-                      }}
-                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
-                    >
-                      ▶️ Avançar
-                    </button>
+                    <AvancarButton onClick={() => avancarPedido(p.numero)} />
                   </div>
                 </div>
               ))}
