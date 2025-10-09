@@ -94,15 +94,12 @@ export default function Cardapio() {
           onClick={() => navigate(`/editar-item/${item.numero}`)}
           className="flex items-center justify-center gap-2 font-medium w-full"
         >
-          ✏️ Editar
-        </button>
+      ✏️ Editar
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
-  ))}
-</div>
-   );
-  }
-
-     
   );
-}
+}     
