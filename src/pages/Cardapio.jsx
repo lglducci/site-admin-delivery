@@ -100,6 +100,8 @@ export default function Cardapio() {
     </div>
   ))}
 </div>
+   );
+  }
 
      
   );
