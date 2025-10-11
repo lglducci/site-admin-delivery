@@ -70,26 +70,29 @@ export default function Cardapio() {
 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
 
   {itensFiltrados.map((item) => (
-    <div
+  <div
       key={item.numero}
-      className="bg-[#2B1E1A] shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition-all border border-[#3A2924]"
+      className="bg-[#0F0F0F] shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all border border-[#222]"
     >
       <img
         src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
         alt={item.nome}
         className="w-full h-48 object-cover"
       />
-      <div className="p-4 text-[#F5E3D0]">
+      
+       <div className="p-4 text-gray-100">
         <h2 className="text-lg font-bold text-[#F5E3D0]">{item.nome}</h2>
         <p className="text-sm text-[#E8D5C0] mt-1 line-clamp-2">
           {item.descricao}
         </p>
-        <p className="mt-2 font-semibold text-[#E0B400]">
+        
+         <p className="mt-2 font-bold text-[#FFD700]">
           💰 R$ {item.preco_grande || item.preco || 0}
         </p>
       </div>
+ 
+     <div className="bg-[#FFB703] hover:bg-[#E09E00] text-black font-semibold px-4 py-2 rounded-b-2xl transition-all shadow-md">
 
-      <div className="bg-[#C48C00] hover:bg-[#D9A404] text-white font-semibold px-4 py-2 rounded-b-2xl transition-all shadow-md">
         <button
           onClick={() => navigate(`/editar-item/${item.numero}`)}
           className="flex items-center justify-center gap-2 font-medium w-full"
