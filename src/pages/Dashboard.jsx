@@ -117,13 +117,20 @@ export default function Dashboard() {
   };
 
   // Tema atualizado — marrom escuro suave
-  const colunas = [
-    { status: "recebido",  titulo: "Recebido",  cls: "bg-[#1f1a16] text-amber-300" },
-    { status: "producao",  titulo: "Produção",  cls: "bg-[#262018] text-amber-300" },
-    { status: "entrega",   titulo: "Entrega",   cls: "bg-[#2e251b] text-amber-300" },
-    { status: "concluido", titulo: "Concluído", cls: "bg-[#181410] text-amber-300" },
-  ];
+   
+const colunas = [
+  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#1a1d22] text-amber-300" },
+  { status: "producao",  titulo: "Produção",  cls: "bg-[#20252b] text-amber-300" },
+  { status: "entrega",   titulo: "Entrega",   cls: "bg-[#252a31] text-amber-300" },
+  { status: "concluido", titulo: "Concluído", cls: "bg-[#191d23] text-amber-300" },
+];
 
+
+
+
+
+
+ 
   if (!carregado) {
     return (
       <div className="flex justify-center items-center h-screen bg-black text-white">
