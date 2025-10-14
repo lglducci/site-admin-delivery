@@ -1,10 +1,10 @@
  import React, { useEffect, useMemo, useState } from "react";
 
-/* cores do tema */
+/* 🎨 Cores do tema */
 const C = {
   bg: "#0F121A",
   panel: "#1B1E25",
-  panelBorder: "rgba(255,159,67,0.55)", // #ff9f43
+  panelBorder: "rgba(255,159,67,0.55)",
   card: "#171c24",
   cardBorder: "rgba(255,159,67,0.25)",
   title: "#ff9f43",
@@ -14,11 +14,9 @@ const C = {
   btnDarkText: "#e5e7eb",
   btnOrange: "#ff9f43",
   btnOrangeText: "#1b1e25",
-  btnGreen: "#22c55e",
-  btnGreenText: "#0b1118",
 };
 
-/* util: empresa do localStorage */
+/* 🔧 Recupera dados da empresa */
 function getEmpresaSafe() {
   try {
     return JSON.parse(localStorage.getItem("empresa") || "{}");
@@ -27,7 +25,7 @@ function getEmpresaSafe() {
   }
 }
 
-/* normaliza status */
+/* Normaliza status */
 const norm = (s) =>
   (s || "")
     .toLowerCase()
@@ -37,9 +35,7 @@ const norm = (s) =>
 export default function Dashboard() {
   const empresa = getEmpresaSafe();
   const idEmpresa = empresa?.id_empresa;
-
   const [pedidos, setPedidos] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
@@ -48,7 +44,6 @@ export default function Dashboard() {
       setErro("Sem empresa no contexto. Faça login novamente.");
       return;
     }
-    setLoading(true);
     try {
       const resp = await fetch(
         `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(
@@ -62,8 +57,6 @@ export default function Dashboard() {
     } catch (e) {
       console.error(e);
       setErro("Falha ao carregar pedidos.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -78,29 +71,22 @@ export default function Dashboard() {
     const ok = window.confirm(`Avançar o pedido nº ${numero}?`);
     if (!ok) return;
     try {
-      const resp = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero, id_empresa: idEmpresa }),
-      });
-      if (!resp.ok) {
-        let d = null;
-        try {
-          d = await resp.json();
-        } catch {}
-        console.error("Falha ao avançar:", resp.status, d);
-        alert("Falha ao avançar o pedido.");
-        return;
-      }
-      // tira da lista imediatamente
+      const resp = await fetch(
+        "https://webhook.lglducci.com.br/webhook/avancar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero, id_empresa: idEmpresa }),
+        }
+      );
+      if (!resp.ok) throw new Error("Falha ao avançar pedido.");
       setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
     } catch (e) {
-      console.error(e);
       alert("Erro ao avançar pedido!");
     }
   };
 
-  /* agrupamentos */
+  /* Agrupa pedidos */
   const grupos = useMemo(() => {
     const r = [], pr = [], e = [], c = [];
     for (const p of pedidos) {
@@ -118,10 +104,7 @@ export default function Dashboard() {
       className="rounded-2xl p-4 md:p-5 border"
       style={{ background: C.panel, borderColor: C.panelBorder }}
     >
-      <div
-        className="pb-3 mb-3 border-b"
-        style={{ borderColor: C.panelBorder }}
-      >
+      <div className="pb-3 mb-3 border-b" style={{ borderColor: C.panelBorder }}>
         <h2 className="text-lg md:text-xl font-semibold" style={{ color: C.title }}>
           {titulo}
         </h2>
@@ -148,16 +131,14 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <a
-                        href="#"
+                      <span
                         className="text-base md:text-lg font-semibold"
                         style={{ color: C.title }}
-                        onClick={(e) => e.preventDefault()}
-                        title={`Pedido nº ${numero}`}
                       >
                         nº {numero}
-                      </a>
-                      <span className="text-xs px-2 py-0.5 rounded-md"
+                      </span>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-md"
                         style={{
                           background: C.btnDark,
                           color: C.btnDarkText,
@@ -167,12 +148,17 @@ export default function Dashboard() {
                         {p.status}
                       </span>
                     </div>
-                    <div className="text-xs md:text-sm mt-1" style={{ color: C.textMuted }}>
+                    <div
+                      className="text-xs md:text-sm mt-1"
+                      style={{ color: C.textMuted }}
+                    >
                       {p.nome_cliente || p.cliente || "—"}
                     </div>
                   </div>
-
-                  <div className="text-sm font-semibold whitespace-nowrap" style={{ color: C.text }}>
+                  <div
+                    className="text-sm font-semibold whitespace-nowrap"
+                    style={{ color: C.text }}
+                  >
                     {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
                   </div>
                 </div>
@@ -193,16 +179,16 @@ export default function Dashboard() {
       )}
     </div>
   );
+
+  /* === RENDER === */
   return (
     <div className="min-h-screen p-4 md:p-6" style={{ background: C.bg }}>
-      {/* container principal com borda laranja suave */}
       <div
         className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
         style={{ borderColor: C.panelBorder, background: C.panel }}
       >
-        {/* --- Header com menu profissional --- */}
+        {/* Cabeçalho */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          {/* título */}
           <div>
             <h1 className="text-xl md:text-2xl font-semibold" style={{ color: C.title }}>
               Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
@@ -212,19 +198,17 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* botões à direita */}
+          {/* Botões */}
           <div className="flex items-center gap-2 relative">
-            {/* botão atualizar */}
             <button
               onClick={carregar}
               className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
               style={{ background: C.btnDark, color: C.btnDarkText }}
-              title="Atualizar pedidos"
             >
               🔄 Atualizar
             </button>
 
-            {/* botão configurações */}
+            {/* Menu Configurações */}
             <div className="relative group">
               <button
                 className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold flex items-center gap-2 transition-all"
@@ -237,7 +221,6 @@ export default function Dashboard() {
                 ⚙️ Configurações
               </button>
 
-              {/* dropdown */}
               <div
                 className="absolute right-0 mt-2 w-56 rounded-xl overflow-hidden border backdrop-blur-md opacity-0 -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200"
                 style={{
@@ -267,12 +250,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* botão sair */}
             <button
               onClick={() => {
-                localStorage.removeItem("empresa");
-                localStorage.removeItem("user_id");
-                localStorage.removeItem("email");
+                localStorage.clear();
                 window.location.href = "/login";
               }}
               className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
@@ -287,16 +267,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* colunas de pedidos */}
+        {/* Colunas */}
         <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Coluna titulo="Recebido" items={grupos.r} />
           <Coluna titulo="Produção" items={grupos.pr} />
           <Coluna titulo="Entrega" items={grupos.e} />
           <Coluna titulo="Concluído" items={grupos.c} />
         </div>
-      </div> {/* fecha container principal */}
-    </div>   {/* fecha página */}
+      </div>
+    </div>
   );
 }
-
- 
