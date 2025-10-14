@@ -2,49 +2,25 @@
 
 export default function KdsView() {
   const [pedidos, setPedidos] = useState([]);
-  const [erro, setErro] = useState("");
-
-  // Lê empresa do localStorage (Login.jsx já grava isso)
-  const empresaData = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("empresa") || "{}");
-    } catch {
-      return {};
-    }
-  })();
+  const empresaData = JSON.parse(localStorage.getItem("empresa") || "{}");
   const idEmpresa = empresaData?.id_empresa;
 
-  // 🔒 Se não tiver empresa, avisa o usuário (impede fetch sem id)
-  useEffect(() => {
-    if (!idEmpresa) {
-      setErro("Sem empresa no contexto. Faça login novamente.");
-    }
-  }, [idEmpresa]);
-
-  // 🔄 Atualiza a lista a cada 5s (filtra por status) e passa id_empresa
   useEffect(() => {
     if (!idEmpresa) return;
 
     const fetchPedidos = async () => {
       try {
         const resp = await fetch(
-          `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(
-            idEmpresa
-          )}`
+          `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(idEmpresa)}`
         );
         const data = await resp.json();
- 
-       const emProducao = (Array.isArray(data) ? data : []).filter((p) => {
-         const s = (p.status || "").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-         return ["producao", "em preparo", "emproducao"].includes(s);
-       });
-
-       
+        const emProducao = (Array.isArray(data) ? data : []).filter((p) => {
+          const s = (p.status || "").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+          return ["producao", "em preparo", "recebido"].includes(s);
+        });
         setPedidos(emProducao);
-        setErro("");
       } catch (err) {
         console.error("Erro ao carregar pedidos:", err);
-        setErro("Falha ao carregar pedidos da cozinha.");
       }
     };
 
@@ -53,22 +29,16 @@ export default function KdsView() {
     return () => clearInterval(interval);
   }, [idEmpresa]);
 
-  // ✅ Marca pedido como pronto informando também o id_empresa
-  const marcarPronto = async (numero) => {
-    if (!idEmpresa) return;
-
+  const avancarPedido = async (numero) => {
     try {
-      await fetch("https://webhook.lglducci.com.br/webhook/pedido_pronto", {
+      await fetch("https://webhook.lglducci.com.br/webhook/pedido_avancar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ numero, id_empresa: idEmpresa }),
       });
-
-      // Otimista: remove da UI
       setPedidos((prev) => prev.filter((p) => p.numero !== numero));
     } catch (err) {
-      console.error("Erro ao marcar como pronto:", err);
-      setErro("Não foi possível marcar como pronto.");
+      console.error("Erro ao avançar pedido:", err);
     }
   };
 
@@ -76,38 +46,49 @@ export default function KdsView() {
     <div className="min-h-screen bg-black text-white p-4">
       <h1 className="text-3xl font-bold mb-1 text-center text-yellow-400">🍳 KDS - Cozinha</h1>
       <p className="text-center text-sm text-gray-400 mb-6">
-        {empresaData?.nome_empresa
-          ? `Empresa: ${empresaData.nome_empresa} (ID ${idEmpresa})`
-          : "Empresa não definida"}
+        Empresa: {empresaData?.nome_empresa} (ID {idEmpresa})
       </p>
 
-      {erro && <div className="mb-4 text-center text-red-400">{erro}</div>}
-
-      {!idEmpresa ? (
-        <p className="text-center text-gray-400">Faça login para carregar os pedidos.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pedidos.length === 0 ? (
-            <p className="text-center text-gray-400 col-span-full">
-              Nenhum pedido em preparo 🍕
-            </p>
-          ) : (
-            pedidos.map((pedido) => (
-              <div key={pedido.numero} className="bg-zinc-800 rounded-2xl p-4 shadow-lg">
-                <h2 className="text-2xl font-bold text-yellow-400">Pedido nº {pedido.numero}</h2>
-                <p className="text-gray-300">{pedido.nome_cliente}</p>
-                <p className="mt-2 text-sm text-gray-400 whitespace-pre-line">{pedido.itens}</p>
-                <button
-                  onClick={() => marcarPronto(pedido.numero)}
-                  className="bg-green-600 hover:bg-green-700 w-full py-3 mt-4 rounded-xl font-bold"
-                >
-                  ✅ Pronto
-                </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {pedidos.length === 0 ? (
+          <p className="text-center text-gray-400 col-span-full">Nenhum pedido em preparo 🍕</p>
+        ) : (
+          pedidos.map((p) => (
+            <div
+              key={p.numero}
+              className="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 shadow-xl flex flex-col justify-between"
+            >
+              <div>
+                <h2 className="text-2xl font-bold text-yellow-400">
+                  Pedido nº{" "}
+                  <a
+                    href={`https://webhook.lglducci.com.br/webhook/detalhes?numero=${p.numero}&id_empresa=${idEmpresa}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-yellow-300 hover:text-yellow-200"
+                  >
+                    {p.numero}
+                  </a>
+                </h2>
+                <p className="text-gray-300 mt-1 font-medium">{p.nome_cliente || "Cliente"}</p>
+                <p className="mt-3 text-sm text-gray-400 whitespace-pre-line">
+                  {p.itens || "Sem descrição de itens"}
+                </p>
+                <p className="mt-2 text-sm text-gray-500">
+                  💰 {p.valor ? `R$ ${Number(p.valor).toFixed(2)}` : ""}
+                </p>
               </div>
-            ))
-          )}
-        </div>
-      )}
+
+              <button
+                onClick={() => avancarPedido(p.numero)}
+                className="bg-green-600 hover:bg-green-700 text-white w-full py-3 mt-4 rounded-xl font-bold text-lg transition"
+              >
+                ➡️ Avançar
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
