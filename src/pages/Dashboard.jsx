@@ -21,10 +21,10 @@ const THEME = {
 
 // Colunas (tons quentes suaves)
 const COLUNAS = [
-  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#] text-[#ffcf88]" },
-  { status: "producao",  titulo: "Produção",  cls: "bg-[#000000] text-[#ffcf88]" },
-  { status: "entrega",   titulo: "Entrega",   cls: "bg-[#000000] text-[#ffcf88]" },
-  { status: "concluido", titulo: "Concluído", cls: "bg-[#000000] text-[#ffcf88]" },
+  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#0F121A] text-[#ffcf88]" },
+  { status: "producao",  titulo: "Produção",  cls: "bg-[#0F121A] text-[#ffcf88]" },
+  { status: "entrega",   titulo: "Entrega",   cls: "bg-[#0F121A] text-[#ffcf88]" },
+  { status: "concluido", titulo: "Concluído", cls: "bg-[#0F121A] text-[#ffcf88]" },
 ];
 
 /* util: empresa do localStorage */
