@@ -1,6 +1,5 @@
  import React, { useEffect, useMemo, useState } from "react";
 
-/* Util: carrega empresa do localStorage de forma segura */
 function getEmpresaSafe() {
   try {
     return JSON.parse(localStorage.getItem("empresa") || "{}");
@@ -9,7 +8,6 @@ function getEmpresaSafe() {
   }
 }
 
-/* Modal simples */
 function Modal({ open, title, onClose, children, footer }) {
   if (!open) return null;
   return (
@@ -27,7 +25,9 @@ function Modal({ open, title, onClose, children, footer }) {
         </div>
         <div className="p-5 overflow-auto max-h-[65vh]">{children}</div>
         {footer ? (
-          <div className="px-5 py-4 border-t border-zinc-700 bg-zinc-950">{footer}</div>
+          <div className="px-5 py-4 border-t border-zinc-700 bg-zinc-950">
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>
@@ -43,7 +43,6 @@ export default function KdsView() {
   const [erro, setErro] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Modal Visualizar
   const [openView, setOpenView] = useState(false);
   const [viewNumero, setViewNumero] = useState(null);
   const [viewData, setViewData] = useState({ items: [], total: null });
@@ -57,23 +56,20 @@ export default function KdsView() {
   const filtroKDS = (lista) =>
     (Array.isArray(lista) ? lista : []).filter((p) => {
       const s = normalizaStatus(p.status);
-      // cozinha vê Recebido + Em preparo/Producao
       return ["recebido", "em preparo", "producao"].includes(s);
     });
 
   const resumoItens = (p) => {
-    // se backend já manda um resumo, usa; senão tenta sintetizar
     if (p.resumo_itens) return p.resumo_itens;
-    const txt = (p.itens || "")
-      .toString()
-      .toLowerCase();
+    const txt = (p.itens || "").toString().toLowerCase();
     const pizzas = (txt.match(/pizza/g) || []).length;
-    const bebidas = (txt.match(/coca|refri|bebida|guarana|fanta|sprite/g) || []).length;
+    const bebidas =
+      (txt.match(/coca|refri|bebida|guarana|fanta|sprite/g) || []).length;
     const partes = [];
     if (pizzas) partes.push(`🍕 ${pizzas} pizza${pizzas > 1 ? "s" : ""}`);
     if (bebidas) partes.push(`🧃 ${bebidas} bebida${bebidas > 1 ? "s" : ""}`);
     return partes.join("  •  ") || "Sem descrição de itens";
-    };
+  };
 
   const carregarPedidos = async () => {
     if (!idEmpresa) {
@@ -103,22 +99,22 @@ export default function KdsView() {
     carregarPedidos();
     const t = setInterval(carregarPedidos, 5000);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idEmpresa]);
 
   const avancarPedido = async (numero) => {
     if (!idEmpresa) return;
-    // confirmação de segurança
     const ok = window.confirm(`Confirmar avanço do pedido nº ${numero}?`);
     if (!ok) return;
 
     try {
-      const resp = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero, id_empresa: idEmpresa }),
-      });
-      // se backend devolver erro, mostra
+      const resp = await fetch(
+        "https://webhook.lglducci.com.br/webhook/avancar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numero, id_empresa: idEmpresa }),
+        }
+      );
       if (!resp.ok) {
         let data = null;
         try {
@@ -128,7 +124,6 @@ export default function KdsView() {
         alert("Falha ao avançar o pedido.");
         return;
       }
-      // feedback otimista: remove o card
       setPedidos((prev) => prev.filter((p) => p.numero !== numero));
     } catch (e) {
       console.error(e);
@@ -169,14 +164,12 @@ export default function KdsView() {
     setOpenView(true);
     setViewData({ items: [], total: null });
 
-    // consome seu webhook “visualizarcozinha”
     try {
       const url = `https://webhook.lglducci.com.br/webhook/visualizarcozinha?numero=${encodeURIComponent(
         numero
       )}&id_empresa=${encodeURIComponent(idEmpresa)}`;
       const resp = await fetch(url);
       const data = await resp.json();
-      // aceita tanto {items:[...], total:...} quanto array “cru”
       if (Array.isArray(data)) {
         setViewData({ items: data, total: null });
       } else {
@@ -190,7 +183,6 @@ export default function KdsView() {
     }
   };
 
-  // agrupa itens por pizza (pai) – só para exibir organizado no modal
   const gruposModal = useMemo(() => {
     const items = viewData.items || [];
     const pais = [];
@@ -213,12 +205,13 @@ export default function KdsView() {
 
   return (
     <div className="min-h-screen bg-black text-white p-4">
-      {/* Cabeçalho */}
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="text-3xl">🍳</div>
           <div>
-            <h1 className="text-3xl font-extrabold text-yellow-400">KDS - Cozinha</h1>
+            <h1 className="text-3xl font-extrabold text-yellow-400">
+              KDS - Cozinha
+            </h1>
             <p className="text-sm text-gray-400">
               Empresa: {empresa?.nome_empresa || "—"} (ID {idEmpresa || "—"}) •{" "}
               {lastUpdated
@@ -231,22 +224,19 @@ export default function KdsView() {
         <div className="flex items-center gap-2">
           <button
             onClick={requisitarTodos}
-            className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 font-semibold"
-            title="Enviar todos os 'Recebidos' para Produção"
+            className="px-4 py-2 rounded-lg bg-orange-500/80 hover:bg-orange-600/80 font-semibold text-sm transition-all"
           >
             ⚡ Requisitar pedidos recebidos
           </button>
           <button
             onClick={carregarPedidos}
-            className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-semibold"
-            title="Atualizar"
+            className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 font-semibold text-sm"
           >
             🔄 Atualizar
           </button>
         </div>
       </div>
 
-      {/* Mensagens de estado */}
       <div className="max-w-7xl mx-auto mt-4">
         {erro && (
           <div className="mb-3 rounded-xl bg-red-900/60 text-red-200 px-4 py-2">
@@ -255,7 +245,6 @@ export default function KdsView() {
         )}
       </div>
 
-      {/* Grid de pedidos */}
       <div className="max-w-7xl mx-auto mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pedidos.length === 0 ? (
           <p className="text-center text-gray-400 col-span-full">
@@ -264,22 +253,25 @@ export default function KdsView() {
         ) : (
           pedidos.map((p) => (
             <div
-              key={p.numero}
-              className="bg-zinc-900 border border-zinc-700 rounded-2xl p-4 shadow-xl flex flex-col"
+              key={p.numero ?? p.pedido_id}
+              className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 shadow-md hover:shadow-lg transition-all"
             >
               <div className="mb-3">
                 <h2 className="text-2xl font-extrabold text-yellow-400">
-                  Pedido nº {p.numero ?? "—"}
+                  Pedido nº {p.numero ?? p.pedido_id ?? "—"}
                 </h2>
                 <div className="text-sm text-gray-400 mt-1">
                   {(() => {
                     const s = normalizaStatus(p.status);
                     if (s === "recebido") return "🟧 Recebido";
-                    if (s === "producao" || s === "em preparo") return "🟦 Em preparo";
+                    if (s === "producao" || s === "em preparo")
+                      return "🟦 Em preparo";
                     return p.status || "—";
                   })()}
                 </div>
-                <div className="text-base text-gray-300 mt-2">{resumoItens(p)}</div>
+                <div className="text-base text-gray-300 mt-2">
+                  {resumoItens(p)}
+                </div>
                 <div className="text-sm text-gray-400 mt-1">
                   💰{" "}
                   {p.valor != null
@@ -290,16 +282,16 @@ export default function KdsView() {
 
               <div className="mt-auto grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => abrirVisualizar(p.numero)}
-                  className="py-3 rounded-xl bg-amber-600 hover:bg-amber-700 font-bold"
+                  onClick={() => abrirVisualizar(p.numero ?? p.pedido_id)}
+                  className="py-2 text-sm rounded-lg bg-amber-500/80 hover:bg-amber-600/80 font-semibold transition-all"
                 >
-                  🟧 Visualizar
+                  Visualizar
                 </button>
                 <button
-                  onClick={() => avancarPedido(p.numero)}
-                  className="py-3 rounded-xl bg-green-600 hover:bg-green-700 font-bold"
+                  onClick={() => avancarPedido(p.numero ?? p.pedido_id)}
+                  className="py-2 text-sm rounded-lg bg-green-500/80 hover:bg-green-600/80 font-semibold transition-all"
                 >
-                  🟩 Avançar
+                  Avançar
                 </button>
               </div>
             </div>
@@ -307,7 +299,6 @@ export default function KdsView() {
         )}
       </div>
 
-      {/* Modal Visualizar */}
       <Modal
         open={openView}
         title={viewNumero ? `Pedido nº ${viewNumero}` : "Pedido"}
@@ -316,7 +307,7 @@ export default function KdsView() {
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={() => setOpenView(false)}
-              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700"
+              className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm"
             >
               Fechar
             </button>
@@ -326,7 +317,7 @@ export default function KdsView() {
                   setOpenView(false);
                   avancarPedido(viewNumero);
                 }}
-                className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 font-semibold"
+                className="px-4 py-2 rounded-lg bg-green-500/80 hover:bg-green-600/80 font-semibold text-sm"
               >
                 Avançar
               </button>
@@ -334,7 +325,6 @@ export default function KdsView() {
           </div>
         }
       >
-        {/* Lista de itens agrupada (pai + filhos) */}
         {gruposModal.length === 0 ? (
           <p className="text-gray-400">Sem itens para exibir.</p>
         ) : (
@@ -347,7 +337,11 @@ export default function KdsView() {
                 {pai ? (
                   <div className="mb-2">
                     <div className="text-yellow-300 font-bold text-lg">
-                      {(pai.categoria || "").toLowerCase().includes("pizza") ? "🍕 " : ""}
+                      {(pai.categoria || "")
+                        .toLowerCase()
+                        .includes("pizza")
+                        ? "🍕 "
+                        : ""}
                       {pai.nome || "Item"}{" "}
                       {pai.tamanho ? `(${pai.tamanho})` : ""}
                       {pai.quantidade > 1 ? ` • ${pai.quantidade} un.` : ""}
@@ -377,7 +371,6 @@ export default function KdsView() {
           </div>
         )}
 
-        {/* Total */}
         {viewData?.total != null ? (
           <div className="mt-4 text-right text-gray-200">
             💰 Total:{" "}
