@@ -1,292 +1,237 @@
- import React, { useEffect, useMemo, useState } from "react";
+ // src/pages/Dashboard.jsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PedidoCard from "../components/PedidoCard";
+import { useEmpresa } from "../context/EmpresaContext";
 
-/* 🎨 Cores do tema */
-const C = {
-  bg: "#0F121A",
-  panel: "#1B1E25",
-  panelBorder: "rgba(255,159,67,0.55)",
-  card: "#171c24",
-  cardBorder: "rgba(255,159,67,0.25)",
-  title: "#ff9f43",
-  text: "#e5e7eb",
-  textMuted: "#9ca3af",
-  btnDark: "#2a2f39",
-  btnDarkText: "#e5e7eb",
-  btnOrange: "#ff9f43",
-  btnOrangeText: "#1b1e25",
-};
-
-/* 🔧 Recupera dados da empresa */
-function getEmpresaSafe() {
-  try {
-    return JSON.parse(localStorage.getItem("empresa") || "{}");
-  } catch {
-    return {};
-  }
+function AvancarButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
+    >
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+      Avançar
+    </button>
+  );
 }
 
-/* Normaliza status */
-const norm = (s) =>
-  (s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-
 export default function Dashboard() {
-  const empresa = getEmpresaSafe();
-  const idEmpresa = empresa?.id_empresa;
   const [pedidos, setPedidos] = useState([]);
-  const [erro, setErro] = useState("");
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
-  const carregar = async () => {
-    if (!idEmpresa) {
-      setErro("Sem empresa no contexto. Faça login novamente.");
-      return;
-    }
+  let empresa = null;
+  let limparEmpresaSafe = () => {};
+  let carregado = false;
+
+  try {
+    const ctx = useEmpresa();
+    if (ctx?.empresa) empresa = ctx.empresa;
+    if (ctx?.limparEmpresa) limparEmpresaSafe = ctx.limparEmpresa;
+    if (ctx?.carregado) carregado = ctx.carregado;
+  } catch {}
+
+  const getIdEmpresaSafe = () => {
     try {
-      const resp = await fetch(
-        `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(
-          idEmpresa
-        )}`
-      );
-      const data = await resp.json();
-      setPedidos(Array.isArray(data) ? data : []);
-      setLastUpdated(new Date());
-      setErro("");
-    } catch (e) {
-      console.error(e);
-      setErro("Falha ao carregar pedidos.");
-    }
+      if (empresa?.id_empresa) return Number(empresa.id_empresa);
+      if (empresa?.idEmpresa) return Number(empresa.idEmpresa);
+      const direto = localStorage.getItem("id_empresa");
+      if (direto && !Number.isNaN(Number(direto))) return Number(direto);
+      const raw = localStorage.getItem("empresa");
+      if (raw) {
+        const obj = JSON.parse(raw);
+        const n = Number(obj?.id_empresa ?? obj?.idEmpresa);
+        if (!Number.isNaN(n)) return n;
+      }
+    } catch {}
+    return null;
   };
 
   useEffect(() => {
-    carregar();
-    const t = setInterval(carregar, 5000);
-    return () => clearInterval(t);
-  }, [idEmpresa]);
+    const fetchPedidos = async () => {
+      try {
+        if (!carregado) return;
+        const empresaId =
+          (empresa && empresa.id_empresa) ||
+          localStorage.getItem("id_empresa");
+        if (!empresaId) return;
 
-  const avancar = async (numero) => {
-    if (!idEmpresa) return;
-    const ok = window.confirm(`Avançar o pedido nº ${numero}?`);
-    if (!ok) return;
+        const response = await fetch(
+          `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${empresaId}`
+        );
+        const data = await response.json();
+        const lista = Array.isArray(data) ? data : [];
+        const pedidosAdaptados = lista.map((p) => ({
+          numero: p.numero ?? p.pedido_id,
+          status: (p.status ?? "").toString().toLowerCase() || "recebido",
+          nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
+          valor: Number(p.valor ?? 0),
+          data: p.data ?? p.create_at ?? new Date().toISOString(),
+        }));
+        setPedidos(pedidosAdaptados);
+      } catch (error) {
+        console.error("Erro ao buscar pedidos:", error);
+      }
+    };
+    fetchPedidos();
+  }, [empresa, carregado]);
+
+  const avancarPedido = async (numero) => {
+    const id_empresa = getIdEmpresaSafe();
+    if (!id_empresa) {
+      alert("Empresa não identificada. Abra o cardápio/logue novamente.");
+      return;
+    }
     try {
-      const resp = await fetch(
+      const response = await fetch(
         "https://webhook.lglducci.com.br/webhook/avancar",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ numero, id_empresa: idEmpresa }),
+          body: JSON.stringify({ numero, id_empresa }),
         }
       );
-      if (!resp.ok) throw new Error("Falha ao avançar pedido.");
-      setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
-    } catch (e) {
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {}
+      if (!response.ok) {
+        console.error("Falha ao avançar:", response.status, data);
+        alert("Falha ao avançar o pedido.");
+        return;
+      }
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao avançar pedido:", err);
       alert("Erro ao avançar pedido!");
     }
   };
 
-  /* Agrupa pedidos */
-  const grupos = useMemo(() => {
-    const r = [], pr = [], e = [], c = [];
-    for (const p of pedidos) {
-      const s = norm(p.status);
-      if (s === "recebido") r.push(p);
-      else if (s === "producao" || s === "em preparo") pr.push(p);
-      else if (s === "entrega" || s === "pronto") e.push(p);
-      else if (s === "concluido" || s === "concluído") c.push(p);
-    }
-    return { r, pr, e, c };
-  }, [pedidos]);
+  const handleSair = () => {
+    localStorage.removeItem("token");
+    limparEmpresaSafe();
+    navigate("/");
+  };
 
-  const Coluna = ({ titulo, items }) => (
-    <div
-      className="rounded-2xl p-4 md:p-5 border"
-      style={{ background: C.panel, borderColor: C.panelBorder }}
-    >
-      <div className="pb-3 mb-3 border-b" style={{ borderColor: C.panelBorder }}>
-        <h2 className="text-lg md:text-xl font-semibold" style={{ color: C.title }}>
-          {titulo}
-        </h2>
+  // Tema atualizado — marrom escuro suave
+  const colunas = [
+    { status: "recebido",  titulo: "Recebido",  cls: "bg-[#1f1a16] text-amber-300" },
+    { status: "producao",  titulo: "Produção",  cls: "bg-[#262018] text-amber-300" },
+    { status: "entrega",   titulo: "Entrega",   cls: "bg-[#2e251b] text-amber-300" },
+    { status: "concluido", titulo: "Concluído", cls: "bg-[#181410] text-amber-300" },
+  ];
+
+  if (!carregado) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black text-white">
+        <h2>Carregando informações da empresa...</h2>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0d0f12] via-[#13161b] to-[#1b1f25] text-white p-6">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-center mb-6 bg-[#13161b] shadow-lg rounded-xl p-4 border border-orange-500/50 relative z-40">
+        <h1 className="text-2xl font-bold text-orange-400">
+          Painel de {empresa?.nome || "Painel Minha Pizzaria"}
+        </h1>
+
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <button
+              onClick={() => setOpen((prev) => !prev)}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-lg font-semibold text-white transition-all"
+            >
+              ⚙️ Configurações
+            </button>
+
+            {open && (
+              <div
+                className="absolute right-0 mt-2 w-56 bg-[#1f242b] border border-orange-400/60 shadow-xl rounded-xl py-2 z-50"
+              >
+                {[
+                  ["🏢", "Dados da Empresa", "https://webhook.lglducci.com.br/webhook/config_empresa"],
+                  ["💬", "Mensagem Padrão", "https://webhook.lglducci.com.br/webhook/mensagem_padrao"],
+                  ["📈", "Relatórios", "/relatorios"],
+                  ["🍕", "Cardápio", "/cardapio"],
+                  ["✨", "Modelo de Custo", "/pizza-modelo"]
+                ].map(([icon, label, link], i) => (
+                  <button
+                    key={i}
+                    onClick={() =>
+                      link.startsWith("http")
+                        ? window.open(link, "_blank")
+                        : navigate(link)
+                    }
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-orange-600/20 flex items-center gap-2 transition-colors"
+                  >
+                    <span>{icon}</span> {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleSair}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition"
+          >
+            Sair
+          </button>
+        </div>
       </div>
 
-      {items.length === 0 ? (
-        <div className="text-sm" style={{ color: C.textMuted }}>
-          Nenhum pedido
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {items.map((p) => {
-            const numero = p.numero ?? p.pedido_id ?? "—";
-            return (
-              <div
-                key={numero}
-                className="rounded-xl p-3 md:p-4 border"
-                style={{
-                  background: C.card,
-                  borderColor: C.cardBorder,
-                  boxShadow: "0 0 10px rgba(255,159,67,0.10)",
-                }}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                     
-                      <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.localStorage.setItem("pedido_visualizar", numero);
-                      window.location.href = `/visualizar?numero=${numero}`;
-                    }}
-                    className="text-base md:text-lg font-semibold underline-offset-4 hover:underline transition-colors"
-                    style={{ color: C.title }}
-                    title={`Visualizar pedido nº ${numero}`}
-                  >
-                    nº {numero}
-                  </a>
-      
+      {/* Colunas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
+        {colunas.map((coluna) => (
+          <div
+            key={coluna.status}
+            className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
+          >
+            <h2 className="text-lg font-bold mb-3 pb-1 border-b border-amber-500/60">
+              {coluna.titulo}
+            </h2>
 
-
-
-                     
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-md"
-                        style={{
-                          background: C.btnDark,
-                          color: C.btnDarkText,
-                          opacity: 0.9,
-                        }}
-                      >
-                        {p.status}
-                      </span>
-                    </div>
-                    <div
-                      className="text-xs md:text-sm mt-1"
-                      style={{ color: C.textMuted }}
+            {pedidos
+              .filter((p) => p.status === coluna.status)
+              .map((p) => (
+                <div
+                  key={p.numero}
+                  className="bg-[#14181d] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/30 hover:border-amber-400/70 transition-all"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(
+                          `/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`
+                        );
+                      }}
+                      className="font-semibold hover:text-amber-300 underline underline-offset-2"
                     >
-                      {p.nome_cliente || p.cliente || "—"}
-                    </div>
+                      nº {p.numero}
+                    </button>
+
+                    <span className="text-amber-400 font-bold">
+                      R$ {p.valor.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
                   </div>
-                  <div
-                    className="text-sm font-semibold whitespace-nowrap"
-                    style={{ color: C.text }}
-                  >
-                    {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
+
+                  <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
+
+                  <div className="flex justify-end">
+                    <AvancarButton onClick={() => avancarPedido(p.numero)} />
                   </div>
                 </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => avancar(numero)}
-                    className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
-                    style={{ background: C.btnOrange, color: C.btnOrangeText }}
-                  >
-                    ▶ Avançar
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
-  /* === RENDER === */
-  return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: C.bg }}>
-      <div
-        className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
-        style={{ borderColor: C.panelBorder, background: C.panel }}
-      >
-        {/* Cabeçalho */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold" style={{ color: C.title }}>
-              Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
-            </h1>
-            <p className="text-xs md:text-sm" style={{ color: C.textMuted }}>
-              Atualizado {lastUpdated ? `às ${lastUpdated.toLocaleTimeString()}` : "…"}
-            </p>
+              ))}
           </div>
-
-          {/* Botões */}
-          <div className="flex items-center gap-2 relative">
-            <button
-              onClick={carregar}
-              className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
-              style={{ background: C.btnDark, color: C.btnDarkText }}
-            >
-              🔄 Atualizar
-            </button>
-
-            {/* Menu Configurações */}
-            <div className="relative group">
-              <button
-                className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold flex items-center gap-2 transition-all"
-                style={{
-                  background: C.btnOrange,
-                  color: C.btnOrangeText,
-                  boxShadow: "0 0 10px rgba(255,159,67,0.15)",
-                }}
-              >
-                ⚙️ Configurações
-              </button>
-
-              <div
-                className="absolute right-0 mt-2 w-56 rounded-xl overflow-hidden border backdrop-blur-md opacity-0 -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200"
-                style={{
-                  borderColor: C.panelBorder,
-                  background: "rgba(27,30,37,0.95)",
-                  boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
-                }}
-              >
-                <ul style={{ color: C.text }}>
-                  {[
-                    ["🏢", "Dados da Empresa", "/empresa"],
-                    ["💬", "Mensagem Padrão", "/mensagem"],
-                    ["📈", "Relatórios", "/relatorios"],
-                    ["🍕", "Cardápio", "/cardapio"],
-                    ["✨", "Modelo de Custo", "/modelo"],
-                  ].map(([icon, label, path], i) => (
-                    <li
-                      key={i}
-                      className="px-4 py-2.5 text-sm hover:bg-[#ff9f4315] cursor-pointer transition-colors"
-                      onClick={() => (window.location.href = path)}
-                    >
-                      <span className="mr-2">{icon}</span>
-                      {label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                localStorage.clear();
-                window.location.href = "/login";
-              }}
-              className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
-              style={{
-                background: "#ef4444",
-                color: "#fff",
-                boxShadow: "0 0 10px rgba(239,68,68,0.15)",
-              }}
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-
-        {/* Colunas */}
-        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Coluna titulo="Recebido" items={grupos.r} />
-          <Coluna titulo="Produção" items={grupos.pr} />
-          <Coluna titulo="Entrega" items={grupos.e} />
-          <Coluna titulo="Concluído" items={grupos.c} />
-        </div>
+        ))}
       </div>
     </div>
   );
