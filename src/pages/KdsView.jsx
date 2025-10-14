@@ -33,11 +33,13 @@ export default function KdsView() {
           )}`
         );
         const data = await resp.json();
+ 
+       const emProducao = (Array.isArray(data) ? data : []).filter((p) => {
+         const s = (p.status || "").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+         return ["producao", "em preparo", "emproducao"].includes(s);
+       });
 
-        // Filtra somente Produção / Em preparo (ajuste se quiser ver Recebidos)
-        const emProducao = (Array.isArray(data) ? data : []).filter(
-          (p) => p.status === "Produção" || p.status === "Em preparo"
-        );
+       
         setPedidos(emProducao);
         setErro("");
       } catch (err) {
