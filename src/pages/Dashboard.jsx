@@ -1,31 +1,27 @@
  import React, { useEffect, useMemo, useState } from "react";
 import ModalVisualizar from "./ModalVisualizar"; // <-- usa o modal que você já tem
-
-/* 🎨 Tema: 🍕 Clássico Pizzaria (quente e moderno) */
+ /* 🎨 Tema dark profissional */
 const THEME = {
-  // Fundo geral (gradiente suave)
-  bgFrom: "#18110e",
-  bgVia:  "#221a14",
-  bgTo:   "#2a2118",
-  // Cores estrutura
-  panelBg: "#13161b",               // cabeçalho
-  panelBorder: "#0F121A"  ,
+  bgFrom: "#0F121A",
+  bgVia:  "#13161B",
+  bgTo:   "#1B1E25",
+  panelBg: "#0F121A",
+  panelBorder: "rgba(255,159,67,0.55)",
   title: "#ff9f43",
   text: "#e5e7eb",
   textMuted: "#9ca3af",
-  // Botões
   btnDark: "#2a2f39",
   btnDarkText: "#e5e7eb",
   btnOrange: "#ff9f43",
   btnOrangeText: "#1b1e25",
-  // Cartões de pedido
-  cardBg: "#1c1612",
-  cardBorder: "rgba(211,124,63,0.30)", // laranja queimado sutil
+  cardBg: "#1B1E25",
+  cardBorder: "rgba(255,159,67,0.25)",
 };
+
 
 // Colunas (tons quentes suaves)
 const COLUNAS = [
-  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#000000] text-[#ffcf88]" },
+  { status: "recebido",  titulo: "Recebido",  cls: "bg-[#] text-[#ffcf88]" },
   { status: "producao",  titulo: "Produção",  cls: "bg-[#000000] text-[#ffcf88]" },
   { status: "entrega",   titulo: "Entrega",   cls: "bg-[#000000] text-[#ffcf88]" },
   { status: "concluido", titulo: "Concluído", cls: "bg-[#000000] text-[#ffcf88]" },
