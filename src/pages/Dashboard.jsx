@@ -201,93 +201,99 @@ export default function Dashboard() {
         className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
         style={{ borderColor: C.panelBorder, background: C.panel }}
       >
-      /* --- Header com menu profissional --- */
-<div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-  {/* título */}
-  <div>
-    <h1 className="text-xl md:text-2xl font-semibold" style={{ color: C.title }}>
-      Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
-    </h1>
-    <p className="text-xs md:text-sm" style={{ color: C.textMuted }}>
-      Atualizado {lastUpdated ? `às ${lastUpdated.toLocaleTimeString()}` : "…"}
-    </p>
-  </div>
+        {/* --- Header com menu profissional --- */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        {/* título */}
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold" style={{ color: C.title }}>
+            Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
+          </h1>
+          <p className="text-xs md:text-sm" style={{ color: C.textMuted }}>
+            Atualizado {lastUpdated ? `às ${lastUpdated.toLocaleTimeString()}` : "…"}
+          </p>
+        </div>
 
-  {/* botões à direita */}
-  <div className="flex items-center gap-2 relative">
-    {/* botão atualizar */}
-    <button
-      onClick={carregar}
-      className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
-      style={{ background: C.btnDark, color: C.btnDarkText }}
-      title="Atualizar pedidos"
-    >
-      🔄 Atualizar
-    </button>
+        {/* botões à direita */}
+        <div className="flex items-center gap-2 relative">
+          {/* botão atualizar */}
+          <button
+            onClick={carregar}
+            className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+            style={{ background: C.btnDark, color: C.btnDarkText }}
+            title="Atualizar pedidos"
+          >
+            🔄 Atualizar
+          </button>
 
-    {/* botão configurações */}
-    <div className="relative group">
-      <button
-        className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold flex items-center gap-2 transition-all"
-        style={{
-          background: C.btnOrange,
-          color: C.btnOrangeText,
-          boxShadow: "0 0 10px rgba(255,159,67,0.15)"
-        }}
-      >
-        ⚙️ Configurações
-      </button>
-
-      {/* dropdown */}
-      <div
-        className="absolute right-0 mt-2 w-56 rounded-xl overflow-hidden border backdrop-blur-md"
-        style={{
-          borderColor: C.panelBorder,
-          background: "rgba(27,30,37,0.95)",
-          boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
-          opacity: 0,
-          transform: "translateY(-5px)",
-          transition: "opacity 0.2s ease, transform 0.2s ease",
-        }}
-      >
-        <ul
-          className="group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
-          style={{ color: C.text }}
-        >
-          {[
-            ["🏢", "Dados da Empresa", "/empresa"],
-            ["💬", "Mensagem Padrão", "/mensagem"],
-            ["📈", "Relatórios", "/relatorios"],
-            ["🍕", "Cardápio", "/cardapio"],
-            ["✨", "Modelo de Custo", "/modelo"]
-          ].map(([icon, label, path], i) => (
-            <li
-              key={i}
-              className="px-4 py-2.5 text-sm hover:bg-[#ff9f4315] cursor-pointer transition-colors"
-              onClick={() => navigate(path)}
+          {/* botão configurações */}
+          <div className="relative group">
+            <button
+              className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold flex items-center gap-2 transition-all"
+              style={{
+                background: C.btnOrange,
+                color: C.btnOrangeText,
+                boxShadow: "0 0 10px rgba(255,159,67,0.15)",
+              }}
             >
-              <span className="mr-2">{icon}</span>
-              {label}
-            </li>
-          ))}
-        </ul>
+              ⚙️ Configurações
+            </button>
+
+            {/* dropdown */}
+            <div
+              className="absolute right-0 mt-2 w-56 rounded-xl overflow-hidden border backdrop-blur-md group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+              style={{
+                borderColor: C.panelBorder,
+                background: "rgba(27,30,37,0.95)",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+              }}
+            >
+              <ul style={{ color: C.text }}>
+                {[
+                  ["🏢", "Dados da Empresa", "/empresa"],
+                  ["💬", "Mensagem Padrão", "/mensagem"],
+                  ["📈", "Relatórios", "/relatorios"],
+                  ["🍕", "Cardápio", "/cardapio"],
+                  ["✨", "Modelo de Custo", "/modelo"],
+                ].map(([icon, label, path], i) => (
+                  <li
+                    key={i}
+                    className="px-4 py-2.5 text-sm hover:bg-[#ff9f4315] cursor-pointer transition-colors"
+                    onClick={() => (window.location.href = path)}
+                  >
+                    <span className="mr-2">{icon}</span>
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* botão sair */}
+          <button
+            onClick={() => {
+              localStorage.removeItem("empresa");
+              window.location.href = "/";
+            }}
+            className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
+            style={{
+              background: "#ef4444",
+              color: "#fff",
+              boxShadow: "0 0 10px rgba(239,68,68,0.15)",
+            }}
+          >
+            Sair
+          </button>
+        </div>
       </div>
-    </div>
 
-    {/* botão sair */}
-    <button
-      onClick={sair}
-      className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
-      style={{
-        background: "#ef4444",
-        color: "#fff",
-        boxShadow: "0 0 10px rgba(239,68,68,0.15)",
-      }}
-    >
-      Sair
-    </button>
-  </div>
-</div>
-
-  );
+      {/* colunas de pedidos */}
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Coluna titulo="Recebido" items={grupos.r} />
+        <Coluna titulo="Produção" items={grupos.pr} />
+        <Coluna titulo="Entrega" items={grupos.e} />
+        <Coluna titulo="Concluído" items={grupos.c} />
+      </div>
+    </div> {/* fecha container principal */}
+  </div>   {/* fecha página */}
+);
 }
