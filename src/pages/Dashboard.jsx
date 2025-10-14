@@ -22,7 +22,7 @@ const THEME = {
   cardBg: "#1c1612",
   cardBorder: "rgba(211,124,63,0.30)", // laranja queimado sutil
 };
-
+/*
 // Colunas (tons quentes suaves)
 const COLUNAS = [
   { status: "recebido",  titulo: "Recebido",  cls: "bg-[#2b1d14] text-[#ffcf88]" },
@@ -30,6 +30,15 @@ const COLUNAS = [
   { status: "entrega",   titulo: "Entrega",   cls: "bg-[#3a2818] text-[#ffcf88]" },
   { status: "concluido", titulo: "Concluído", cls: "bg-[#261a11] text-[#ffcf88]" },
 ];
+*/
+
+
+  const colunas = [
+    { status: "recebido",  titulo: "Recebido",  cls: "bg-[#1f1a16] text-amber-300" },
+    { status: "producao",  titulo: "Produção",  cls: "bg-[#262018] text-amber-300" },
+    { status: "entrega",   titulo: "Entrega",   cls: "bg-[#2e251b] text-amber-300" },
+    { status: "concluido", titulo: "Concluído", cls: "bg-[#181410] text-amber-300" },
+  ];
 
 /* util: empresa do localStorage */
 function getEmpresaSafe() {
