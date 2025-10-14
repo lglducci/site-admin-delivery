@@ -1,261 +1,245 @@
- // src/pages/Dashboard.jsx
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PedidoCard from "../components/PedidoCard"; // ok manter, mesmo sem uso
-import { useEmpresa } from "../context/EmpresaContext";
+ import React, { useEffect, useMemo, useState } from "react";
 
-function AvancarButton({ onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-3 py-1 rounded-lg shadow transition-all"
-    >
-      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-      Avançar
-    </button>
-  );
+/* cores do tema */
+const C = {
+  bg: "#0F121A",
+  panel: "#1B1E25",
+  panelBorder: "rgba(255,159,67,0.55)", // #ff9f43
+  card: "#171c24",
+  cardBorder: "rgba(255,159,67,0.25)",
+  title: "#ff9f43",
+  text: "#e5e7eb",
+  textMuted: "#9ca3af",
+  btnDark: "#2a2f39",
+  btnDarkText: "#e5e7eb",
+  btnOrange: "#ff9f43",
+  btnOrangeText: "#1b1e25",
+  btnGreen: "#22c55e",
+  btnGreenText: "#0b1118",
+};
+
+/* util: empresa do localStorage */
+function getEmpresaSafe() {
+  try {
+    return JSON.parse(localStorage.getItem("empresa") || "{}");
+  } catch {
+    return {};
+  }
 }
 
+/* normaliza status */
+const norm = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
 export default function Dashboard() {
+  const empresa = getEmpresaSafe();
+  const idEmpresa = empresa?.id_empresa;
+
   const [pedidos, setPedidos] = useState([]);
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Contexto seguro
-  let empresa = null;
-  let limparEmpresaSafe = () => {};
-  let carregado = false;
-
-  try {
-    const ctx = useEmpresa();
-    if (ctx?.empresa) empresa = ctx.empresa;
-    if (ctx?.limparEmpresa) limparEmpresaSafe = ctx.limparEmpresa;
-    if (ctx?.carregado) carregado = ctx.carregado;
-  } catch {
-    /* safe */
-  }
-
-  const getIdEmpresaSafe = () => {
+  const carregar = async () => {
+    if (!idEmpresa) {
+      setErro("Sem empresa no contexto. Faça login novamente.");
+      return;
+    }
+    setLoading(true);
     try {
-      if (empresa?.id_empresa) return Number(empresa.id_empresa);
-      if (empresa?.idEmpresa) return Number(empresa.idEmpresa);
-      const direto = localStorage.getItem("id_empresa");
-      if (direto && !Number.isNaN(Number(direto))) return Number(direto);
-      const raw = localStorage.getItem("empresa");
-      if (raw) {
-        const obj = JSON.parse(raw);
-        const n = Number(obj?.id_empresa ?? obj?.idEmpresa);
-        if (!Number.isNaN(n)) return n;
-      }
-    } catch {}
-    return null;
+      const resp = await fetch(
+        `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(
+          idEmpresa
+        )}`
+      );
+      const data = await resp.json();
+      setPedidos(Array.isArray(data) ? data : []);
+      setLastUpdated(new Date());
+      setErro("");
+    } catch (e) {
+      console.error(e);
+      setErro("Falha ao carregar pedidos.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        if (!carregado) return;
-        const empresaId =
-          (empresa && empresa.id_empresa) ||
-          localStorage.getItem("id_empresa");
-        if (!empresaId) return;
+    carregar();
+    const t = setInterval(carregar, 5000);
+    return () => clearInterval(t);
+  }, [idEmpresa]);
 
-        const response = await fetch(
-          `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${empresaId}`
-        );
-        const data = await response.json();
-        const lista = Array.isArray(data) ? data : [];
-        const pedidosAdaptados = lista.map((p) => ({
-          numero: p.numero ?? p.pedido_id,
-          status: (p.status ?? "").toString().toLowerCase() || "recebido",
-          nomeCliente: p.nomeCliente ?? p.nome ?? "Cliente",
-          valor: Number(p.valor ?? 0),
-          data: p.data ?? p.create_at ?? new Date().toISOString(),
-        }));
-        setPedidos(pedidosAdaptados);
-      } catch (error) {
-        console.error("Erro ao buscar pedidos:", error);
-      }
-    };
-    fetchPedidos();
-  }, [empresa, carregado]);
-
-  const avancarPedido = async (numero) => {
-    const id_empresa = getIdEmpresaSafe();
-    if (!id_empresa) {
-      alert("Empresa não identificada. Abra o cardápio/logue novamente.");
-      return;
-    }
+  const avancar = async (numero) => {
+    if (!idEmpresa) return;
+    const ok = window.confirm(`Avançar o pedido nº ${numero}?`);
+    if (!ok) return;
     try {
-      const response = await fetch(
-        "https://webhook.lglducci.com.br/webhook/avancar",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ numero, id_empresa }),
-        }
-      );
-      let data = null;
-      try {
-        data = await response.json();
-      } catch {}
-      if (!response.ok) {
-        console.error("Falha ao avançar:", response.status, data);
+      const resp = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numero, id_empresa: idEmpresa }),
+      });
+      if (!resp.ok) {
+        let d = null;
+        try {
+          d = await resp.json();
+        } catch {}
+        console.error("Falha ao avançar:", resp.status, d);
         alert("Falha ao avançar o pedido.");
         return;
       }
-      window.location.reload();
-    } catch (err) {
-      console.error("Erro ao avançar pedido:", err);
+      // tira da lista imediatamente
+      setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
+    } catch (e) {
+      console.error(e);
       alert("Erro ao avançar pedido!");
     }
   };
 
-  const handleSair = () => {
-    localStorage.removeItem("token");
-    limparEmpresaSafe();
-    navigate("/");
-  };
+  /* agrupamentos */
+  const grupos = useMemo(() => {
+    const r = [], pr = [], e = [], c = [];
+    for (const p of pedidos) {
+      const s = norm(p.status);
+      if (s === "recebido") r.push(p);
+      else if (s === "producao" || s === "em preparo") pr.push(p);
+      else if (s === "entrega" || s === "pronto") e.push(p);
+      else if (s === "concluido" || s === "concluído") c.push(p);
+    }
+    return { r, pr, e, c };
+  }, [pedidos]);
 
-  // Cores por coluna (marrom → mais escuro)
-  const colunas = [
-    { status: "recebido",  titulo: "Recebido",  cls: "bg-[#2b1f19] text-amber-300" },
-    { status: "producao",  titulo: "Produção",  cls: "bg-[#3a261c] text-amber-300" },
-    { status: "entrega",   titulo: "Entrega",   cls: "bg-[#4a2f20] text-amber-300" },
-    { status: "concluido", titulo: "Concluído", cls: "bg-[#1a1410] text-amber-300" },
-  ];
-
-  if (!carregado) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black text-white">
-        <h2>Carregando informações da empresa...</h2>
+  const Coluna = ({ titulo, items }) => (
+    <div
+      className="rounded-2xl p-4 md:p-5 border"
+      style={{ background: C.panel, borderColor: C.panelBorder }}
+    >
+      <div
+        className="pb-3 mb-3 border-b"
+        style={{ borderColor: C.panelBorder }}
+      >
+        <h2 className="text-lg md:text-xl font-semibold" style={{ color: C.title }}>
+          {titulo}
+        </h2>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white p-6">
-      {/* Cabeçalho */}
-      <div className="flex justify-between items-center mb-6 bg-gray-950 shadow-lg rounded-xl p-4 border border-orange-500">
-        <h1 className="text-2xl font-bold text-orange-400">
-          Painel de {empresa?.nome || "Painel Minha Pizzaria"}
-        </h1>
-
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <button
-              onClick={() => setOpen((prev) => !prev)}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-lg font-semibold text-white transition-all"
-            >
-              ⚙️ Configurações
-            </button>
-
-            {open && (
-              <div className="absolute right-0 mt-2 w-52 bg-gray-900 border border-orange-500 shadow-lg rounded-lg p-2 z-50">
-                <button
-                  onClick={() =>
-                    window.open(
-                      "https://webhook.lglducci.com.br/webhook/config_empresa",
-                      "_blank"
-                    )
-                  }
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
-                >
-                  🏢 Dados da Empresa
-                </button>
-
-                <button
-                  onClick={() =>
-                    window.open(
-                      "https://webhook.lglducci.com.br/webhook/mensagem_padrao",
-                      "_blank"
-                    )
-                  }
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
-                >
-                  💬 Mensagem Padrão
-                </button>
-
-                <button
-                  onClick={() => window.open("/relatorios", "_self")}
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
-                >
-                  📈 Relatórios
-                </button>
-
-                <button
-                  onClick={() => window.open("/cardapio", "_self")}
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
-                >
-                  🍕 Cardápio
-                </button>
-
-                <button
-                  onClick={() => window.open("/pizza-modelo", "_self")}
-                  className="w-full text-left px-3 py-2 hover:bg-orange-600 rounded transition"
-                >
-                  ✨ Modelo de Custo
-                </button>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={handleSair}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition"
-          >
-            Sair
-          </button>
+      {items.length === 0 ? (
+        <div className="text-sm" style={{ color: C.textMuted }}>
+          Nenhum pedido
         </div>
-      </div>
-
-      {/* Colunas de pedidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {colunas.map((coluna) => (
-          <div
-            key={coluna.status}
-            className={`rounded-2xl shadow-lg p-4 ring-1 ring-[#a25b2a]/40 ${coluna.cls}`}
-          >
-            <h2 className="text-lg font-bold mb-3 pb-1 border-b border-amber-500/60">
-              {coluna.titulo}
-            </h2>
-
-            {pedidos
-              .filter((p) => p.status === coluna.status)
-              .map((p) => (
-                <div
-                  key={p.numero}
-                  className="bg-[#1b1410] text-gray-100 p-3 rounded-xl shadow-md mb-3 border border-[#784421]/40 hover:border-amber-500 transition-all"
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(
-                          `/detalhes?numero=${p.numero}&id_empresa=${getIdEmpresaSafe()}`
-                        );
-                      }}
-                      className="font-semibold hover:text-amber-300 underline"
-                    >
-                      nº {p.numero}
-                    </button>
-
-                    <span className="text-amber-400 font-bold">
-                      R$ {p.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </span>
+      ) : (
+        <div className="space-y-3">
+          {items.map((p) => {
+            const numero = p.numero ?? p.pedido_id ?? "—";
+            return (
+              <div
+                key={numero}
+                className="rounded-xl p-3 md:p-4 border"
+                style={{
+                  background: C.card,
+                  borderColor: C.cardBorder,
+                  boxShadow: "0 0 10px rgba(255,159,67,0.10)",
+                }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href="#"
+                        className="text-base md:text-lg font-semibold"
+                        style={{ color: C.title }}
+                        onClick={(e) => e.preventDefault()}
+                        title={`Pedido nº ${numero}`}
+                      >
+                        nº {numero}
+                      </a>
+                      <span className="text-xs px-2 py-0.5 rounded-md"
+                        style={{
+                          background: C.btnDark,
+                          color: C.btnDarkText,
+                          opacity: 0.9,
+                        }}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                    <div className="text-xs md:text-sm mt-1" style={{ color: C.textMuted }}>
+                      {p.nome_cliente || p.cliente || "—"}
+                    </div>
                   </div>
 
-                  <p className="text-sm text-gray-300 mb-2">{p.nomeCliente}</p>
-
-                  <div className="flex justify-end">
-                    <AvancarButton onClick={() => avancarPedido(p.numero)} />
+                  <div className="text-sm font-semibold whitespace-nowrap" style={{ color: C.text }}>
+                    {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
                   </div>
                 </div>
-              ))}
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => avancar(numero)}
+                    className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
+                    style={{ background: C.btnOrange, color: C.btnOrangeText }}
+                  >
+                    ▶ Avançar
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen p-4 md:p-6" style={{ background: C.bg }}>
+      {/* container principal com borda laranja suave */}
+      <div
+        className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
+        style={{ borderColor: C.panelBorder, background: C.panel }}
+      >
+        {/* header */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl md:text-2xl font-semibold" style={{ color: C.title }}>
+              Painel de {empresa?.nome_empresa || "Minha Pizzaria"}
+            </h1>
+            <p className="text-xs md:text-sm" style={{ color: C.textMuted }}>
+              Atualizado {lastUpdated ? `às ${lastUpdated.toLocaleTimeString()}` : "…"}
+            </p>
           </div>
-        ))}
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={carregar}
+              className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+              style={{ background: C.btnDark, color: C.btnDarkText }}
+            >
+              🔄 Atualizar
+            </button>
+          </div>
+        </div>
+
+        {/* erro */}
+        {erro ? (
+          <div
+            className="mt-4 rounded-lg px-3 py-2 text-sm"
+            style={{ background: "#3b1f1f", color: "#fca5a5" }}
+          >
+            {erro}
+          </div>
+        ) : null}
+
+        {/* colunas */}
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Coluna titulo="Recebido" items={grupos.r} />
+          <Coluna titulo="Produção" items={grupos.pr} />
+          <Coluna titulo="Entrega" items={grupos.e} />
+          <Coluna titulo="Concluído" items={grupos.c} />
+        </div>
       </div>
     </div>
   );
