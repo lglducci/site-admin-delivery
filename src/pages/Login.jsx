@@ -1,53 +1,56 @@
-  import React, { useState } from "react";
+ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEmpresa } from "../context/EmpresaContext"; 
+import { useEmpresa } from "../context/EmpresaContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
   const { salvarEmpresa } = useEmpresa();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-   try {
-  const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+    try {
+      const response = await fetch("https://webhook.lglducci.com.br/webhook/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-  const data = await response.json();
-  console.log("🔐 Resposta do login:", data);
+      const data = await response.json();
+      console.log("🔐 Resposta do login:", data);
 
-  // 🔸 valida se veio o id_empresa
-  if (data?.id_empresa) {
-    const empresaData = {
-      id_empresa: data.id_empresa,
-      nome_empresa: data.nome_empresa,
-      saudacao: data.saudacao,
-    };
+      // ✅ valida retorno mínimo
+      if (data?.id_empresa) {
+        const empresaData = {
+          id_empresa: data.id_empresa,
+          nome_empresa: data.nome_empresa,
+          saudacao: data.saudacao,
+        };
 
-    salvarEmpresa(empresaData);
-    localStorage.setItem("empresa", JSON.stringify(empresaData));
-    localStorage.setItem("user_id", data.user_id);
-    localStorage.setItem("email", data.email);
+        // ✅ normaliza tipo_admin com fallback seguro
+        const tipo = (data?.tipo_admin ?? "admin").toString().toLowerCase().trim();
 
-    // 🔸 redireciona conforme tipo_admin
-    if (data.tipo_admin === "cozinha") {
-      navigate("/kds");
-    } else {
-      navigate("/dashboard");
+        salvarEmpresa(empresaData);
+        localStorage.setItem("empresa", JSON.stringify(empresaData));
+        localStorage.setItem("user_id", data.user_id ?? "");
+        localStorage.setItem("email", data.email ?? "");
+        localStorage.setItem("tipo_admin", tipo);
+
+        // ✅ redirecionamento por perfil
+        if (tipo === "cozinha") {
+          navigate("/kds");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        alert("Usuário inválido ou empresa não encontrada.");
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      alert("Erro ao conectar com o servidor.");
     }
-  } else {
-    alert("Usuário inválido ou empresa não encontrada.");
-  }
-} catch (error) {
-  console.error("Erro no login:", error);
-  alert("Erro ao conectar com o servidor.");
-}
   };
 
   return (
