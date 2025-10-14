@@ -9,7 +9,7 @@ const THEME = {
   bgTo:   "#2a2118",
   // Cores estrutura
   panelBg: "#13161b",               // cabeçalho
-  panelBorder: "#0F121A"  
+  panelBorder: "#0F121A"  ,
   title: "#ff9f43",
   text: "#e5e7eb",
   textMuted: "#9ca3af",
