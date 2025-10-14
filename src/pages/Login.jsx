@@ -36,7 +36,19 @@ export default function Login() {
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("email", data.email);
 
-        navigate("/dashboard");
+         
+      // 🔸 NOVO: redirecionamento conforme tipo_admin
+            if (data.tipo_admin === "cozinha") {
+              navigate("/kds");
+            } else {
+              navigate("/dashboard");
+            }
+          } else {
+            alert("Usuário inválido ou empresa não encontrada.");
+          }
+
+
+       
       } else {
         alert("Usuário inválido ou empresa não encontrada.");
       }
