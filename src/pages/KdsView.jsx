@@ -1,4 +1,5 @@
  import React, { useEffect, useMemo, useState } from "react";
+import ModalVisualizar from "./ModalVisualizar";
 
 function getEmpresaSafe() {
   try {
@@ -6,32 +7,6 @@ function getEmpresaSafe() {
   } catch {
     return {};
   }
-}
-
-function Modal({ open, title, onClose, children, footer }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl">
-        <div className="px-5 py-4 border-b border-zinc-700 flex items-center justify-between">
-          <h3 className="text-xl font-bold text-yellow-400">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-sm px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700"
-          >
-            Fechar
-          </button>
-        </div>
-        <div className="p-5 overflow-auto max-h-[65vh]">{children}</div>
-        {footer ? (
-          <div className="px-5 py-4 border-t border-zinc-700 bg-zinc-950">
-            {footer}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
 }
 
 export default function KdsView() {
@@ -43,9 +18,9 @@ export default function KdsView() {
   const [erro, setErro] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
+  // modal
   const [openView, setOpenView] = useState(false);
   const [viewNumero, setViewNumero] = useState(null);
-  const [viewData, setViewData] = useState({ items: [], total: null });
 
   const normalizaStatus = (s) =>
     (s || "")
@@ -124,7 +99,8 @@ export default function KdsView() {
         alert("Falha ao avançar o pedido.");
         return;
       }
-      setPedidos((prev) => prev.filter((p) => p.numero !== numero));
+      // remove da UI após avançar
+      setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
     } catch (e) {
       console.error(e);
       alert("Erro ao avançar pedido!");
@@ -158,228 +134,132 @@ export default function KdsView() {
     }
   };
 
-  const abrirVisualizar = async (numero) => {
-    if (!idEmpresa) return;
+  const abrirVisualizar = (numero) => {
     setViewNumero(numero);
     setOpenView(true);
-    setViewData({ items: [], total: null });
-
-    try {
-      const url = `https://webhook.lglducci.com.br/webhook/visualizarcozinha?numero=${encodeURIComponent(
-        numero
-      )}&id_empresa=${encodeURIComponent(idEmpresa)}`;
-      const resp = await fetch(url);
-      const data = await resp.json();
-      if (Array.isArray(data)) {
-        setViewData({ items: data, total: null });
-      } else {
-        setViewData({
-          items: Array.isArray(data?.items) ? data.items : [],
-          total: data?.total ?? null,
-        });
-      }
-    } catch (e) {
-      console.error("Erro ao visualizar pedido:", e);
-    }
   };
 
-  const gruposModal = useMemo(() => {
-    const items = viewData.items || [];
-    const pais = [];
-    const filhos = [];
-    for (const it of items) {
-      if (it?.numero_pai || it?.nome_pai) filhos.push(it);
-      else pais.push(it);
-    }
-    const mapa = new Map();
-    for (const p of pais) {
-      mapa.set(p.numero, { pai: p, filhos: [] });
-    }
-    for (const f of filhos) {
-      const key = f.numero_pai ?? f.pai_numero ?? -9999;
-      if (!mapa.has(key)) mapa.set(key, { pai: null, filhos: [] });
-      mapa.get(key).filhos.push(f);
-    }
-    return Array.from(mapa.values());
-  }, [viewData]);
+  const tituloCor = { color: "#ff9f43" };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl">🍳</div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-yellow-400">
-              KDS - Cozinha
-            </h1>
-            <p className="text-sm text-gray-400">
-              Empresa: {empresa?.nome_empresa || "—"} (ID {idEmpresa || "—"}) •{" "}
-              {lastUpdated
-                ? `Atualizado às ${lastUpdated.toLocaleTimeString()}`
-                : "Carregando..."}
-            </p>
+    <div className="min-h-screen p-4" style={{ backgroundColor: "#111827" }}>
+      {/* container com borda alaranjada leve */}
+      <div
+        className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
+        style={{ borderColor: "rgba(255,159,67,0.6)", backgroundColor: "#1b1e25" }}
+      >
+        {/* cabeçalho */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">🍳</div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-semibold" style={tituloCor}>
+                KDS - Cozinha
+              </h1>
+              <p className="text-xs md:text-sm text-gray-300">
+                Empresa: {empresa?.nome_empresa || "—"} (ID {idEmpresa || "—"}) •{" "}
+                {lastUpdated
+                  ? `Atualizado às ${lastUpdated.toLocaleTimeString()}`
+                  : "Carregando..."}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={requisitarTodos}
+              className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+              style={{ backgroundColor: "#ff9f43", color: "#1b1e25" }}
+              title="Enviar todos os 'Recebidos' para Produção"
+            >
+              ⚡ Requisitar pedidos recebidos
+            </button>
+            <button
+              onClick={carregarPedidos}
+              className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+              style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
+              title="Atualizar"
+            >
+              🔄 Atualizar
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={requisitarTodos}
-            className="px-4 py-2 rounded-lg bg-orange-500/80 hover:bg-orange-600/80 font-semibold text-sm transition-all"
-          >
-            ⚡ Requisitar pedidos recebidos
-          </button>
-          <button
-            onClick={carregarPedidos}
-            className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 font-semibold text-sm"
-          >
-            🔄 Atualizar
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-4">
-        {erro && (
-          <div className="mb-3 rounded-xl bg-red-900/60 text-red-200 px-4 py-2">
+        {/* mensagens */}
+        {erro ? (
+          <div className="mt-4 rounded-lg px-3 py-2 text-sm"
+               style={{ backgroundColor: "#3b1f1f", color: "#fca5a5" }}>
             {erro}
           </div>
-        )}
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {pedidos.length === 0 ? (
-          <p className="text-center text-gray-400 col-span-full">
-            {loading ? "Carregando pedidos..." : "Nenhum pedido em preparo 🍕"}
-          </p>
-        ) : (
-          pedidos.map((p) => (
-            <div
-              key={p.numero ?? p.pedido_id}
-              className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 shadow-md hover:shadow-lg transition-all"
-            >
-              <div className="mb-3">
-                <h2 className="text-2xl font-extrabold text-yellow-400">
-                  Pedido nº {p.numero ?? p.pedido_id ?? "—"}
-                </h2>
-                <div className="text-sm text-gray-400 mt-1">
-                  {(() => {
-                    const s = normalizaStatus(p.status);
-                    if (s === "recebido") return "🟧 Recebido";
-                    if (s === "producao" || s === "em preparo")
-                      return "🟦 Em preparo";
-                    return p.status || "—";
-                  })()}
-                </div>
-                <div className="text-base text-gray-300 mt-2">
-                  {resumoItens(p)}
-                </div>
-                <div className="text-sm text-gray-400 mt-1">
-                  💰{" "}
-                  {p.valor != null
-                    ? `R$ ${Number(p.valor).toFixed(2)}`
-                    : "—"}
-                </div>
-              </div>
-
-              <div className="mt-auto grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => abrirVisualizar(p.numero ?? p.pedido_id)}
-                  className="py-2 text-sm rounded-lg bg-amber-500/80 hover:bg-amber-600/80 font-semibold transition-all"
-                >
-                  Visualizar
-                </button>
-                <button
-                  onClick={() => avancarPedido(p.numero ?? p.pedido_id)}
-                  className="py-2 text-sm rounded-lg bg-green-500/80 hover:bg-green-600/80 font-semibold transition-all"
-                >
-                  Avançar
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <Modal
-        open={openView}
-        title={viewNumero ? `Pedido nº ${viewNumero}` : "Pedido"}
-        onClose={() => setOpenView(false)}
-        footer={
-          <div className="flex items-center justify-end gap-2">
-            <button
-              onClick={() => setOpenView(false)}
-              className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm"
-            >
-              Fechar
-            </button>
-            {viewNumero ? (
-              <button
-                onClick={() => {
-                  setOpenView(false);
-                  avancarPedido(viewNumero);
-                }}
-                className="px-4 py-2 rounded-lg bg-green-500/80 hover:bg-green-600/80 font-semibold text-sm"
-              >
-                Avançar
-              </button>
-            ) : null}
-          </div>
-        }
-      >
-        {gruposModal.length === 0 ? (
-          <p className="text-gray-400">Sem itens para exibir.</p>
-        ) : (
-          <div className="space-y-4">
-            {gruposModal.map(({ pai, filhos }, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-zinc-700 bg-zinc-950 p-3"
-              >
-                {pai ? (
-                  <div className="mb-2">
-                    <div className="text-yellow-300 font-bold text-lg">
-                      {(pai.categoria || "")
-                        .toLowerCase()
-                        .includes("pizza")
-                        ? "🍕 "
-                        : ""}
-                      {pai.nome || "Item"}{" "}
-                      {pai.tamanho ? `(${pai.tamanho})` : ""}
-                      {pai.quantidade > 1 ? ` • ${pai.quantidade} un.` : ""}
-                    </div>
-                    {pai.observacao ? (
-                      <div className="text-sm text-gray-400 mt-1">
-                        {pai.observacao}
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {filhos?.length ? (
-                  <div className="space-y-1">
-                    {filhos.map((f, i) => (
-                      <div key={i} className="text-gray-300 text-sm">
-                        • {f.categoria ? `[${f.categoria}] ` : ""}
-                        {f.nome}
-                        {f.tamanho ? ` (${f.tamanho})` : ""}
-                        {f.quantidade > 1 ? ` • ${f.quantidade} un.` : ""}
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {viewData?.total != null ? (
-          <div className="mt-4 text-right text-gray-200">
-            💰 Total:{" "}
-            <span className="font-bold">
-              R$ {Number(viewData.total).toFixed(2)}
-            </span>
-          </div>
         ) : null}
-      </Modal>
+
+        {/* grid de pedidos */}
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {pedidos.length === 0 ? (
+            <p className="text-center text-gray-300 col-span-full">
+              {loading ? "Carregando pedidos..." : "Nenhum pedido em preparo 🍕"}
+            </p>
+          ) : (
+            pedidos.map((p) => {
+              const numero = p.numero ?? p.pedido_id ?? "—";
+              const s = normalizaStatus(p.status);
+              const statusText =
+                s === "recebido" ? "🟠 Recebido" :
+                s === "producao" || s === "em preparo" ? "🔵 Em preparo" :
+                p.status || "—";
+
+              return (
+                <div
+                  key={numero}
+                  className="rounded-xl p-4 border transition-shadow"
+                  style={{
+                    backgroundColor: "#151a23",
+                    borderColor: "rgba(255,159,67,0.2)",
+                    boxShadow: "0 0 10px rgba(255,159,67,0.10)",
+                  }}
+                >
+                  <div className="mb-2">
+                    <h2 className="text-lg font-semibold" style={tituloCor}>
+                      Pedido nº {numero}
+                    </h2>
+                    <div className="text-xs text-gray-300 mt-0.5">{statusText}</div>
+                  </div>
+
+                  <div className="text-sm text-gray-200 mt-2">{resumoItens(p)}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    💰 {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => abrirVisualizar(numero)}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+                      style={{ backgroundColor: "#ff9f43", color: "#1b1e25" }}
+                    >
+                      Visualizar
+                    </button>
+                    <button
+                      onClick={() => avancarPedido(numero)}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+                      style={{ backgroundColor: "#22c55e", color: "#0b1118" }}
+                    >
+                      Avançar
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* modal */}
+      <ModalVisualizar
+        open={openView}
+        onClose={() => setOpenView(false)}
+        numero={viewNumero}
+        idEmpresa={idEmpresa}
+      />
     </div>
   );
 }
