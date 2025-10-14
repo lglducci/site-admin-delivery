@@ -131,12 +131,25 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span
-                        className="text-base md:text-lg font-semibold"
-                        style={{ color: C.title }}
-                      >
-                        nº {numero}
-                      </span>
+                     
+                      <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.localStorage.setItem("pedido_visualizar", numero);
+                      window.location.href = `/visualizar?numero=${numero}`;
+                    }}
+                    className="text-base md:text-lg font-semibold underline-offset-4 hover:underline transition-colors"
+                    style={{ color: C.title }}
+                    title={`Visualizar pedido nº ${numero}`}
+                  >
+                    nº {numero}
+                  </a>
+      
+
+
+
+                     
                       <span
                         className="text-xs px-2 py-0.5 rounded-md"
                         style={{
