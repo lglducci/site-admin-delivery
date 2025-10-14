@@ -106,7 +106,18 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                               </span>
                             </>
                           ) : null}
+
+                          {it.descricao ? (
+                            <div className="mt-1 text-sm text-gray-400 leading-snug">
+                              {it.descricao}
+                            </div>
+                          ) : null}
                         </div>
+                         
+
+
+
+                        
                         {/* se houver relação pai/filho, mostra discretamente */}
                         {it.numero_pai || it.nome_pai ? (
                           <div className="mt-1 text-xs text-gray-400">
