@@ -1,4 +1,8 @@
  import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+
+
 
 function parseMoneyFromResumo(resumo, label) {
   if (!resumo) return null;
@@ -107,14 +111,24 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
   const entrega = entregaFromResumo ?? 0;
   const total = totalFromResumo ?? (subtotal + entrega);
+      const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Pedido-${numero}`,
+  });
 
+ 
   if (!open) return null;
 
+ 
+
+ 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div
-        className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40 print-fullpage"
-      >
+   <div
+   ref={printRef}
+    className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40 print-fullpage"
+
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl"
@@ -223,7 +237,11 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
         <div className="mt-6 text-right flex gap-2 justify-end">
           <button
-            onClick={() => window.print()}
+
+           
+            
+            onClick={handlePrint}
+           
             className="bg-[#2a2f39] text-gray-100 font-semibold px-4 py-2 rounded-md hover:bg-[#3a3f49] transition"
           >
             🖨️ Imprimir
