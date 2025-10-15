@@ -67,8 +67,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    carregar();
-    const t = setInterval(carregar, 300000);
+    carregar();                       
+    const t = setInterval(carregar, 200000);
     return () => clearInterval(t);
   }, [idEmpresa]);
 
