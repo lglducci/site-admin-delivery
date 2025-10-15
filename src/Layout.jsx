@@ -1,4 +1,4 @@
-// src/Layout.jsx
+ // src/Layout.jsx
 import { Link, Outlet } from "react-router-dom"; // ou use Next.js com <Link>
 
 export default function Layout() {
