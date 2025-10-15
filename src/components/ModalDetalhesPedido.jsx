@@ -1,8 +1,5 @@
- import React, { useEffect, useMemo, useState } from "react";
- 
+ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-
-
 
 function parseMoneyFromResumo(resumo, label) {
   if (!resumo) return null;
@@ -26,40 +23,26 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   const [data, setData] = useState(null);
   const [erro, setErro] = useState("");
 
-  // --- CSS global de impressão (sem cortar o modal) ---
-  const printStyle = `
-    @page {
-      size: A4 portrait;
-      margin: 12mm;
-    }
+  // 🔹 REFERÊNCIA PARA IMPRESSÃO
+  const printRef = useRef();
 
-    @media print {
-      .fixed, .absolute { position: static !important; }
-      .bg-black, .bg-black\\/70, .bg-black\\/60 { background: #fff !important; }
-      .print-fullpage {
-        width: 100% !important;
-        max-width: none !important;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        box-shadow: none !important;
-        border: none !important;
-        background: #fff !important;
-        color: #000 !important;
-      }
-      .print-fullpage * { break-inside: avoid-page; page-break-inside: avoid; }
-      .print-fullpage table { border-collapse: collapse !important; }
-      .print-fullpage table th, 
-      .print-fullpage table td {
-        border: 1px solid #ccc !important;
-        color: #000 !important;
-      }
-      .print-fullpage button { display: none !important; }
-      .resumo-bruto { display: block !important; visibility: visible !important; }
-    }
-  `;
+  // 🔹 Função de impressão isolada para imprimir SOMENTE o conteúdo do modal
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Pedido-${numero}`,
+  });
 
+  // 🔹 CSS global de impressão
   useEffect(() => {
+    const printStyle = `
+      @page { size: A4 portrait; margin: 12mm; }
+      @media print {
+        body * { visibility: hidden; }
+        .print-area, .print-area * { visibility: visible; }
+        .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+        button { display: none !important; }
+      }
+    `;
     const styleTag = document.createElement("style");
     styleTag.innerHTML = printStyle;
     document.head.appendChild(styleTag);
@@ -111,27 +94,16 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
   const entrega = entregaFromResumo ?? 0;
   const total = totalFromResumo ?? (subtotal + entrega);
-      const printRef = useRef();
-  
 
- 
   if (!open) return null;
 
- const printRef = useRef();
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `Pedido-${numero}`,
-  });
-
- 
- 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-   <div
-   ref={printRef}
-    <div
-    className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40 print-fullpage"
-
+      {/* 🔹 SOMENTE ESSA DIV SERÁ IMPRESSA */}
+      <div
+        ref={printRef}
+        className="print-area bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40"
+      >
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl"
@@ -156,7 +128,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           />
         ) : (
           <>
-            {/* Cliente + Endereço */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
                 <div className="text-xs text-gray-400">Cliente</div>
@@ -226,9 +197,9 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
               </div>
             </div>
 
-            {/* Resumo bruto sempre impresso */}
+            {/* Resumo bruto */}
             {data?.resumo && (
-              <div className="mt-4 resumo-bruto">
+              <div className="mt-4">
                 <h4 className="text-sm text-gray-400 mb-1">Resumo bruto:</h4>
                 <pre className="p-3 bg-[#0F121A] rounded-lg text-xs whitespace-pre-wrap text-gray-300">
                   {data.resumo}
@@ -238,13 +209,10 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           </>
         )}
 
+        {/* Botões */}
         <div className="mt-6 text-right flex gap-2 justify-end">
           <button
-
-           
-            
             onClick={handlePrint}
-           
             className="bg-[#2a2f39] text-gray-100 font-semibold px-4 py-2 rounded-md hover:bg-[#3a3f49] transition"
           >
             🖨️ Imprimir
