@@ -24,7 +24,9 @@ function parseMoneyFromResumo(resumo, label) {
   const re = new RegExp(`${label}\\s*:\\s*R\\$\\s*([0-9]+[\\.,]?[0-9]{0,2})`, "i");
   const m = resumo.match(re);
   if (!m) return null;
-  const raw = m[1].replace(".", "").replace(",", ".");
+ 
+  const raw = m[1].replace(",", ".");
+ 
   const num = Number(raw);
   return Number.isFinite(num) ? num : null;
 }
