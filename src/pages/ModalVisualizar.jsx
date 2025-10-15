@@ -71,14 +71,68 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
 
   if (!open) return null;
 
+     // --- CSS global de impressão (sem cortar o modal) ---
+  const printStyle = `
+    @page {
+      size: A4 portrait;
+      margin: 12mm;
+    }
+    @media print {
+      .fixed, .absolute { position: static !important; }
+      .modal-backdrop, .bg-black\\\/60 { display:none !important; }
+
+      .print-fullpage {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .print-fullpage * { break-inside: avoid-page; }
+      .print-fullpage li { page-break-inside: avoid; }
+
+      .print-fullpage .overflow-auto,
+      .print-fullpage .max-h-\\[68vh\\] {
+        overflow: visible !important;
+        max-height: none !important;
+      }
+
+      .print-fullpage [style*="background-color: #1b1e25"],
+      .print-fullpage [style*="background-color: #151a23"],
+      .print-fullpage [style*="background-color: #2a2f39"] {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .print-fullpage button { display: none !important; }
+      .resumo-bruto { display: block !important; visibility: visible !important; }
+    }
+  `;
+        // injeta estilo no DOM ao renderizar
+  useEffect(() => {
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = printStyle;
+    document.head.appendChild(styleTag);
+    return () => styleTag.remove();
+  }, []);
+
+
+ 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* backdrop */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
-      {/* container */}
-      <div
-        className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
+      {/* container  */}
+
+ <div
+   className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
+   
+       
         style={{ backgroundColor: "#1b1e25", boxShadow: "0 0 24px rgba(0,0,0,0.5)" }}
       >
         {/* header */}
