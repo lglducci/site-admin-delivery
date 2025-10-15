@@ -72,7 +72,7 @@ export default function KdsView() {
 
   useEffect(() => {
     carregarPedidos();
-    const t = setInterval(carregarPedidos, 5000);
+    const t = setInterval(carregarPedidos, 500000);
     return () => clearInterval(t);
   }, [idEmpresa]);
 
