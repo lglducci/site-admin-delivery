@@ -12,74 +12,16 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Carrega itens quando abrir
-  useEffect(() => {
-    if (!open || !numero || !idEmpresa) return;
-
-    const fetchItens = async () => {
-      setLoading(true);
-      try {
-        const url = `https://webhook.lglducci.com.br/webhook/visualizarcozinha?numero=${encodeURIComponent(
-          numero
-        )}&id_empresa=${encodeURIComponent(idEmpresa)}`;
-        const resp = await fetch(url);
-        const data = await resp.json();
-        // webhook retorna um array de itens
-        setItens(Array.isArray(data) ? data : []);
-      } catch (e) {
-        console.error("Erro ao carregar itens do pedido:", e);
-        setItens([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItens();
-  }, [open, numero, idEmpresa]);
-
-  // --- Resumo por categoria + total (sem alterar SQL/n8n) ---
-  const resumo = useMemo(() => {
-    const acc = { pizza: 0, borda: 0, esfirra: 0, bebida: 0, outros: 0, total: 0 };
-
-    for (const it of itens) {
-      const cat = String(it?.categoria || "").toLowerCase();
-      const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
-
-      if (cat.includes("pizza")) acc.pizza += qtd;
-      else if (cat.includes("borda")) acc.borda += qtd;
-      else if (cat.includes("esfirra")) acc.esfirra += qtd;
-      else if (cat.includes("bebida")) acc.bebida += qtd;
-      else acc.outros += qtd;
-
-      acc.total += qtd;
-    }
-    return acc;
-  }, [itens]);
-
-  // string amigável do resumo (mostra só categorias com qtd > 0)
-  const resumoTexto = useMemo(() => {
-    const partes = [];
-    if (resumo.pizza > 0) partes.push(`🍕 ${resumo.pizza} ${resumo.pizza === 1 ? "pizza" : "pizzas"}`);
-    if (resumo.borda > 0) partes.push(`🧀 ${resumo.borda} ${resumo.borda === 1 ? "borda" : "bordas"}`);
-    if (resumo.esfirra > 0) partes.push(`🫓 ${resumo.esfirra} ${resumo.esfirra === 1 ? "esfirra" : "esfirras"}`);
-    if (resumo.bebida > 0) partes.push(`🥤 ${resumo.bebida} ${resumo.bebida === 1 ? "bebida" : "bebidas"}`);
-    if (resumo.outros > 0) partes.push(`📦 ${resumo.outros} ${resumo.outros === 1 ? "outro item" : "outros itens"}`);
-
-    const base = partes.join(" • ");
-    return resumo.total > 0 ? `${base}${base ? " — " : ""}Total: ${resumo.total} ${resumo.total === 1 ? "item" : "itens"}` : "";
-  }, [resumo]);
-
-  if (!open) return null;
-
-     // --- CSS global de impressão (sem cortar o modal) ---
+  // --- CSS global de impressão (somente ao imprimir) ---
   const printStyle = `
     @page {
       size: A4 portrait;
       margin: 12mm;
     }
+
     @media print {
       .fixed, .absolute { position: static !important; }
-      .modal-backdrop, .bg-black\\\/60 { display:none !important; }
+      .modal-backdrop, .bg-black\\/60 { display:none !important; }
 
       .print-fullpage {
         width: 100% !important;
@@ -92,6 +34,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         background: #fff !important;
         color: #000 !important;
       }
+
       .print-fullpage * { break-inside: avoid-page; }
       .print-fullpage li { page-break-inside: avoid; }
 
@@ -112,7 +55,8 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       .resumo-bruto { display: block !important; visibility: visible !important; }
     }
   `;
-        // injeta estilo no DOM ao renderizar
+
+  // injeta estilo no DOM uma única vez
   useEffect(() => {
     const styleTag = document.createElement("style");
     styleTag.innerHTML = printStyle;
@@ -120,19 +64,74 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
     return () => styleTag.remove();
   }, []);
 
+  // --- Resumo por categoria + total (sem alterar SQL/n8n) ---
+  const resumo = useMemo(() => {
+    const acc = { pizza: 0, borda: 0, esfirra: 0, bebida: 0, outros: 0, total: 0 };
 
- 
+    for (const it of itens) {
+      const cat = String(it?.categoria || "").toLowerCase();
+      const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
+
+      if (cat.includes("pizza")) acc.pizza += qtd;
+      else if (cat.includes("borda")) acc.borda += qtd;
+      else if (cat.includes("esfirra")) acc.esfirra += qtd;
+      else if (cat.includes("bebida")) acc.bebida += qtd;
+      else acc.outros += qtd;
+
+      acc.total += qtd;
+    }
+    return acc;
+  }, [itens]);
+
+  // string amigável do resumo
+  const resumoTexto = useMemo(() => {
+    const partes = [];
+    if (resumo.pizza > 0) partes.push(`🍕 ${resumo.pizza} ${resumo.pizza === 1 ? "pizza" : "pizzas"}`);
+    if (resumo.borda > 0) partes.push(`🧀 ${resumo.borda} ${resumo.borda === 1 ? "borda" : "bordas"}`);
+    if (resumo.esfirra > 0) partes.push(`🫓 ${resumo.esfirra} ${resumo.esfirra === 1 ? "esfirra" : "esfirras"}`);
+    if (resumo.bebida > 0) partes.push(`🥤 ${resumo.bebida} ${resumo.bebida === 1 ? "bebida" : "bebidas"}`);
+    if (resumo.outros > 0) partes.push(`📦 ${resumo.outros} ${resumo.outros === 1 ? "outro item" : "outros itens"}`);
+
+    const base = partes.join(" • ");
+    return resumo.total > 0
+      ? `${base}${base ? " — " : ""}Total: ${resumo.total} ${resumo.total === 1 ? "item" : "itens"}`
+      : "";
+  }, [resumo]);
+
+  // Carrega itens quando abrir
+  useEffect(() => {
+    if (!open || !numero || !idEmpresa) return;
+
+    const fetchItens = async () => {
+      setLoading(true);
+      try {
+        const url = `https://webhook.lglducci.com.br/webhook/visualizarcozinha?numero=${encodeURIComponent(
+          numero
+        )}&id_empresa=${encodeURIComponent(idEmpresa)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        setItens(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("Erro ao carregar itens do pedido:", e);
+        setItens([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItens();
+  }, [open, numero, idEmpresa]);
+
+  if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* backdrop */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
-      {/* container  */}
-
- <div
-   className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
-   
-       
+      {/* container */}
+      <div
+        className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
         style={{ backgroundColor: "#1b1e25", boxShadow: "0 0 24px rgba(0,0,0,0.5)" }}
       >
         {/* header */}
@@ -141,18 +140,27 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             <h3 className="text-base md:text-lg font-semibold" style={{ color: "#ff9f43" }}>
               Detalhes do Pedido nº {numero}
             </h3>
-            <button
-              onClick={onClose}
-              className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
-              style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
-            >
-              Fechar
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => window.print()}
+                className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+                style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
+              >
+                Imprimir
+              </button>
+              <button
+                onClick={onClose}
+                className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
+                style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
+              >
+                Fechar
+              </button>
+            </div>
           </div>
 
           {/* faixa-resumo no header */}
           {resumoTexto ? (
-            <div className="mt-1 text-xs md:text-sm text-gray-200 opacity-90">
+            <div className="mt-1 text-xs md:text-sm text-gray-200 opacity-90 resumo-bruto">
               {resumoTexto}
             </div>
           ) : null}
@@ -173,13 +181,8 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                 const isBorda = categoria.includes("borda");
                 const icone = isPizza ? "🍕" : isBebida ? "🥤" : isBorda ? "🧀" : "•";
 
-                // número do item (ordem) com fallback
                 const numeroItem =
-                  it?.ordem_item ??
-                  it?.ordem ??
-                  it?.numero ??
-                  idx + 1;
-
+                  it?.ordem_item ?? it?.ordem ?? it?.numero ?? idx + 1;
                 const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
 
                 return (
@@ -187,17 +190,22 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                     key={idx}
                     className="rounded-lg p-3 border"
                     style={{
-                      borderColor: isBorda ? "rgba(255, 220, 120, 0.4)" : "rgba(255,159,67,0.25)",
+                      borderColor: isBorda
+                        ? "rgba(255, 220, 120, 0.4)"
+                        : "rgba(255,159,67,0.25)",
                       backgroundColor: isBorda ? "#1f1a12" : "#151a23",
                     }}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          {/* badge com número do item */}
                           <span
                             className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
-                            style={{ backgroundColor: "#2a2f39", color: "#ffcf99", border: "1px solid rgba(255,159,67,0.35)" }}
+                            style={{
+                              backgroundColor: "#2a2f39",
+                              color: "#ffcf99",
+                              border: "1px solid rgba(255,159,67,0.35)",
+                            }}
                             title={`Item ${numeroItem}`}
                           >
                             {numeroItem}
@@ -230,7 +238,6 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           ) : null}
                         </div>
 
-                        {/* vínculo pai/filho */}
                         {it.numero_pai || it.nome_pai ? (
                           <div className="mt-1 text-xs text-gray-400">
                             Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
