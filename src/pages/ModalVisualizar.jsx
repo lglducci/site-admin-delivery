@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useMemo, useState } from "react";
 
 /**
  * Modal discreto para visualizar apenas os itens do pedido.
@@ -37,6 +37,46 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
     fetchItens();
   }, [open, numero, idEmpresa]);
 
+  // --- NOVO: resumo por categoria + total (sem alterar SQL/n8n) ---
+  const resumo = useMemo(() => {
+    const acc = {
+      pizza: 0,
+      borda: 0,
+      esfirra: 0,
+      bebida: 0,
+      outros: 0,
+      total: 0,
+    };
+
+    for (const it of itens) {
+      const cat = String(it?.categoria || "").toLowerCase();
+      const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
+
+      if (cat.includes("pizza")) acc.pizza += qtd;
+      else if (cat.includes("borda")) acc.borda += qtd;
+      else if (cat.includes("esfirra")) acc.esfirra += qtd;
+      else if (cat.includes("bebida")) acc.bebida += qtd;
+      else acc.outros += qtd;
+
+      acc.total += qtd;
+    }
+
+    return acc;
+  }, [itens]);
+
+  // string amigável do resumo (mostra só categorias com qtd > 0)
+  const resumoTexto = useMemo(() => {
+    const partes = [];
+    if (resumo.pizza > 0) partes.push(`🍕 ${resumo.pizza} ${resumo.pizza === 1 ? "pizza" : "pizzas"}`);
+    if (resumo.borda > 0) partes.push(`🧀 ${resumo.borda} ${resumo.borda === 1 ? "borda" : "bordas"}`);
+    if (resumo.esfirra > 0) partes.push(`🫓 ${resumo.esfirra} ${resumo.esfirra === 1 ? "esfirra" : "esfirras"}`);
+    if (resumo.bebida > 0) partes.push(`🥤 ${resumo.bebida} ${resumo.bebida === 1 ? "bebida" : "bebidas"}`);
+    if (resumo.outros > 0) partes.push(`📦 ${resumo.outros} ${resumo.outros === 1 ? "outro item" : "outros itens"}`);
+
+    const base = partes.join(" • ");
+    return resumo.total > 0 ? `${base}${base ? " — " : ""}Total: ${resumo.total} ${resumo.total === 1 ? "item" : "itens"}` : "";
+  }, [resumo]);
+
   if (!open) return null;
 
   return (
@@ -45,8 +85,10 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       {/* container */}
-      <div className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
-           style={{ backgroundColor: "#1b1e25", boxShadow: "0 0 24px rgba(0,0,0,0.5)" }}>
+      <div
+        className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
+        style={{ backgroundColor: "#1b1e25", boxShadow: "0 0 24px rgba(0,0,0,0.5)" }}
+      >
         {/* header */}
         <div className="px-5 py-3 border-b" style={{ borderColor: "#ff9f43" }}>
           <div className="flex items-center justify-between">
@@ -61,6 +103,13 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
               Fechar
             </button>
           </div>
+
+          {/* --- NOVO: faixa-resumo no header --- */}
+          {resumoTexto ? (
+            <div className="mt-1 text-xs md:text-sm text-gray-200 opacity-90">
+              {resumoTexto}
+            </div>
+          ) : null}
         </div>
 
         {/* content */}
@@ -77,6 +126,15 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                 const isBebida = categoria.includes("bebida");
                 const icone = isPizza ? "🍕" : isBebida ? "🧃" : "•";
 
+                // --- NOVO: número do item (ordem) com fallback ---
+                const numeroItem =
+                  it?.ordem_item ??
+                  it?.ordem ??
+                  it?.numero ??
+                  idx + 1;
+
+                const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
+
                 return (
                   <li
                     key={idx}
@@ -89,18 +147,29 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
+                          {/* --- NOVO: badge com número do item --- */}
+                          <span
+                            className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
+                            style={{ backgroundColor: "#2a2f39", color: "#ffcf99", border: "1px solid rgba(255,159,67,0.35)" }}
+                            title={`Item ${numeroItem}`}
+                          >
+                            {numeroItem}
+                          </span>
+
                           <span className="text-base">{icone}</span>
+
                           <span className="font-semibold" style={{ color: "#ff9f43" }}>
                             {it.nome || "Item"}
                           </span>
                         </div>
+
                         <div className="mt-1 text-gray-300">
                           {it.tamanho ? `Tamanho: ${it.tamanho}` : null}
-                          {it.tamanho && it.quantidade ? " • " : ""}
-                          {it.quantidade ? `Qtd: ${it.quantidade}` : null}
+                          {it.tamanho && qtd ? " • " : ""}
+                          {qtd ? `Qtd: ${qtd}` : null}
                           {categoria ? (
                             <>
-                              {(it.tamanho || it.quantidade) ? " • " : ""}
+                              {(it.tamanho || qtd) ? " • " : ""}
                               <span className="uppercase tracking-wide text-xs opacity-80">
                                 {categoria}
                               </span>
@@ -113,11 +182,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                             </div>
                           ) : null}
                         </div>
-                         
 
-
-
-                        
                         {/* se houver relação pai/filho, mostra discretamente */}
                         {it.numero_pai || it.nome_pai ? (
                           <div className="mt-1 text-xs text-gray-400">
