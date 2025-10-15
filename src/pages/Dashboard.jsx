@@ -1,6 +1,11 @@
- import React, { useEffect, useMemo, useState } from "react";
+import ModalDetalhesPedido from "../components/ModalDetalhesPedido";
+import React, { useEffect, useMemo, useState } from "react";
 import ModalVisualizar from "./ModalVisualizar"; // <-- usa o modal que você já tem
  /* 🎨 Tema dark profissional */
+
+const [showDetalhes, setShowDetalhes] = useState(false);
+const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
+
 const THEME = {
   bgFrom: "#0F121A",
   bgVia:  "#13161B",
@@ -130,15 +135,26 @@ export default function Dashboard() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               {/* número clicável -> abre modal */}
-              <a
+
+
+
+             <a
                 href="#"
-                onClick={(e) => { e.preventDefault(); setViewNumero(numero); setOpenView(true); }}
-                className="text-base md:text-lg font-semibold underline-offset-4 hover:underline transition-colors"
-                style={{ color: THEME.title }}
-                title={`Visualizar pedido nº ${numero}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPedidoSelecionado(p);
+                  setShowDetalhes(true);
+                }}
+                className="text-base md:text-lg font-semibold"
+                style={{ color: C.title }}
               >
                 nº {numero}
               </a>
+
+             
+               
+
+             
               <span
                 className="text-[11px] md:text-xs px-2 py-0.5 rounded-md"
                 style={{ background: THEME.btnDark, color: THEME.btnDarkText, opacity: 0.9 }}
@@ -288,13 +304,16 @@ export default function Dashboard() {
         <Coluna titulo="Concluído" items={grupos.c}  cls={COLUNAS[3].cls} />
       </div>
 
-      {/* Modal Visualizar (abre ao clicar no nº do pedido) */}
-      <ModalVisualizar
-        open={openView}
-        onClose={() => setOpenView(false)}
-        numero={viewNumero}
-        idEmpresa={idEmpresa}
-      />
+    
+
+     {showDetalhes && pedidoSelecionado && (
+  <ModalDetalhesPedido
+    open={showDetalhes}
+    onClose={() => setShowDetalhes(false)}
+    numero={pedidoSelecionado.numero ?? pedidoSelecionado.pedido_id}
+    idEmpresa={idEmpresa}
+  />
+)}
     </div>
   );
 }
