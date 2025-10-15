@@ -1,5 +1,5 @@
  import React, { useEffect, useMemo, useState } from "react";
-
+  
 /* 🎨 Tema dark profissional */
 const THEME = {
   bgFrom: "#0F121A",
