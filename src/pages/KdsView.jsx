@@ -7,7 +7,7 @@ function getEmpresaSafe() {
   } catch {
     return {};
   }
-}
+} 
 
 export default function KdsView() {
   const empresa = getEmpresaSafe();
