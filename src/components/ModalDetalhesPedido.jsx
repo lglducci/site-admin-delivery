@@ -1,32 +1,11 @@
  import React, { useEffect, useMemo, useState } from "react";
 
-/**
- * Mostra detalhes do pedido a partir do webhook que retorna:
- *
- * [
- *   {
- *     "pedido_detalhado": {
- *       "pedido_id": 46,
- *       "nome_cliente": "Benedito Rui Barbosa",
- *       "tipo_cobranca": "pix",
- *       "resumo": "📦 ... Entrega: R$3,00 ... Total: R$ 148.00 ...",
- *       "endereco": "rua beirute 14",
- *       "bairro": "centro",
- *       "itens": [{ "nome": "...", "quantidade": 1, "valor": 68, ... }]
- *     }
- *   }
- * ]
- */
-
 function parseMoneyFromResumo(resumo, label) {
   if (!resumo) return null;
-  // tenta "Entrega: R$3,00" ou "Total: R$ 148.00"
   const re = new RegExp(`${label}\\s*:\\s*R\\$\\s*([0-9]+[\\.,]?[0-9]{0,2})`, "i");
   const m = resumo.match(re);
   if (!m) return null;
- 
   const raw = m[1].replace(",", ".");
- 
   const num = Number(raw);
   return Number.isFinite(num) ? num : null;
 }
@@ -43,33 +22,64 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   const [data, setData] = useState(null);
   const [erro, setErro] = useState("");
 
+  // --- CSS global de impressão (sem cortar o modal) ---
+  const printStyle = `
+    @page {
+      size: A4 portrait;
+      margin: 12mm;
+    }
+
+    @media print {
+      .fixed, .absolute { position: static !important; }
+      .bg-black, .bg-black\\/70, .bg-black\\/60 { background: #fff !important; }
+      .print-fullpage {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .print-fullpage * { break-inside: avoid-page; page-break-inside: avoid; }
+      .print-fullpage table { border-collapse: collapse !important; }
+      .print-fullpage table th, 
+      .print-fullpage table td {
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+      }
+      .print-fullpage button { display: none !important; }
+      .resumo-bruto { display: block !important; visibility: visible !important; }
+    }
+  `;
+
+  useEffect(() => {
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = printStyle;
+    document.head.appendChild(styleTag);
+    return () => styleTag.remove();
+  }, []);
+
   useEffect(() => {
     if (!open || !numero) return;
-
     const carregar = async () => {
       try {
-        // ⚠️ Ajuste para o endpoint que você confirmou (pedido_detalhado)
         const url = `https://webhook.lglducci.com.br/webhook/pedido_detalhado?numero=${numero}&id_empresa=${idEmpresa}`;
         const resp = await fetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-        // tenta JSON; se vier texto/HTML, ainda mostra como fallback
         let json;
         try {
           json = await resp.json();
         } catch {
           const text = await resp.text();
-          // caso raro: veio HTML; mostra bruto
           setData({ html: text });
           setErro("");
           return;
         }
 
-        /**
-         * Normaliza o formato:
-         * - pode vir como array com 1 objeto
-         * - pode ter a chave "pedido_detalhado"
-         */
         let payload = json;
         if (Array.isArray(json) && json.length > 0) payload = json[0];
         if (payload && payload.pedido_detalhado) payload = payload.pedido_detalhado;
@@ -85,7 +95,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
     carregar();
   }, [open, numero, idEmpresa]);
 
-  // Monta tabela de itens e totais
   const { itens = [], nome_cliente, tipo_cobranca, endereco, bairro, resumo } = data || {};
 
   const subtotal = useMemo(() => {
@@ -103,7 +112,9 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40">
+      <div
+        className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40 print-fullpage"
+      >
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl"
@@ -121,7 +132,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
         {erro && <p className="text-red-400 mb-4">{erro}</p>}
 
-        {/* Se vier HTML bruto do webhook, renderiza direto */}
         {data?.html ? (
           <div
             className="prose prose-invert max-w-none text-gray-200"
@@ -129,13 +139,11 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           />
         ) : (
           <>
-            {/* Linha com cliente e endereço */}
+            {/* Cliente + Endereço */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
                 <div className="text-xs text-gray-400">Cliente</div>
-                <div className="text-sm font-semibold">
-                  {nome_cliente || "—"}
-                </div>
+                <div className="text-sm font-semibold">{nome_cliente || "—"}</div>
               </div>
               <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
                 <div className="text-xs text-gray-400">Endereço</div>
@@ -201,21 +209,25 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
               </div>
             </div>
 
-            {/* Observações/resumo bruto (opcional) */}
+            {/* Resumo bruto sempre impresso */}
             {data?.resumo && (
-              <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-200">
-                  Ver resumo bruto
-                </summary>
-                <pre className="mt-2 p-3 bg-[#0F121A] rounded-lg text-xs whitespace-pre-wrap text-gray-300">
-{data.resumo}
+              <div className="mt-4 resumo-bruto">
+                <h4 className="text-sm text-gray-400 mb-1">Resumo bruto:</h4>
+                <pre className="p-3 bg-[#0F121A] rounded-lg text-xs whitespace-pre-wrap text-gray-300">
+                  {data.resumo}
                 </pre>
-              </details>
+              </div>
             )}
           </>
         )}
 
-        <div className="mt-6 text-right">
+        <div className="mt-6 text-right flex gap-2 justify-end">
+          <button
+            onClick={() => window.print()}
+            className="bg-[#2a2f39] text-gray-100 font-semibold px-4 py-2 rounded-md hover:bg-[#3a3f49] transition"
+          >
+            🖨️ Imprimir
+          </button>
           <button
             onClick={onClose}
             className="bg-[#ff9f43] text-[#1B1E25] font-semibold px-4 py-2 rounded-md hover:bg-[#ffb763] transition"
