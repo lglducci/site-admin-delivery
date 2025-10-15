@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 
 /**
  * Modal de detalhes completos do pedido
@@ -12,7 +12,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   const [pedido, setPedido] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Carrega detalhes do pedido quando abrir
   useEffect(() => {
     if (!open || !numero || !idEmpresa) return;
 
@@ -41,10 +40,7 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* fundo escuro */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-
-      {/* container */}
       <div
         className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
         style={{
@@ -52,7 +48,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           boxShadow: "0 0 24px rgba(0,0,0,0.5)",
         }}
       >
-        {/* cabeçalho */}
         <div
           className="px-5 py-3 border-b flex items-center justify-between"
           style={{ borderColor: "#ff9f43" }}
@@ -72,7 +67,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           </button>
         </div>
 
-        {/* conteúdo */}
         <div className="p-4 overflow-auto max-h-[68vh] text-sm md:text-base text-gray-200">
           {loading ? (
             <p className="text-gray-400">Carregando detalhes...</p>
@@ -80,7 +74,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
             <p className="text-gray-400">Nenhum detalhe encontrado.</p>
           ) : (
             <div className="space-y-4">
-              {/* resumo principal */}
               <div>
                 <p className="text-lg font-semibold text-[#ff9f43]">
                   {pedido.nome_cliente}
@@ -93,7 +86,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
                 </p>
               </div>
 
-              {/* lista de itens */}
               <div>
                 <h4 className="text-base font-semibold mb-2 text-[#ff9f43]">
                   Itens do Pedido
@@ -140,7 +132,6 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
                 </ul>
               </div>
 
-              {/* resumo textual */}
               <div>
                 <h4 className="text-base font-semibold mb-2 text-[#ff9f43]">
                   Resumo do Pedido
