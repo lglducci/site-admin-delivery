@@ -9,7 +9,8 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
     const carregar = async () => {
       try {
-        const url = `https://webhook.lglducci.com.br/webhook/pedido_detalhes?numero=${numero}&id_empresa=${idEmpresa}`;
+        const url = `https://webhook.lglducci.com.br/webhook/pedido_detalhado?numero=${numero}&id_empresa=${idEmpresa}`;
+      
         const resp = await fetch(url);
 
         if (!resp.ok) throw new Error(`Erro HTTP ${resp.status}`);
