@@ -293,7 +293,7 @@ export default function Dashboard() {
         <Coluna titulo="Concluído" items={grupos.c} cls={COLUNAS[3].cls} />
       </div>
 
-      {/* Modal */}
+      {/* 🪟 Modal Detalhes */}
       {showDetalhes && pedidoSelecionado && (
         <ModalDetalhesPedido
           open={showDetalhes}
