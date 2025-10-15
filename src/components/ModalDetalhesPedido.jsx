@@ -112,21 +112,24 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   const entrega = entregaFromResumo ?? 0;
   const total = totalFromResumo ?? (subtotal + entrega);
       const printRef = useRef();
+  
+
+ 
+  if (!open) return null;
+
+ const printRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `Pedido-${numero}`,
   });
 
  
-  if (!open) return null;
-
- 
-
  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
    <div
    ref={printRef}
+    <div
     className="bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40 print-fullpage"
 
         <button
