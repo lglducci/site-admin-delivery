@@ -1,5 +1,4 @@
  import React, { useEffect, useMemo, useState, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
 
 function parseMoneyFromResumo(resumo, label) {
   if (!resumo) return null;
@@ -22,33 +21,51 @@ function formatBRL(n) {
 export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }) {
   const [data, setData] = useState(null);
   const [erro, setErro] = useState("");
+  const printRef = useRef(null);
 
-  // 🔹 REFERÊNCIA PARA IMPRESSÃO
-  const printRef = useRef();
-
-  // 🔹 Função de impressão isolada para imprimir SOMENTE o conteúdo do modal
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `Pedido-${numero}`,
-  });
-
-  // 🔹 CSS global de impressão
+  // 🔸 CSS para impressão apenas da modal
   useEffect(() => {
-    const printStyle = `
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = `
       @page { size: A4 portrait; margin: 12mm; }
       @media print {
         body * { visibility: hidden; }
-        .print-area, .print-area * { visibility: visible; }
-        .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+        .printable, .printable * { visibility: visible; }
+        .printable { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; }
         button { display: none !important; }
       }
     `;
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = printStyle;
     document.head.appendChild(styleTag);
     return () => styleTag.remove();
   }, []);
 
+  // 🔸 Função para imprimir apenas o conteúdo da modal
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
+
+    const printWindow = window.open("", "PRINT", "width=900,height=650");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Pedido nº ${numero}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ccc; padding: 8px; }
+            th { background: #eee; }
+          </style>
+        </head>
+        <body>${printContent.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  // 🔸 Busca dos dados
   useEffect(() => {
     if (!open || !numero) return;
     const carregar = async () => {
@@ -99,10 +116,9 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      {/* 🔹 SOMENTE ESSA DIV SERÁ IMPRESSA */}
       <div
         ref={printRef}
-        className="print-area bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40"
+        className="printable bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40"
       >
         <button
           onClick={onClose}
@@ -128,6 +144,7 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
           />
         ) : (
           <>
+            {/* Cliente + Endereço */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
                 <div className="text-xs text-gray-400">Cliente</div>
