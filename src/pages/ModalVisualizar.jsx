@@ -37,16 +37,9 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
     fetchItens();
   }, [open, numero, idEmpresa]);
 
-  // --- NOVO: resumo por categoria + total (sem alterar SQL/n8n) ---
+  // --- Resumo por categoria + total (sem alterar SQL/n8n) ---
   const resumo = useMemo(() => {
-    const acc = {
-      pizza: 0,
-      borda: 0,
-      esfirra: 0,
-      bebida: 0,
-      outros: 0,
-      total: 0,
-    };
+    const acc = { pizza: 0, borda: 0, esfirra: 0, bebida: 0, outros: 0, total: 0 };
 
     for (const it of itens) {
       const cat = String(it?.categoria || "").toLowerCase();
@@ -60,7 +53,6 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
 
       acc.total += qtd;
     }
-
     return acc;
   }, [itens]);
 
@@ -104,7 +96,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             </button>
           </div>
 
-          {/* --- NOVO: faixa-resumo no header --- */}
+          {/* faixa-resumo no header */}
           {resumoTexto ? (
             <div className="mt-1 text-xs md:text-sm text-gray-200 opacity-90">
               {resumoTexto}
@@ -124,9 +116,10 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                 const categoria = (it.categoria || "").toLowerCase();
                 const isPizza = categoria.includes("pizza");
                 const isBebida = categoria.includes("bebida");
-                const icone = isPizza ? "🍕" : isBebida ? "🧃" : "•";
+                const isBorda = categoria.includes("borda");
+                const icone = isPizza ? "🍕" : isBebida ? "🥤" : isBorda ? "🧀" : "•";
 
-                // --- NOVO: número do item (ordem) com fallback ---
+                // número do item (ordem) com fallback
                 const numeroItem =
                   it?.ordem_item ??
                   it?.ordem ??
@@ -140,14 +133,14 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                     key={idx}
                     className="rounded-lg p-3 border"
                     style={{
-                      borderColor: "rgba(255,159,67,0.25)",
-                      backgroundColor: "#151a23",
+                      borderColor: isBorda ? "rgba(255, 220, 120, 0.4)" : "rgba(255,159,67,0.25)",
+                      backgroundColor: isBorda ? "#1f1a12" : "#151a23",
                     }}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          {/* --- NOVO: badge com número do item --- */}
+                          {/* badge com número do item */}
                           <span
                             className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
                             style={{ backgroundColor: "#2a2f39", color: "#ffcf99", border: "1px solid rgba(255,159,67,0.35)" }}
@@ -183,7 +176,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           ) : null}
                         </div>
 
-                        {/* se houver relação pai/filho, mostra discretamente */}
+                        {/* vínculo pai/filho */}
                         {it.numero_pai || it.nome_pai ? (
                           <div className="mt-1 text-xs text-gray-400">
                             Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
