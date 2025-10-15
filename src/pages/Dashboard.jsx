@@ -19,14 +19,6 @@ const THEME = {
   cardBorder: "rgba(255,159,67,0.25)",
 };
 
-/* Colunas */
-const COLUNAS = [
-  { status: "recebido", titulo: "Recebido", cls: "bg-[#0F121A] text-[#ffcf88]" },
-  { status: "producao", titulo: "Produção", cls: "bg-[#0F121A] text-[#ffcf88]" },
-  { status: "entrega", titulo: "Entrega", cls: "bg-[#0F121A] text-[#ffcf88]" },
-  { status: "concluido", titulo: "Concluído", cls: "bg-[#0F121A] text-[#ffcf88]" },
-];
-
 function getEmpresaSafe() {
   try {
     return JSON.parse(localStorage.getItem("empresa") || "{}");
@@ -106,10 +98,7 @@ export default function Dashboard() {
   };
 
   const grupos = useMemo(() => {
-    const r = [],
-      pr = [],
-      e = [],
-      c = [];
+    const r = [], pr = [], e = [], c = [];
     for (const p of pedidos) {
       const s = norm(p.status);
       if (s === "recebido") r.push(p);
@@ -122,7 +111,6 @@ export default function Dashboard() {
 
   const PedidoItem = ({ p }) => {
     const numero = p.numero ?? p.pedido_id ?? "—";
-    const linkDetalhes = `https://webhook.lglducci.com.br/webhook/pedido_detalhes?numero=${p.numero ?? p.pedido_id}&id_empresa=${idEmpresa}`;
     return (
       <div
         className="rounded-xl p-3 md:p-4 border shadow-md mb-3 transition-all"
@@ -131,11 +119,14 @@ export default function Dashboard() {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              {/* 🔗 Número do pedido como hiperlink */}
+              {/* 🔗 Agora o número abre o modal, não nova aba */}
               <a
-                href={linkDetalhes}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPedidoSelecionado(p);
+                  setShowDetalhes(true);
+                }}
                 className="text-base md:text-lg font-semibold hover:underline"
                 style={{ color: THEME.title }}
               >
@@ -286,11 +277,21 @@ export default function Dashboard() {
 
       {/* Colunas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-        <Coluna titulo="Recebido" items={grupos.r} cls={COLUNAS[0].cls} />
-        <Coluna titulo="Produção" items={grupos.pr} cls={COLUNAS[1].cls} />
-        <Coluna titulo="Entrega" items={grupos.e} cls={COLUNAS[2].cls} />
-        <Coluna titulo="Concluído" items={grupos.c} cls={COLUNAS[3].cls} />
+        <Coluna titulo="Recebido" items={grupos.r} cls="bg-[#0F121A] text-[#ffcf88]" />
+        <Coluna titulo="Produção" items={grupos.pr} cls="bg-[#0F121A] text-[#ffcf88]" />
+        <Coluna titulo="Entrega" items={grupos.e} cls="bg-[#0F121A] text-[#ffcf88]" />
+        <Coluna titulo="Concluído" items={grupos.c} cls="bg-[#0F121A] text-[#ffcf88]" />
       </div>
+
+      {/* 🪟 Modal Detalhes */}
+      {showDetalhes && pedidoSelecionado && (
+        <ModalDetalhesPedido
+          open={showDetalhes}
+          onClose={() => setShowDetalhes(false)}
+          numero={pedidoSelecionado.numero ?? pedidoSelecionado.pedido_id}
+          idEmpresa={idEmpresa}
+        />
+      )}
     </div>
   );
 }
