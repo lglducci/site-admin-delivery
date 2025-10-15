@@ -18,6 +18,7 @@ const THEME = {
   cardBorder: "rgba(255,159,67,0.25)",
 };
 
+/* Colunas */
 const COLUNAS = [
   { status: "recebido", titulo: "Recebido", cls: "bg-[#0F121A] text-[#ffcf88]" },
   { status: "producao", titulo: "Produção", cls: "bg-[#0F121A] text-[#ffcf88]" },
@@ -25,6 +26,7 @@ const COLUNAS = [
   { status: "concluido", titulo: "Concluído", cls: "bg-[#0F121A] text-[#ffcf88]" },
 ];
 
+/* Utilitário */
 function getEmpresaSafe() {
   try {
     return JSON.parse(localStorage.getItem("empresa") || "{}");
@@ -41,7 +43,9 @@ const norm = (s) =>
 
 export default function Dashboard() {
   const empresa = getEmpresaSafe();
-  const idEmpresa = empresa?.id_empresa ?? empresa?.idEmpresa ?? localStorage.getItem("id_empresa");
+  const idEmpresa =
+    empresa?.id_empresa ?? empresa?.idEmpresa ?? localStorage.getItem("id_empresa");
+
   const [pedidos, setPedidos] = useState([]);
   const [erro, setErro] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -54,7 +58,9 @@ export default function Dashboard() {
     }
     try {
       const resp = await fetch(
-        `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(id)}`
+        `https://webhook.lglducci.com.br/webhook/pedidos?id_empresa=${encodeURIComponent(
+          id
+        )}`
       );
       const data = await resp.json();
       setPedidos(Array.isArray(data) ? data : []);
@@ -192,6 +198,7 @@ export default function Dashboard() {
         background: `linear-gradient(to bottom, ${THEME.bgFrom}, ${THEME.bgVia}, ${THEME.bgTo})`,
       }}
     >
+      {/* Cabeçalho */}
       <div
         className="flex justify-between items-center mb-6 shadow-lg rounded-xl p-4 border relative z-50"
         style={{ background: THEME.panelBg, borderColor: THEME.panelBorder }}
@@ -214,6 +221,52 @@ export default function Dashboard() {
           >
             🔄 Atualizar
           </button>
+
+          {/* ⚙️ Configurações */}
+          <div className="relative">
+            <details>
+              <summary
+                className="list-none cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg font-semibold transition-all"
+                style={{
+                  background: THEME.btnOrange,
+                  color: THEME.btnOrangeText,
+                  boxShadow: "0 0 10px rgba(255,159,67,0.15)",
+                }}
+              >
+                ⚙️ Configurações
+              </summary>
+              <div
+                className="absolute right-0 mt-2 w-60 rounded-xl border shadow-xl z-[9999]"
+                style={{
+                  borderColor: THEME.panelBorder,
+                  background: "rgba(27,30,37,0.98)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {[
+                  ["🏢", "Dados da Empresa", "https://webhook.lglducci.com.br/webhook/config_empresa"],
+                  ["💬", "Mensagem Padrão", "https://webhook.lglducci.com.br/webhook/mensagem_padrao"],
+                  ["📈", "Relatórios", "/relatorios"],
+                  ["🍕", "Cardápio", "/cardapio"],
+                  ["✨", "Modelo de Custo", "/pizza-modelo"],
+                ].map(([icon, label, link], i) => (
+                  <button
+                    key={i}
+                    onClick={() =>
+                      link.startsWith("http")
+                        ? window.open(link, "_blank")
+                        : (window.location.href = link)
+                    }
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#ff9f4315] flex items-center gap-2 transition-colors"
+                    style={{ color: THEME.text }}
+                  >
+                    <span>{icon}</span> {label}
+                  </button>
+                ))}
+              </div>
+            </details>
+          </div>
+
           <button
             onClick={sair}
             className="px-4 py-2 rounded-lg font-semibold transition"
@@ -224,6 +277,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Colunas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
         <Coluna titulo="Recebido" items={grupos.r} cls={COLUNAS[0].cls} />
         <Coluna titulo="Produção" items={grupos.pr} cls={COLUNAS[1].cls} />
