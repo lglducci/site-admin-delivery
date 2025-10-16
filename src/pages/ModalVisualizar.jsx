@@ -170,7 +170,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
 
           {/* faixa-resumo no header */}
           {resumoTexto ? (
-            <div className="mt-1 text-xs md:text-sm text-gray-200 opacity-90 resumo-bruto">
+            <div className="mt-1 text-xs md:text-sm text-gray-800 opacity-90 resumo-bruto">
               {resumoTexto}
             </div>
           ) : null}
@@ -179,9 +179,9 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         {/* content */}
         <div className="p-4 overflow-auto max-h-[68vh] text-sm md:text-base">
           {loading ? (
-            <p className="text-gray-300">Carregando itens…</p>
+            <p className="text-gray-900">Carregando itens…</p>
           ) : itens.length === 0 ? (
-            <p className="text-gray-400">Sem itens para exibir.</p>
+            <p className="text-gray-800">Sem itens para exibir.</p>
           ) : (
             <ul className="space-y-3">
               {itens.map((it, idx) => {
@@ -237,7 +237,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           </span>
                         </div>
 
-                        <div className="mt-1 text-gray-300">
+                        <div className="mt-1 text-gray-800">
                           {it.tamanho ? `Tamanho: ${it.tamanho}` : null}
                           {it.tamanho && qtd ? " • " : ""}
                           {qtd ? `Qtd: ${qtd}` : null}
@@ -251,7 +251,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           ) : null}
 
                           {it.descricao ? (
-                            <div className="mt-1 text-sm text-gray-400 leading-snug">
+                            <div className="mt-1 text-sm text-gray-900 leading-snug">
                               {it.descricao}
                             </div>
                           ) : null}
