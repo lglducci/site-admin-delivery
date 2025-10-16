@@ -19,9 +19,6 @@ export default function Login() {
       });
 
       const data = await response.json();
-      console.log("🔐 Resposta do login:", data);
-
-      // ✅ valida retorno mínimo
       if (data?.id_empresa) {
         const empresaData = {
           id_empresa: data.id_empresa,
@@ -29,7 +26,6 @@ export default function Login() {
           saudacao: data.saudacao,
         };
 
-        // ✅ normaliza tipo_admin com fallback seguro
         const tipo = (data?.tipo_admin ?? "admin").toString().toLowerCase().trim();
 
         salvarEmpresa(empresaData);
@@ -38,12 +34,8 @@ export default function Login() {
         localStorage.setItem("email", data.email ?? "");
         localStorage.setItem("tipo_admin", tipo);
 
-        // ✅ redirecionamento por perfil
-        if (tipo === "cozinha") {
-          navigate("/kds");
-        } else {
-          navigate("/dashboard");
-        }
+        if (tipo === "cozinha") navigate("/kds");
+        else navigate("/dashboard");
       } else {
         alert("Usuário inválido ou empresa não encontrada.");
       }
@@ -54,29 +46,38 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-800">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        background: "linear-gradient(135deg, #ff9f43 0%, #ff3c00 100%)",
+      }}
+    >
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md w-80"
+        className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-80 border border-white/20"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-white drop-shadow">
+          🍕 AdminDelivery
+        </h2>
+
         <input
           type="email"
           placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-3 p-2 rounded bg-white dark:bg-gray-700"
+          className="w-full mb-3 p-3 rounded bg-white/80 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
         <input
           type="password"
           placeholder="Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 p-2 rounded bg-white dark:bg-gray-700"
+          className="w-full mb-5 p-3 rounded bg-white/80 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
+
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-semibold py-2 rounded-lg shadow-md hover:opacity-90 transition"
         >
           Entrar
         </button>
