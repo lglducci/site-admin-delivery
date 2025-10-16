@@ -22,6 +22,20 @@ export default function KdsView() {
   const [openView, setOpenView] = useState(false);
   const [viewNumero, setViewNumero] = useState(null);
 
+
+ // ---- Tema KDS alinhado ao Login ----
+const THEME = {
+  pageBg:    "#0e2a3a",              // fundo da página (mais escuro que o card)
+  panelBg:   "#17384a",              // painel grande (container com título KDS)
+  cardBg:    "#254759",              // <<< cor do “bloco do login” (um pouco mais claro)
+  border:    "rgba(255,159,67,0.30)",// laranja discreto
+  cardShadow:"0 6px 20px rgba(0,0,0,0.25)",
+  title:     "#ff9f43",
+  textMain:  "#e8eef2",
+  textSub:   "#bac7cf"
+};
+
+
   const normalizaStatus = (s) =>
     (s || "")
       .toLowerCase()
@@ -150,11 +164,17 @@ export default function KdsView() {
 
   return (
      
-    <div className="min-h-screen p-4" style={{ backgroundColor: "#091219" }}>
+    
+    <div className="min-h-screen p-4" style={{ backgroundColor: THEME.pageBg }}>
+
+
+     
       {/* container com borda alaranjada leve */}
       <div
         className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
-        style={{ borderColor: "rgba(255,159,67,0.6)", backgroundColor: "#153b54" }}
+       
+       
+       style={{ borderColor: THEME.border, backgroundColor: THEME.panelBg }}
       >
         {/* cabeçalho */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
@@ -221,21 +241,24 @@ export default function KdsView() {
                   key={numero}
                   className="rounded-xl p-4 border transition-shadow"
                   style={{
-                    backgroundColor: "#151a23",
-                    borderColor: "rgba(255,159,67,0.2)",
-                    boxShadow: "0 0 10px rgba(255,159,67,0.10)",
+                     backgroundColor: THEME.cardBg,
+                      borderColor: THEME.border,
+                      boxShadow: THEME.cardShadow,
                   }}
                 >
                   <div className="mb-2">
                     <h2 className="text-lg font-semibold" style={tituloCor}>
                       Pedido nº {numero}
                     </h2>
-                    <div className="text-xs text-gray-300 mt-0.5">{statusText}</div>
-                  </div>
+                
+                   <div className="text-xs mt-0.5" style={{ color: THEME.textSub }}>{statusText}</div>
 
-                  <div className="text-sm text-gray-200 mt-2">{resumoItens(p)}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    💰 {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
+                   
+                  </div>
+                  <div className="text-sm" style={{ color: THEME.textMain }}>{resumoItens(p)}</div>
+                   <div className="text-xs" style={{ color: THEME.textSub }}>
+                  
+                     💰 {p.valor != null ? `R$ ${Number(p.valor).toFixed(2)}` : "—"}
                   </div>
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
