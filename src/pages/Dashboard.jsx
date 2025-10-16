@@ -79,30 +79,43 @@ export default function Dashboard() {
     return () => clearInterval(t);
   }, [idEmpresa]);
 
-  const avancar = async (numero) => {
-    const id = Number(idEmpresa);
-    if (!id || Number.isNaN(id)) {
-      alert("Empresa não identificada. Abra o cardápio/logue novamente.");
+ const [pendingNumero, setPendingNumero] = useState(null);
+
+const avancar = async (numero) => {
+  const id = Number(idEmpresa);
+  if (!id || Number.isNaN(id)) {
+    alert("Empresa não identificada. Abra o cardápio/logue novamente.");
+    return;
+  }
+
+  const ok = window.confirm(`Avançar o pedido nº ${numero}?`);
+  if (!ok) return;
+
+  try {
+    setPendingNumero(numero); // desabilita o botão desse pedido
+    const resp = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero, id_empresa: id }),
+    });
+
+    if (!resp.ok) {
+      alert("Falha ao avançar o pedido.");
       return;
     }
-    const ok = window.confirm(`Avançar o pedido nº ${numero}?`);
-    if (!ok) return;
-    try {
-      const resp = await fetch("https://webhook.lglducci.com.br/webhook/avancar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero, id_empresa: id }),
-      });
-      if (!resp.ok) {
-        alert("Falha ao avançar o pedido.");
-        return;
-      }
-      setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
-    } catch (e) {
-      console.error(e);
-      alert("Erro ao avançar pedido!");
-    }
-  };
+
+    // 1) remove otimista
+    setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
+    // 2) força refresh do servidor (garante consistência)
+    await carregar();
+  } catch (e) {
+    console.error(e);
+    alert("Erro ao avançar pedido!");
+  } finally {
+    setPendingNumero(null);
+  }
+};
+
 
   const grupos = useMemo(() => {
     const r = [], pr = [], e = [], c = [];
@@ -166,13 +179,15 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-3 flex justify-end">
-          <button
-            onClick={() => avancar(numero)}
-            className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors"
-            style={{ background: THEME.btnOrange, color: THEME.btnOrangeText }}
-          >
-            ▶ Avançar
-          </button>
+       <button
+           onClick={() => avancar(numero)}
+           disabled={pendingNumero === numero}
+           className="px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+           style={{ background: THEME.btnOrange, color: THEME.btnOrangeText }}
+         >
+           {pendingNumero === numero ? "… Avançando" : "▶ Avançar"}
+         </button>
+
         </div>
       </div>
     );
