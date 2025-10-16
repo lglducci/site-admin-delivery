@@ -149,11 +149,12 @@ export default function KdsView() {
   const tituloCor = { color: "#ff9f43" };
 
   return (
-    <div className="min-h-screen p-4" style={{ backgroundColor: "#012e46" }}>
+     
+    <div className="min-h-screen p-4" style={{ backgroundColor: "#091219" }}>
       {/* container com borda alaranjada leve */}
       <div
         className="max-w-7xl mx-auto rounded-2xl border p-4 md:p-6"
-        style={{ borderColor: "rgba(255,159,67,0.6)", backgroundColor: "#0c1d2a" }}
+        style={{ borderColor: "rgba(255,159,67,0.6)", backgroundColor: "#153b54" }}
       >
         {/* cabeçalho */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
