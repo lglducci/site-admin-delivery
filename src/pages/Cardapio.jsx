@@ -179,15 +179,13 @@ export default function Cardapio() {
           {itensCategoria.map((item) => (
              
 
-             <div
-                key={item.numero}
-               className="rounded-2xl overflow-hidden hover:shadow-2xl transition-all border"
-               style={{
-                 background: THEME.cardBg,
-                 borderColor: THEME.cardBorder,
-                 boxShadow: THEME.cardShadow,
-               }}
+
+         <div
+           key={item.numero}
+               className="bg-[#0F0F0F] shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all border border-[#222]"
              >
+
+            
              
 
 
