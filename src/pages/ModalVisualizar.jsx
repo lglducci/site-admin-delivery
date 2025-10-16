@@ -258,7 +258,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                         </div>
 
                         {it.numero_pai || it.nome_pai ? (
-                          <div className="mt-1 text-xs text-gray-400">
+                          <div className="mt-1 text-xs text-gray-900">
                             Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
                           </div>
                         ) : null}
