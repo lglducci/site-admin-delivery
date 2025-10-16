@@ -30,7 +30,7 @@ const CATEGORIES = [
   { key: "borda", label: "Bordas", icon: "🧀" },
   { key: "bebida", label: "Refrigerantes", icon: "🥤" },
   { key: "item", label: "Itens", icon: "🧩" },
-    { key: "esfirra", label: "Esfirra", icon: "" },
+    { key: "esfirra", label: "Esfirra", icon: "" } 
 ];
 
 export default function Cardapio() {
