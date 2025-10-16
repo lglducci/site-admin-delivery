@@ -18,7 +18,7 @@ const THEME = {
   title:     "#ff9f43",
   text:      "#e8eef2",
   textMuted: "#bac7cf",
-
+    
   // botões
   btnDark:   "#2a2f39",
   btnDarkText:"#e5e7eb",
