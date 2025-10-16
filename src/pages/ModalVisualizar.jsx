@@ -93,7 +93,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         ref={printRef}
         className="print-area relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
         style={{
-          backgroundColor: "#fff9f0",
+          backgroundColor: " #012e46",  
           color: "#091219",
           border: "1px solid #ff9f43",
           boxShadow: "0 0 24px rgba(255,159,67,0.3)",
