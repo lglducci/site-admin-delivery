@@ -1,4 +1,7 @@
  import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+
 
 /**
  * Modal discreto para visualizar apenas os itens do pedido.
@@ -130,15 +133,19 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       {/* container */}
-       <div
+
+    <div
+  ref={printRef}
   className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
   style={{
     backgroundColor: "#fff9f0",
-    color: "#091219",                 // texto mais escuro (pretão azulado)
+    color: "#091219",
     border: "1px solid #ff9f43",
     boxShadow: "0 0 24px rgba(255,159,67,0.3)",
   }}
 >
+
+ 
 
  
  
@@ -152,7 +159,8 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             </h3>
             <div className="flex gap-2">
               <button
-                onClick={() => window.print()}
+               
+                 onClick={handlePrint}
                 className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
                 style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
               >
