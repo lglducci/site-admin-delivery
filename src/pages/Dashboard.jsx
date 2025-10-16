@@ -178,24 +178,30 @@ export default function Dashboard() {
     );
   };
 
-  const Coluna = ({ titulo, items, cls }) => (
-    
+ const Coluna = ({ titulo, items }) => (
   <div
-  className={`rounded-2xl p-4 md:p-5 ${cls || ""}`}
-   style={{ background: THEME.panelBg, border: `1px solid ${THEME.panelBorder}` }}
+    className="rounded-2xl p-4 md:p-5"
+    style={{ background: THEME.panelBg, border: `1px solid ${THEME.panelBorder}` }}
   >
-
-     
-      <div className="pb-3 mb-3 border-b border-[#d37c3f]/60">
-        <h2 className="text-lg md:text-xl font-semibold">{titulo}</h2>
-      </div>
-      {items.length === 0 ? (
-        <div className="text-sm opacity-90">Nenhum pedido</div>
-      ) : (
-        items.map((p) => <PedidoItem key={p.numero ?? p.pedido_id} p={p} />)
-      )}
+    <div
+      className="pb-3 mb-3 border-b"
+      style={{ borderColor: THEME.panelBorder }}
+    >
+      <h2 className="text-lg md:text-xl font-semibold" style={{ color: THEME.title }}>
+        {titulo}
+      </h2>
     </div>
-  );
+
+    {items.length === 0 ? (
+      <div className="text-sm opacity-90" style={{ color: THEME.textMuted }}>
+        Nenhum pedido
+      </div>
+    ) : (
+      items.map((p) => <PedidoItem key={p.numero ?? p.pedido_id} p={p} />)
+    )}
+  </div>
+);
+
 
   const sair = () => {
     localStorage.clear();
@@ -294,15 +300,14 @@ export default function Dashboard() {
       </div>
 
       {/* Colunas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-        <Coluna titulo="Recebido"  items={grupos.r} />
-        <Coluna titulo="Produção" items={grupos.pr} />
-        <Coluna titulo="Entrega"  items={grupos.e} />
-        <Coluna titulo="Concluído" items={grupos.c} />
+      
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
+      <Coluna titulo="Recebido"  items={grupos.r} />
+      <Coluna titulo="Produção" items={grupos.pr} />
+      <Coluna titulo="Entrega"  items={grupos.e} />
+      <Coluna titulo="Concluído" items={grupos.c} />
+    </div>
 
-      </div>
-
-    
 
       {/* 🪟 Modal Detalhes */}
       {showDetalhes && pedidoSelecionado && (
