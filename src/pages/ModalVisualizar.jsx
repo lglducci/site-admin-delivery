@@ -123,20 +123,20 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             </div>
           </div>
 
-          {/* resumo */}
-          {resumoTexto && (
           
-
-
-<div
+  {/* resumo */}
+          {resumoTexto && (
+            <div
   className="mt-1 text-xs md:text-sm resumo-bruto"
-  style={{ color: "#ff9f43", fontWeight: "600" }}
+  style={{ color: "#091219", fontWeight: "600" }}
 >
   {resumoTexto}
 </div>
 
+          )}
+        </div>
 
-
+           
        
 
         {/* conteúdo */}
