@@ -2,6 +2,31 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/* 🎨 Tema azul coerente com Login/KDS */
+const THEME = {
+  // página
+  pageBg: "#0e2a3a",
+  // painel/containers
+  panelBg: "#17384a",
+  panelBorder: "rgba(255,159,67,0.30)",
+  // cards
+  cardBg: "#254759",
+  cardBorder: "rgba(255,159,67,0.30)",
+  // tipografia e acentos
+  title: "#ff9f43",
+  text: "#e8eef2",
+  textMuted: "#bac7cf",
+  // inputs
+  fieldBg: "#1f3b4d",
+  fieldBorder: "rgba(255,159,67,0.25)",
+  focusRing: "#ff9f43",
+  // botões
+  btnDark: "#2a2f39",
+  btnDarkText: "#e5e7eb",
+  btnOrange: "#ff9f43",
+  btnOrangeText: "#1b1e25",
+};
+
 const API_BASE =
   location.hostname === "localhost" || location.hostname.startsWith("127.")
     ? "/api/webhook"
@@ -32,7 +57,6 @@ export default function KpiTermometroDia() {
 
   const [idEmpresa, setIdEmpresa] = useState(getIdEmpresaSafe());
   const [dataRef, setDataRef] = useState(() => {
-    // dd/mm/aaaa para exibição
     const d = new Date();
     const dd = String(d.getDate()).padStart(2, "0");
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -64,7 +88,6 @@ export default function KpiTermometroDia() {
   });
 
   const dataIso = useMemo(() => {
-    // converte dd/mm/aaaa -> aaaa-mm-dd
     const [dd, mm, yyyy] = (dataRef || "").split("/");
     if (!dd || !mm || !yyyy) return "";
     return `${yyyy}-${mm}-${dd}`;
@@ -84,7 +107,6 @@ export default function KpiTermometroDia() {
       const r = await fetch(url.toString(), { cache: "no-store" });
       const json = await r.json().catch(() => ({}));
 
-      // aceitamos: {kpi_termometro_dia:{...}} ou [ {kpi_termometro_dia:{...}} ]
       const payload = Array.isArray(json) ? json[0] : json;
       const core = payload?.kpi_termometro_dia ?? payload ?? {};
 
@@ -123,21 +145,41 @@ export default function KpiTermometroDia() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const fieldCls =
+    "w-full rounded px-3 py-2 focus:outline-none transition-shadow";
+  const fieldStyle = {
+    background: THEME.fieldBg,
+    color: THEME.text,
+    border: `1px solid ${THEME.fieldBorder}`,
+  };
+  const onFocus = (e) => (e.target.style.boxShadow = `0 0 0 2px ${THEME.focusRing}55`);
+  const onBlur = (e) => (e.target.style.boxShadow = "none");
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
-      <div className="max-w-6xl mx-auto bg-gray-800 rounded-2xl shadow-xl border border-orange-500 p-6">
+    <div
+      className="min-h-screen p-6"
+      style={{ background: THEME.pageBg, color: THEME.text }}
+    >
+      <div
+        className="max-w-6xl mx-auto rounded-2xl shadow-xl border p-6"
+        style={{ background: THEME.panelBg, borderColor: THEME.panelBorder }}
+      >
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-2xl font-bold text-orange-400">📊 Termômetro do Dia</h1>
+          <h1 className="text-2xl font-bold" style={{ color: THEME.title }}>
+            📊 Termômetro do Dia
+          </h1>
           <div className="flex gap-2">
             <button
               onClick={() => navigate(-1)}
-              className="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg"
+              className="px-3 py-2 rounded-lg font-semibold"
+              style={{ background: THEME.btnDark, color: THEME.btnDarkText }}
             >
               ⬅️ Voltar
             </button>
             <button
               onClick={carregar}
-              className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg"
+              className="px-3 py-2 rounded-lg font-semibold"
+              style={{ background: THEME.btnOrange, color: THEME.btnOrangeText }}
             >
               🔄 Recarregar
             </button>
@@ -147,36 +189,52 @@ export default function KpiTermometroDia() {
         {/* filtros */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
           <div>
-            <label className="text-sm text-gray-300">Empresa</label>
+            <label className="text-sm" style={{ color: THEME.textMuted }}>
+              Empresa
+            </label>
             <input
               value={idEmpresa}
               onChange={(e) => setIdEmpresa(Number(e.target.value || 0))}
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
           </div>
           <div>
-            <label className="text-sm text-gray-300">Data</label>
+            <label className="text-sm" style={{ color: THEME.textMuted }}>
+              Data
+            </label>
             <input
               value={dataRef}
               onChange={(e) => setDataRef(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2"
+              className={fieldCls}
+              style={fieldStyle}
               placeholder="dd/mm/aaaa"
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
           </div>
           <div>
-            <label className="text-sm text-gray-300">Taxa por Entrega (R$)</label>
+            <label className="text-sm" style={{ color: THEME.textMuted }}>
+              Taxa por Entrega (R$)
+            </label>
             <input
               type="number"
               step="0.01"
               value={taxaEntrega}
               onChange={(e) => setTaxaEntrega(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
           </div>
           <div className="flex items-end">
             <button
               onClick={carregar}
-              className="w-full bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded-lg font-semibold"
+              className="w-full px-3 py-2 rounded-lg font-semibold"
+              style={{ background: THEME.btnOrange, color: THEME.btnOrangeText }}
             >
               Aplicar filtros
             </button>
@@ -184,7 +242,10 @@ export default function KpiTermometroDia() {
         </div>
 
         {err && (
-          <div className="mb-4 bg-red-900/30 border border-red-700 text-red-200 rounded p-3">
+          <div
+            className="mb-4 rounded p-3"
+            style={{ background: "#3b1f1f", color: "#fca5a5", border: "1px solid #7f1d1d" }}
+          >
             {err}
           </div>
         )}
@@ -217,23 +278,29 @@ export default function KpiTermometroDia() {
 
         {/* Tabelas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-gray-900/40 border border-orange-500 rounded-xl">
-            <div className="px-4 py-3 border-b border-gray-700 text-orange-300 font-semibold">
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ background: THEME.cardBg, border: `1px solid ${THEME.cardBorder}` }}
+          >
+            <div
+              className="px-4 py-3 border-b font-semibold"
+              style={{ borderColor: THEME.cardBorder, color: THEME.title }}
+            >
               Vendas por Hora
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-gray-300">
-                    <th className="p-2">Hora</th>
-                    <th className="p-2">Pedidos</th>
-                    <th className="p-2">Total</th>
+                  <tr style={{ color: THEME.textMuted }}>
+                    <th className="p-2 text-left">Hora</th>
+                    <th className="p-2 text-left">Pedidos</th>
+                    <th className="p-2 text-left">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {kpi.vendas_hora.length ? (
                     kpi.vendas_hora.map((h, i) => (
-                      <tr key={i} className="border-t border-gray-800">
+                      <tr key={i} style={{ borderTop: `1px solid ${THEME.cardBorder}` }}>
                         <td className="p-2">{String(h.hora).padStart(2, "0")}:00</td>
                         <td className="p-2">{h.pedidos ?? 0}</td>
                         <td className="p-2">{C(h.total ?? 0)}</td>
@@ -241,7 +308,7 @@ export default function KpiTermometroDia() {
                     ))
                   ) : (
                     <tr>
-                      <td className="p-3 text-gray-400" colSpan={3}>
+                      <td className="p-3" style={{ color: THEME.textMuted }} colSpan={3}>
                         Sem movimento.
                       </td>
                     </tr>
@@ -251,23 +318,29 @@ export default function KpiTermometroDia() {
             </div>
           </div>
 
-          <div className="bg-gray-900/40 border border-orange-500 rounded-xl">
-            <div className="px-4 py-3 border-b border-gray-700 text-orange-300 font-semibold">
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ background: THEME.cardBg, border: `1px solid ${THEME.cardBorder}` }}
+          >
+            <div
+              className="px-4 py-3 border-b font-semibold"
+              style={{ borderColor: THEME.cardBorder, color: THEME.title }}
+            >
               Top Itens do Dia
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-gray-300">
-                    <th className="p-2">Item</th>
-                    <th className="p-2">Qtd</th>
-                    <th className="p-2">Total</th>
+                  <tr style={{ color: THEME.textMuted }}>
+                    <th className="p-2 text-left">Item</th>
+                    <th className="p-2 text-left">Qtd</th>
+                    <th className="p-2 text-left">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {kpi.top_itens.length ? (
                     kpi.top_itens.map((t, i) => (
-                      <tr key={i} className="border-top border-gray-800">
+                      <tr key={i} style={{ borderTop: `1px solid ${THEME.cardBorder}` }}>
                         <td className="p-2">{t.nome}</td>
                         <td className="p-2">{t.qtd ?? 0}</td>
                         <td className="p-2">{C(t.total ?? 0)}</td>
@@ -275,7 +348,7 @@ export default function KpiTermometroDia() {
                     ))
                   ) : (
                     <tr>
-                      <td className="p-3 text-gray-400" colSpan={3}>
+                      <td className="p-3" style={{ color: THEME.textMuted }} colSpan={3}>
                         Sem dados.
                       </td>
                     </tr>
@@ -287,9 +360,14 @@ export default function KpiTermometroDia() {
         </div>
 
         {kpi.observacoes && (
-          <div className="mt-6 text-sm text-gray-300 bg-black/30 border border-gray-700 rounded p-3">
-            <div className="font-semibold mb-1">Observações do cálculo</div>
-            <pre className="whitespace-pre-wrap">
+          <div
+            className="mt-6 text-sm rounded p-3"
+            style={{ background: THEME.cardBg, border: `1px solid ${THEME.cardBorder}` }}
+          >
+            <div className="font-semibold mb-1" style={{ color: THEME.title }}>
+              Observações do cálculo
+            </div>
+            <pre className="whitespace-pre-wrap" style={{ color: THEME.textMuted }}>
 {JSON.stringify(kpi.observacoes, null, 2)}
             </pre>
           </div>
@@ -301,9 +379,16 @@ export default function KpiTermometroDia() {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-gray-900/40 border border-gray-700 rounded-xl p-4">
-      <div className="text-gray-300 text-sm mb-1">{title}</div>
-      <div className="text-2xl font-bold">{value}</div>
+    <div
+      className="rounded-xl p-4"
+      style={{ background: THEME.cardBg, border: `1px solid ${THEME.cardBorder}` }}
+    >
+      <div className="text-sm mb-1" style={{ color: THEME.textMuted }}>
+        {title}
+      </div>
+      <div className="text-2xl font-bold" style={{ color: THEME.text }}>
+        {value}
+      </div>
     </div>
   );
 }
