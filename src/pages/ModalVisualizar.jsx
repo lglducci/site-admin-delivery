@@ -194,23 +194,32 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                   <li
                     key={idx}
                     className="rounded-lg p-3 border"
-                    style={{
+                     
+                  style={{
                       borderColor: isBorda
-                        ? "rgba(255, 220, 120, 0.4)"
-                        : "rgba(255,159,67,0.25)",
-                      backgroundColor: isBorda ? "#1f1a12" : "#151a23",
+                        ? "rgba(255, 180, 50, 0.5)"
+                        : "rgba(255,159,67,0.6)",
+                      backgroundColor: isBorda ? "#fff7e6" : "#fffdf8",
                     }}
+
+
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span
                             className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
-                            style={{
-                              backgroundColor: "#2a2f39",
-                              color: "#ffcf99",
-                              border: "1px solid rgba(255,159,67,0.35)",
-                            }}
+                          
+                          
+
+
+                           style={{
+                               backgroundColor: "#ffecd2",
+                               color: "#1b1e25",
+                               border: "1px solid rgba(255,159,67,0.6)",
+                             }}
+
+                           
                             title={`Item ${numeroItem}`}
                           >
                             {numeroItem}
