@@ -2,6 +2,30 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+/* 🎨 Tema azul coerente com Login/KDS (fora escuro, dentro mais claro) */
+const THEME = {
+  pageBg: "#0e2a3a",                 // fundo da página (escuro)
+  panelBg: "#17384a",                // fundos auxiliares (se precisar)
+  panelBorder: "rgba(255,159,67,0.30)",
+
+  cardBg: "#254759",                 // bloco interno mais claro
+  cardBorder: "rgba(255,159,67,0.35)",
+  cardShadow: "0 6px 20px rgba(0,0,0,0.25)",
+
+  title: "#ff9f43",
+  text: "#e8eef2",
+  textMuted: "#bac7cf",
+
+  fieldBg: "#1f3b4d",                // inputs (um tom acima do card)
+  fieldBorder: "rgba(255,159,67,0.25)",
+  focusRing: "#ff9f43",
+
+  btnPrimary: "#ff9f43",
+  btnPrimaryText: "#1b1e25",
+  btnSecondary: "#ef4444",
+  btnSecondaryText: "#ffffff",
+};
+
 /* Helper: pega id_empresa do localStorage */
 function getIdEmpresa() {
   try {
@@ -31,7 +55,7 @@ export default function EditarItem() {
   const numeroParam = params?.numero ?? params?.id ?? null;
 
   const [item, setItem] = useState(null);
-  const [modelos, setModelos] = useState([]);          // << opções do select
+  const [modelos, setModelos] = useState([]); // opções do select
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -117,30 +141,62 @@ export default function EditarItem() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: THEME.pageBg, color: THEME.textMuted }}
+      >
         Carregando item…
       </div>
     );
   }
   if (erro) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-red-400">{erro}</div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: THEME.pageBg, color: THEME.text }}
+      >
+        <div style={{ color: "#fca5a5" }}>{erro}</div>
       </div>
     );
   }
   if (!item) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: THEME.pageBg, color: THEME.text }}
+      >
         Item não encontrado.
       </div>
     );
   }
 
+  const fieldCls =
+    "w-full px-3 py-2 rounded-xl focus:outline-none transition-shadow";
+  const fieldStyle = {
+    background: THEME.fieldBg,
+    color: THEME.text,
+    border: `1px solid ${THEME.fieldBorder}`,
+    boxShadow: "none",
+  };
+  const fieldFocus = { boxShadow: `0 0 0 2px ${THEME.focusRing}55` };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white py-10 px-4">
-      <div className="w-full max-w-4xl mx-auto bg-orange-500/15 border border-orange-400 rounded-2xl shadow-2xl p-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-orange-300 text-center">
+    <div
+      className="min-h-screen py-10 px-4"
+      style={{ background: THEME.pageBg, color: THEME.text }}
+    >
+      <div
+        className="w-full max-w-4xl mx-auto rounded-2xl p-8 border shadow-2xl"
+        style={{
+          background: THEME.cardBg,            // << mais claro
+          borderColor: THEME.cardBorder,
+          boxShadow: THEME.cardShadow,
+        }}
+      >
+        <h1
+          className="text-2xl md:text-3xl font-bold mb-6 text-center"
+          style={{ color: THEME.title }}
+        >
           ✏️ Editar Item
         </h1>
 
@@ -151,7 +207,8 @@ export default function EditarItem() {
             <input
               value={item.numero ?? ""}
               disabled
-              className="w-full px-3 py-2 rounded-xl bg-gray-800 text-gray-300 border border-gray-700"
+              className={fieldCls}
+              style={{ ...fieldStyle, opacity: 0.8 }}
             />
           </div>
 
@@ -161,7 +218,8 @@ export default function EditarItem() {
             <input
               value={item.id_empresa ?? ""}
               disabled
-              className="w-full px-3 py-2 rounded-xl bg-gray-800 text-gray-300 border border-gray-700"
+              className={fieldCls}
+              style={{ ...fieldStyle, opacity: 0.8 }}
             />
           </div>
 
@@ -172,7 +230,10 @@ export default function EditarItem() {
               name="nome"
               value={item.nome ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -184,7 +245,10 @@ export default function EditarItem() {
               value={item.descricao ?? ""}
               onChange={handleChange}
               rows="3"
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400 resize-none"
+              className={`${fieldCls} resize-none`}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -195,7 +259,10 @@ export default function EditarItem() {
               name="tipo"
               value={item.tipo ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -206,7 +273,10 @@ export default function EditarItem() {
               name="categoria"
               value={item.categoria ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -221,7 +291,10 @@ export default function EditarItem() {
                   id_referencia: e.target.value ? Number(e.target.value) : null,
                 }))
               }
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             >
               <option value="">— selecione —</option>
               {modelos.map((m) => (
@@ -241,7 +314,10 @@ export default function EditarItem() {
               name="preco_pequena"
               value={item.preco_pequena ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -252,7 +328,10 @@ export default function EditarItem() {
               name="preco_medio"
               value={item.preco_medio ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -263,7 +342,10 @@ export default function EditarItem() {
               name="preco_grande"
               value={item.preco_grande ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -274,7 +356,10 @@ export default function EditarItem() {
               name="volume"
               value={item.volume ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -285,7 +370,10 @@ export default function EditarItem() {
               name="codigo"
               value={item.codigo ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -296,7 +384,10 @@ export default function EditarItem() {
               name="palavras_chave"
               value={item.palavras_chave ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
 
@@ -307,7 +398,8 @@ export default function EditarItem() {
               name="disponivel"
               checked={!!item.disponivel}
               onChange={handleChange}
-              className="w-5 h-5 rounded border-gray-400 accent-orange-500"
+              className="w-5 h-5 rounded border"
+              style={{ accentColor: THEME.btnPrimary, borderColor: THEME.fieldBorder }}
             />
             <label className="text-sm font-semibold">Disponível</label>
           </div>
@@ -319,7 +411,10 @@ export default function EditarItem() {
               name="imagem"
               value={item.imagem ?? ""}
               onChange={handleChange}
-              className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white border border-gray-600 focus:ring-2 focus:ring-orange-400"
+              className={fieldCls}
+              style={fieldStyle}
+              onFocus={(e) => Object.assign(e.target.style, fieldFocus)}
+              onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
           </div>
         </div>
@@ -328,7 +423,8 @@ export default function EditarItem() {
         <div className="flex justify-between pt-6">
           <button
             onClick={() => window.history.back()}
-            className="px-5 py-2 bg-orange-600 hover:bg-orange-700 rounded-xl shadow-md text-white"
+            className="px-5 py-2 rounded-xl shadow-md"
+            style={{ background: THEME.btnSecondary, color: THEME.btnSecondaryText }}
           >
             🔙 Voltar
           </button>
@@ -336,9 +432,13 @@ export default function EditarItem() {
           <button
             onClick={handleSalvar}
             disabled={salvando}
-            className={`px-6 py-2 rounded-xl text-white shadow-md ${
-              salvando ? "bg-orange-400 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700"
-            }`}
+            className="px-6 py-2 rounded-xl shadow-md"
+            style={{
+              background: salvando ? "#f1b97e" : THEME.btnPrimary,
+              color: THEME.btnPrimaryText,
+              opacity: salvando ? 0.8 : 1,
+              cursor: salvando ? "not-allowed" : "pointer",
+            }}
           >
             {salvando ? "Salvando..." : "💾 Salvar"}
           </button>
