@@ -144,7 +144,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
     boxShadow: "0 0 24px rgba(255,159,67,0.3)",
   }}
 >
-
+>
   
         {/* header */}
         <div className="px-5 py-3 border-b" style={{ borderColor: "#ff9f43" }}>
@@ -153,8 +153,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
               Detalhes do Pedido nº {numero}
             </h3>
             <div className="flex gap-2">
-              <button
-               
+              <button 
                  onClick={handlePrint}
                 className="px-3 py-1.5 rounded-md text-xs md:text-sm transition-colors"
                 style={{ backgroundColor: "#2a2f39", color: "#e5e7eb" }}
