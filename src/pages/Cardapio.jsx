@@ -1,11 +1,36 @@
  import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+ /* 🎨 Tema azul (coerente com Login e KDS) */
+const THEME = {
+  // página
+  pageBg:    "#0e2a3a",      // fundo geral (mais escuro)
+  // painel grande (contêiner que envolve as colunas)
+  panelBg:   "#17384a",
+  panelBorder: "rgba(255,159,67,0.30)",
+
+  // cards/caixas dentro das colunas
+  cardBg:    "#254759",      // “cor do bloco do login” (um pouco mais claro)
+  cardBorder:"rgba(255,159,67,0.30)",
+  cardShadow:"0 6px 20px rgba(0,0,0,0.25)",
+
+  // tipografia e acentos
+  title:     "#ff9f43",
+  text:      "#e8eef2",
+  textMuted: "#bac7cf",
+
+  // botões
+  btnDark:   "#2a2f39",
+  btnDarkText:"#e5e7eb",
+  btnOrange: "#ff9f43",
+  btnOrangeText:"#1b1e25",
+};
 const CATEGORIES = [
   { key: "pizza", label: "Pizzas", icon: "🍕" },
   { key: "borda", label: "Bordas", icon: "🧀" },
   { key: "bebida", label: "Refrigerantes", icon: "🥤" },
   { key: "item", label: "Itens", icon: "🧩" },
+    { key: "esfirra", label: "Esfirra", icon: "" },
 ];
 
 export default function Cardapio() {
