@@ -125,11 +125,19 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
 
           {/* resumo */}
           {resumoTexto && (
-            <div className="mt-1 text-xs md:text-sm text-gray-800 opacity-90 resumo-bruto">
-              {resumoTexto}
-            </div>
-          )}
-        </div>
+          
+
+
+<div
+  className="mt-1 text-xs md:text-sm resumo-bruto"
+  style={{ color: "#ff9f43", fontWeight: "600" }}
+>
+  {resumoTexto}
+</div>
+
+
+
+       
 
         {/* conteúdo */}
         <div className="p-4 overflow-auto max-h-[68vh] text-sm md:text-base">
