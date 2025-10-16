@@ -145,12 +145,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
   }}
 >
 
- 
-
- 
- 
-       
-      >
+  
         {/* header */}
         <div className="px-5 py-3 border-b" style={{ borderColor: "#ff9f43" }}>
           <div className="flex items-center justify-between">
