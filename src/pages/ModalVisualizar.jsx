@@ -1,7 +1,5 @@
- import React, { useEffect, useMemo, useState } from "react";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-
 
 /**
  * Modal discreto para visualizar apenas os itens do pedido.
