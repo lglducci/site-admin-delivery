@@ -140,7 +140,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             boxShadow: "0 0 24px rgba(255,159,67,0.3)",
           }}
 >
-assName="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
+ 
        
       >
         {/* header */}
