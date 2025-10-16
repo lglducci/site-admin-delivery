@@ -50,7 +50,7 @@ export default function Login() {
       className="min-h-screen flex items-center justify-center"
       style={{
      
-         background: "linear-gradient(135deg, #83C7C7 0%, #3da7a8 100%)",
+         background: "linear-gradient(135deg, #7091af 33%, #012e46 100%)",
       
       }}
     >
