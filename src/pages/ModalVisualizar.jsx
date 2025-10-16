@@ -132,7 +132,12 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       {/* container */}
       <div
         className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
-        style={{ backgroundColor: "#1b1e25", boxShadow: "0 0 24px rgba(0,0,0,0.5)" }}
+       style={{
+  backgroundColor: "#fff9f0",      // fundo claro
+  color: "#1b1e25",                // texto escuro
+  border: "1px solid #ff9f43",     // borda alaranjada
+  boxShadow: "0 0 24px rgba(255,159,67,0.3)" // brilho suave
+}}
       >
         {/* header */}
         <div className="px-5 py-3 border-b" style={{ borderColor: "#ff9f43" }}>
