@@ -179,7 +179,13 @@ export default function Dashboard() {
   };
 
   const Coluna = ({ titulo, items, cls }) => (
-    <div className={`rounded-2xl p-4 md:p-5 ring-1 ring-[#d37c3f]/30 ${cls}`}>
+    
+  <div
+  className={`rounded-2xl p-4 md:p-5 ${cls || ""}`}
+   style={{ background: THEME.panelBg, border: `1px solid ${THEME.panelBorder}` }}
+  >
+
+     
       <div className="pb-3 mb-3 border-b border-[#d37c3f]/60">
         <h2 className="text-lg md:text-xl font-semibold">{titulo}</h2>
       </div>
@@ -200,7 +206,9 @@ export default function Dashboard() {
     <div
       className="min-h-screen p-4 md:p-6 text-white"
       style={{
-        background: `linear-gradient(to bottom, ${THEME.bgFrom}, ${THEME.bgVia}, ${THEME.bgTo})`,
+       style={{ background: THEME.pageBg }}
+
+       
       }}
     >
       {/* Cabeçalho */}
@@ -287,11 +295,14 @@ export default function Dashboard() {
 
       {/* Colunas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-        <Coluna titulo="Recebido" items={grupos.r} cls="bg-[#0F121A] text-[#ffcf88]" />
-        <Coluna titulo="Produção" items={grupos.pr} cls="bg-[#0F121A] text-[#ffcf88]" />
-        <Coluna titulo="Entrega" items={grupos.e} cls="bg-[#0F121A] text-[#ffcf88]" />
-        <Coluna titulo="Concluído" items={grupos.c} cls="bg-[#0F121A] text-[#ffcf88]" />
+        <Coluna titulo="Recebido"  items={grupos.r} />
+        <Coluna titulo="Produção" items={grupos.pr} />
+        <Coluna titulo="Entrega"  items={grupos.e} />
+        <Coluna titulo="Concluído" items={grupos.c} />
+
       </div>
+
+    
 
       {/* 🪟 Modal Detalhes */}
       {showDetalhes && pedidoSelecionado && (
