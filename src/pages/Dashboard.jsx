@@ -211,11 +211,8 @@ export default function Dashboard() {
   return (
     <div
       className="min-h-screen p-4 md:p-6 text-white"
-      style={{
-       style={{ background: THEME.pageBg }}
-
-       
-      }}
+    
+style={{ background: THEME.pageBg     }}
     >
       {/* Cabeçalho */}
       <div
