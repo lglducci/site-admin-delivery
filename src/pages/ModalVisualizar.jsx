@@ -130,16 +130,17 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       {/* container */}
-      <div
-        cl<div
-          className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
-          style={{
-            backgroundColor: "#fff9f0",
-            color: "#1b1e25",
-            border: "1px solid #ff9f43",
-            boxShadow: "0 0 24px rgba(255,159,67,0.3)",
-          }}
+       <div
+  className="relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl print-fullpage"
+  style={{
+    backgroundColor: "#fff9f0",
+    color: "#091219",                 // texto mais escuro (pretão azulado)
+    border: "1px solid #ff9f43",
+    boxShadow: "0 0 24px rgba(255,159,67,0.3)",
+  }}
 >
+
+ 
  
        
       >
