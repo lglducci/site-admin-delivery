@@ -1,22 +1,29 @@
  import React, { useEffect, useMemo, useState } from "react";
 import ModalDetalhesPedido from "../components/ModalDetalhesPedido";
 
-/* 🎨 Tema dark profissional */
+ /* 🎨 Tema azul (coerente com Login e KDS) */
 const THEME = {
-  bgFrom: "#0F121A",
-  bgVia: "#13161B",
-  bgTo: "#1B1E25",
-  panelBg: "#0F121A",
-  panelBorder: "rgba(255,159,67,0.55)",
-  title: "#ff9f43",
-  text: "#e5e7eb",
-  textMuted: "#9ca3af",
-  btnDark: "#2a2f39",
-  btnDarkText: "#e5e7eb",
+  // página
+  pageBg:    "#0e2a3a",      // fundo geral (mais escuro)
+  // painel grande (contêiner que envolve as colunas)
+  panelBg:   "#17384a",
+  panelBorder: "rgba(255,159,67,0.30)",
+
+  // cards/caixas dentro das colunas
+  cardBg:    "#254759",      // “cor do bloco do login” (um pouco mais claro)
+  cardBorder:"rgba(255,159,67,0.30)",
+  cardShadow:"0 6px 20px rgba(0,0,0,0.25)",
+
+  // tipografia e acentos
+  title:     "#ff9f43",
+  text:      "#e8eef2",
+  textMuted: "#bac7cf",
+
+  // botões
+  btnDark:   "#2a2f39",
+  btnDarkText:"#e5e7eb",
   btnOrange: "#ff9f43",
-  btnOrangeText: "#1b1e25",
-  cardBg: "#1B1E25",
-  cardBorder: "rgba(255,159,67,0.25)",
+  btnOrangeText:"#1b1e25",
 };
 
 function getEmpresaSafe() {
@@ -199,7 +206,10 @@ export default function Dashboard() {
       {/* Cabeçalho */}
       <div
         className="flex justify-between items-center mb-6 shadow-lg rounded-xl p-4 border relative z-50"
-        style={{ background: THEME.panelBg, borderColor: THEME.panelBorder }}
+        style={{backgroundColor: THEME.panelBg, borderColor: THEME.panelBorder}}
+
+
+       
       >
         <div>
           <h1 className="text-2xl font-bold" style={{ color: THEME.title }}>
@@ -255,7 +265,7 @@ export default function Dashboard() {
                         ? window.open(link, "_blank")
                         : (window.location.href = link)
                     }
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#ff9f4315] flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#ff9f43] flex items-center gap-2 transition-colors"
                     style={{ color: THEME.text }}
                   >
                     <span>{icon}</span> {label}
