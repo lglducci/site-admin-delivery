@@ -110,12 +110,18 @@ export default function Cardapio() {
     );
 
   return (
-    <div className="p-6" style={{ backgroundColor: "#0B0B0B", minHeight: "100vh" }}>
-      {/* Topo */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-3xl font-bold flex items-center gap-2 text-white">
-          📋 Cardápio
-        </h1>
+     <div
+  className="p-6"
+  style={{ background: THEME.pageBg, minHeight: "100vh", color: THEME.text }}
+>
+            <h1
+              className="text-3xl font-bold flex items-center gap-2"
+              style={{ color: THEME.title }}
+            >
+              📋 Cardápio
+            </h1>
+
+ 
 
         <div className="flex gap-2 w-full md:w-auto">
           <input
@@ -143,11 +149,18 @@ export default function Cardapio() {
             <button
               key={c.key}
               onClick={() => setActiveCat(c.key)}
-              className={`px-3 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                isActive
-                  ? "bg-[#FFB703] text-black border-[#FFB703]"
-                  : "bg-[#161616] text-gray-200 border-[#2a2a2a] hover:bg-[#1f1f1f]"
-              }`}
+            
+
+
+              className="px-3 py-2 rounded-xl text-sm font-semibold transition-all border"
+                 style={{
+                   background: isActive ? THEME.btnOrange : THEME.btnDark,
+                   color:     isActive ? THEME.btnOrangeText : THEME.btnDarkText,
+                   borderColor: THEME.panelBorder,
+                 }}
+                   
+
+             
             >
               {c.icon} {c.label}
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${isActive ? "bg-black/20" : "bg-white/10"}`}>
@@ -164,10 +177,21 @@ export default function Cardapio() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6">
           {itensCategoria.map((item) => (
-            <div
-              key={item.numero}
-              className="bg-[#0F0F0F] shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all border border-[#222]"
-            >
+             
+
+             <div
+                key={item.numero}
+               className="rounded-2xl overflow-hidden hover:shadow-2xl transition-all border"
+               style={{
+                 background: THEME.cardBg,
+                 borderColor: THEME.cardBorder,
+                 boxShadow: THEME.cardShadow,
+               }}
+             >
+             
+
+
+             
               <img
                 src={item.imagem || "https://placehold.co/400x250?text=Sem+Imagem"}
                 alt={item.nome}
