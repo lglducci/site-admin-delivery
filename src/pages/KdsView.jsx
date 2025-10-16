@@ -99,8 +99,15 @@ export default function KdsView() {
         alert("Falha ao avançar o pedido.");
         return;
       }
-      // remove da UI após avançar
-      setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
+ 
+
+       // remove da UI e atualiza lista logo em seguida
+       setPedidos((prev) => prev.filter((p) => (p.numero ?? p.pedido_id) !== numero));
+       await carregarPedidos();
+
+
+
+     
     } catch (e) {
       console.error(e);
       alert("Erro ao avançar pedido!");
