@@ -122,7 +122,7 @@ export default function Cardapio() {
   return (
     <div
       className="min-h-screen p-6"
-      style={{ background:  panelwhite , color: THEME.text }}   // THEME.pageBg
+      style={{ background:  THEME.panelwhite , color: THEME.text }}   // THEME.pageBg
     >
       {/* Topo em painel */}
       <div
