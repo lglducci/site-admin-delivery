@@ -175,8 +175,8 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         <span
           className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
           style={{
-            backgroundColor: "#ffecd2",
-            color: "#1b1e25",
+            backgroundColor: "#06283c", //#ffecd2",
+            color: "##06283c", // 1b1e25",
             border: "1px solid rgba(255,159,67,0.6)",
           }}
           title={`Item ${numeroItem}`}
@@ -185,7 +185,7 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         </span>
 
         <span className="text-base">{icone}</span>
-        <span className="font-semibold" style={{ color: "#ff9f43" }}>
+        <span className="font-semibold" style={{ color: "#06283c" }}>
           {it.nome || "Item"}
         </span>
       </div>
@@ -194,19 +194,19 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
       <div className="mt-1 text-gray-100 text-sm leading-snug">
         {it.tamanho && (
           <span className="font-semibold text-white">
-            Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
+            Tamanho: <span className="text-[#06283c]">{it.tamanho}</span>
           </span>
         )}
         {it.tamanho && qtd ? " • " : ""}
         {qtd && (
           <span className="font-semibold text-white">
-            Qtd: <span className="text-[#ff9f43]">{qtd}</span>
+            Qtd: <span className="text-[#06283c]">{qtd}</span>
           </span>
         )}
         {categoria && (
           <>
             {(it.tamanho || qtd) ? " • " : ""}
-            <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
+            <span className="uppercase tracking-wide text-xs font-bold text-[#06283c]">
               {categoria}
             </span>
           </>
