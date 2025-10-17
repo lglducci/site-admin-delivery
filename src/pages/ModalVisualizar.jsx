@@ -212,16 +212,20 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
           </>
         )}
 
-        {it.descricao && (
-          <div className="mt-1 text-black-200 font-medium leading-snug">
-            {it.descricao}
-          </div>
-        )}
+          {it.descricao && (
+            <div className="mt-1 text-gray-900 font-medium leading-snug">
+              {it.descricao}
+            </div>
+          )}
+          
+          {(it.numero_pai || it.nome_pai) && (
+            <div className="mt-1 text-xs text-gray-900 font-semibold">
+              Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
+            </div>
+          )}
 
-        {(it.numero_pai || it.nome_pai) && (
-          <div className="mt-1 text-xs text-black-900">
-            Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
-          </div>
+       
+     
         )}
       </div>
     </div>
