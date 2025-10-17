@@ -190,35 +190,34 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           </span>
                         </div>
 
-                          
-                         <div className="mt-1 text-gray-100 text-sm leading-snug">
-                           {it.tamanho && (
-                             <span className="font-semibold text-white">
-                               Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
-                             </span>
-                           )}
-                           {it.tamanho && qtd ? " • " : ""}
-                           {qtd && (
-                             <span className="font-semibold text-white">
-                               Qtd: <span className="text-[#ff9f43]">{qtd}</span>
-                             </span>
-                           )}
-                           {categoria && (
-                             <>
-                               {(it.tamanho || qtd) ? " • " : ""}
-                               <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
-                                 {categoria}
-                               </span>
-                             </>
-                           )}
-                         
-                           {it.descricao && (
-                             <div className="mt-1 text-gray-200 font-medium leading-snug">
-                               {it.descricao}
-                             </div>
-                           )}
-                         </div>
+                       
+<div className="mt-1 text-gray-100 text-sm leading-snug">
+  {it.tamanho && (
+    <span className="font-semibold text-white">
+      Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
+    </span>
+  )}
+  {it.tamanho && qtd ? " • " : ""}
+  {qtd && (
+    <span className="font-semibold text-white">
+      Qtd: <span className="text-[#ff9f43]">{qtd}</span>
+    </span>
+  )}
+  {categoria && (
+    <>
+      {(it.tamanho || qtd) ? " • " : ""}
+      <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
+        {categoria}
+      </span>
+    </>
+  )}
 
+  {it.descricao && (
+    <div className="mt-1 text-gray-200 font-medium leading-snug">
+      {it.descricao}
+    </div>
+  )}
+</div>
 
 
 
