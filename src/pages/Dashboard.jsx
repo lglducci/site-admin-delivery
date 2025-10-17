@@ -193,11 +193,18 @@ const avancar = async (numero) => {
     );
   };
 
+
  const Coluna = ({ titulo, items }) => (
   <div
     className="rounded-2xl p-4 md:p-5"
-    style={{ background: THEME.panelBg, border: `1px solid ${THEME.panelBorder}` }}
+    style={{
+      backgroundColor: "#ccd5da", // 👈 COR QUE VOCÊ QUER
+      border: `1px solid ${THEME.panelBorder}`,
+    }}
   >
+
+
+ 
     <div
       className="pb-3 mb-3 border-b"
       style={{ borderColor: THEME.panelBorder }}
