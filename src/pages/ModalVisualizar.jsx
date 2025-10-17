@@ -190,25 +190,47 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
                           </span>
                         </div>
 
-                        <div className="mt-1 text-gray-800">
-                          {it.tamanho ? `Tamanho: ${it.tamanho}` : null}
-                          {it.tamanho && qtd ? " • " : ""}
-                          {qtd ? `Qtd: ${qtd}` : null}
-                          {categoria && (
-                            <>
-                              {(it.tamanho || qtd) ? " • " : ""}
-                              <span className="uppercase tracking-wide text-xs opacity-80">
-                                {categoria}
-                              </span>
-                            </>
-                          )}
+                          
+                         <div className="mt-1 text-gray-100 text-sm leading-snug">
+                           {it.tamanho && (
+                             <span className="font-semibold text-white">
+                               Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
+                             </span>
+                           )}
+                           {it.tamanho && qtd ? " • " : ""}
+                           {qtd && (
+                             <span className="font-semibold text-white">
+                               Qtd: <span className="text-[#ff9f43]">{qtd}</span>
+                             </span>
+                           )}
+                           {categoria && (
+                             <>
+                               {(it.tamanho || qtd) ? " • " : ""}
+                               <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
+                                 {categoria}
+                               </span>
+                             </>
+                           )}
+                         
+                           {it.descricao && (
+                             <div className="mt-1 text-gray-200 font-medium leading-snug">
+                               {it.descricao}
+                             </div>
+                           )}
+                         </div>
 
-                          {it.descricao && (
-                            <div className="mt-1 text-sm text-gray-900 leading-snug">
-                              {it.descricao}
-                            </div>
-                          )}
 
+
+
+
+
+
+
+
+
+
+
+                       
                           {/* 🔙 Vinculado a item ou borda */}
                           {(it.numero_pai || it.nome_pai) && (
                             <div className="mt-1 text-xs text-gray-900">
