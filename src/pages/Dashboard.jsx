@@ -4,7 +4,7 @@ import ModalDetalhesPedido from "../components/ModalDetalhesPedido";
  /* 🎨 Tema azul (coerente com Login e KDS) */
 const THEME = {
   // página
-  pageBg:    "#0e2a3a",      // fundo geral (mais escuro)
+  pageBg:    "#153b54",      // fundo geral #0e2a3a (mais escuro)
   // painel grande (contêiner que envolve as colunas)
   panelBg:   "#17384a",
   panelBorder: "rgba(255,159,67,0.30)",
