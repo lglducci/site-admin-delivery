@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 
 /* === TEMA PADRÃO (azul/laranja) === */
 const THEME = {
-  cardBg:    "#254759",                 // “cor do bloco do login”
+  cardBg:    "#012e46",                 // “cor do bloco do login #254759”
+
+ 
   border:    "rgba(255,159,67,0.30)",   // borda laranja suave
   title:     "#ff9f43",
   text:      "#e8eef2",
