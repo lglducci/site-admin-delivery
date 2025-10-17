@@ -313,21 +313,14 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
 
       {/* Colunas */}
       
- 
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 text-white rounded-xl" style={{ backgroundColor: "#dd3424" }}>
-  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
-    Recebido
-  </div>
-  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
-    Produção
-  </div>
-  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
-    Entrega
-  </div>
-  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
-    Concluído
-  </div>
+ <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 bg-red-700 p-5">
+  <Coluna titulo="Recebido"  items={grupos.r} />
+  <Coluna titulo="Produção" items={grupos.pr} />
+  <Coluna titulo="Entrega"  items={grupos.e} />
+  <Coluna titulo="Concluído" items={grupos.c} />
 </div>
+
+ 
 
 
       {/* 🪟 Modal Detalhes */}
