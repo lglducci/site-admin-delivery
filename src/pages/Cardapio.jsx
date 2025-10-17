@@ -11,7 +11,7 @@ const THEME = {
   panelBorder: "rgba(255,159,67,0.30)",
 
   // cards
-  cardBg: "#254759",
+  cardBg: "#012e46",
   cardBorder: "rgba(255,159,67,0.30)",
   cardShadow: "0 6px 20px rgba(0,0,0,0.25)",
 
