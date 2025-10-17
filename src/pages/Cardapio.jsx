@@ -9,7 +9,7 @@ const THEME = {
   // painel grande (topo)
   panelBg: "#17384a",
   panelBorder: "rgba(255,159,67,0.30)",
-  panelwhite: #ffffff,
+  panelwhite: "#ffffff",
 
   // cards
   cardBg: "#012e46",
