@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 /* 🎨 Tema azul coerente com Login/KDS */
 const THEME = {
   // página
-  pageBg: "#0e2a3a",
+  pageBg: "#012e46",
   // painel/containers
-  panelBg: "#17384a",
+  panelBg: "#153b54",
   panelBorder: "rgba(255,159,67,0.30)",
   // cards
   cardBg: "#254759",
