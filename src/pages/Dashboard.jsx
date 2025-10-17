@@ -313,14 +313,22 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
 
       {/* Colunas */}
       
-    
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 bg-red-700 p-4">
-  <div className="bg-yellow-700 p-3 rounded-xl text-white">Recebido</div>
-  <div className="bg-orange-700 p-3 rounded-xl text-white">Produção</div>
-  <div className="bg-blue-700 p-3 rounded-xl text-white">Entrega</div>
-  <div className="bg-green-700 p-3 rounded-xl text-white">Concluído</div>
+ 
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 text-white rounded-xl" style={{ backgroundColor: "#dd3424" }}>
+  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
+    Recebido
+  </div>
+  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
+    Produção
+  </div>
+  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
+    Entrega
+  </div>
+  <div className="p-4 rounded-xl shadow-lg text-center font-bold text-lg bg-[#202020]">
+    Concluído
+  </div>
 </div>
+
 
       {/* 🪟 Modal Detalhes */}
       {showDetalhes && pedidoSelecionado && (
