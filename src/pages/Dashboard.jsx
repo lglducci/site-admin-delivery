@@ -229,7 +229,7 @@ const avancar = async (numero) => {
     <div
       className="min-h-screen p-4 md:p-6 text-white"
     
-style={{ background: "#ffffff"      }}  //THEME.pageBg 
+style={{ background: "#012e46"      }}  //THEME.pageBg 
     >
       {/* Cabeçalho */}
       <div
