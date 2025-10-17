@@ -315,8 +315,20 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
 
       {/* Colunas */}
  
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 p-5"
-     style={{ backgroundColor: "#99abb5" }}>
+
+      {/*  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 p-5"
+     style={{ backgroundColor: "#99abb5" }}> */}
+
+
+ <div
+  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 mx-auto"
+  style={{
+    backgroundColor: "#2c2c2c",   // cinza de fundo
+    transform: "scale(0.8)",      // reduz 80% do tamanho atual
+    transformOrigin: "top center",
+    borderRadius: "12px",
+  }}
+>
   <Coluna titulo="Recebido"  items={grupos.r} />
   <Coluna titulo="Produção" items={grupos.pr} />
   <Coluna titulo="Entrega"  items={grupos.e} />
