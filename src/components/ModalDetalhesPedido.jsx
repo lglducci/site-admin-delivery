@@ -1,4 +1,20 @@
- import React, { useEffect, useMemo, useState, useRef } from "react";
+ // src/components/ModalDetalhesPedido.jsx
+import React, { useEffect, useMemo, useState, useRef } from "react";
+
+/* === TEMA PADRÃO (azul/laranja) === */
+const THEME = {
+  cardBg:    "#254759",                 // “cor do bloco do login”
+  border:    "rgba(255,159,67,0.30)",   // borda laranja suave
+  title:     "#ff9f43",
+  text:      "#e8eef2",
+  textMuted: "#bac7cf",
+  chipBg:    "#2a2f39",
+  chipText:  "#e5e7eb",
+  btnDark:   "#2a2f39",
+  btnDarkText:"#e5e7eb",
+  btnOrange: "#ff9f43",
+  btnOrangeText:"#1b1e25",
+};
 
 function parseMoneyFromResumo(resumo, label) {
   if (!resumo) return null;
@@ -23,49 +39,55 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   const [erro, setErro] = useState("");
   const printRef = useRef(null);
 
-  // 🔸 CSS para impressão apenas da modal
+  // CSS de impressão mínimo (não interfere no layout principal)
   useEffect(() => {
     const styleTag = document.createElement("style");
     styleTag.innerHTML = `
       @page { size: A4 portrait; margin: 12mm; }
-      @media print {
-        body * { visibility: hidden; }
-        .printable, .printable * { visibility: visible; }
-        .printable { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; }
-        button { display: none !important; }
-      }
+      @media print { button { display: none !important; } }
     `;
     document.head.appendChild(styleTag);
     return () => styleTag.remove();
   }, []);
 
-  // 🔸 Função para imprimir apenas o conteúdo da modal
+  // Imprimir só a modal (nova janela; aguarda onload)
   const handlePrint = () => {
-    const printContent = printRef.current;
-    if (!printContent) return;
+    const el = printRef.current;
+    if (!el) return;
 
-    const printWindow = window.open("", "PRINT", "width=900,height=650");
-    printWindow.document.write(`
+    const html = `
       <html>
         <head>
+          <meta charSet="utf-8" />
           <title>Pedido nº ${numero}</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
+            * { box-sizing: border-box; }
+            body { font-family: Arial, Helvetica, sans-serif; padding: 20px; color: #000; background: #fff; }
+            h1,h2,h3 { margin: 0 0 8px; }
+            .muted { color: #444; font-size: 12px; }
+            .badge { display:inline-block; padding:2px 6px; border:1px solid #ddd; border-radius:6px; font-size:12px; }
             table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #ccc; padding: 8px; }
-            th { background: #eee; }
+            th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+            th { background: #f2f2f2; }
           </style>
         </head>
-        <body>${printContent.innerHTML}</body>
+        <body>${el.innerHTML}</body>
       </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    `;
+
+    const w = window.open("", "PRINT", "width=900,height=650");
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => {
+      w.focus();
+      w.print();
+      w.close();
+    };
   };
 
-  // 🔸 Busca dos dados
+  // Busca dos dados
   useEffect(() => {
     if (!open || !numero) return;
     const carregar = async () => {
@@ -115,43 +137,59 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
       <div
         ref={printRef}
-        className="printable bg-[#1B1E25] text-white rounded-2xl shadow-2xl w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto p-6 relative border border-[#ff9f43]/40"
+        className="relative w-11/12 max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl border p-6"
+        style={{
+          background: THEME.cardBg,
+          borderColor: THEME.border,
+          color: THEME.text,
+        }}
       >
+        {/* Fechar */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl"
+          className="absolute top-3 right-3 text-sm px-2 py-1 rounded-md"
+          style={{ background: THEME.btnDark, color: THEME.btnDarkText }}
           aria-label="Fechar"
+          title="Fechar"
         >
           ✖
         </button>
 
-        <h2 className="text-2xl font-bold mb-1 text-[#ff9f43]">
+        {/* Título */}
+        <h2 className="text-2xl font-bold mb-1" style={{ color: THEME.title }}>
           Detalhes do Pedido nº {numero}
         </h2>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm mb-4" style={{ color: THEME.textMuted }}>
           {tipo_cobranca ? `Pagamento: ${String(tipo_cobranca).toUpperCase()}` : ""}
         </p>
 
-        {erro && <p className="text-red-400 mb-4">{erro}</p>}
+        {erro && <p className="mb-4" style={{ color: "#fca5a5" }}>{erro}</p>}
 
+        {/* HTML bruto (fallback) */}
         {data?.html ? (
           <div
-            className="prose prose-invert max-w-none text-gray-200"
+            className="prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: data.html }}
           />
         ) : (
           <>
             {/* Cliente + Endereço */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
-                <div className="text-xs text-gray-400">Cliente</div>
+              <div
+                className="rounded-xl p-3 border"
+                style={{ background: "#1b3c4d", borderColor: THEME.border }}
+              >
+                <div className="text-xs" style={{ color: THEME.textMuted }}>Cliente</div>
                 <div className="text-sm font-semibold">{nome_cliente || "—"}</div>
               </div>
-              <div className="bg-[#0F121A] rounded-xl p-3 border border-[#ff9f43]/20">
-                <div className="text-xs text-gray-400">Endereço</div>
+              <div
+                className="rounded-xl p-3 border"
+                style={{ background: "#1b3c4d", borderColor: THEME.border }}
+              >
+                <div className="text-xs" style={{ color: THEME.textMuted }}>Endereço</div>
                 <div className="text-sm">
                   {endereco ? `${endereco}${bairro ? ` – ${bairro}` : ""}` : "—"}
                 </div>
@@ -159,11 +197,11 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
             </div>
 
             {/* Itens */}
-            <div className="rounded-xl overflow-hidden border border-[#ff9f43]/20 mb-4">
+            <div className="rounded-xl overflow-hidden border mb-4" style={{ borderColor: THEME.border }}>
               <table className="w-full text-sm">
-                <thead className="bg-[#0F121A]">
-                  <tr className="text-left">
-                    <th className="px-3 py-2">Item</th>
+                <thead>
+                  <tr style={{ background: "#1b3c4d", color: THEME.text }}>
+                    <th className="px-3 py-2 text-left">Item</th>
                     <th className="px-3 py-2 text-center">Qtd</th>
                     <th className="px-3 py-2 text-right">Valor</th>
                     <th className="px-3 py-2 text-right">Subtotal</th>
@@ -176,23 +214,41 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
                       const val = Number(it.valor) || 0;
                       const sub = qtd * val;
                       return (
-                        <tr key={idx} className="border-t border-[#ff9f43]/10">
-                          <td className="px-3 py-2">
+                        <tr key={idx} className="border-t" style={{ borderColor: "rgba(255,159,67,0.15)" }}>
+                          <td className="px-3 py-2 align-top">
                             <div className="font-medium">{it.nome || "—"}</div>
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs" style={{ color: THEME.textMuted }}>
                               {it.categoria || it.tipo || ""}
                               {it.fracionada ? " • fracionada" : ""}
                             </div>
+
+                            {/* Vinculado a: (restaurado) */}
+                            {(it.nome_pai || it.numero_pai) ? (
+                              <div className="mt-1 text-xs">
+                                <span style={{ color: THEME.textMuted }}>Vinculado a: </span>
+                                {it.nome_pai ? (
+                                  <span
+                                    className="inline-block px-2 py-0.5 rounded-md mr-2"
+                                    style={{ background: THEME.chipBg, color: THEME.chipText }}
+                                  >
+                                    {it.nome_pai}
+                                  </span>
+                                ) : null}
+                                {it.numero_pai ? (
+                                  <span className="muted"># {it.numero_pai}</span>
+                                ) : null}
+                              </div>
+                            ) : null}
                           </td>
-                          <td className="px-3 py-2 text-center">{qtd}</td>
-                          <td className="px-3 py-2 text-right">{formatBRL(val)}</td>
-                          <td className="px-3 py-2 text-right">{formatBRL(sub)}</td>
+                          <td className="px-3 py-2 text-center align-top">{qtd}</td>
+                          <td className="px-3 py-2 text-right align-top">{formatBRL(val)}</td>
+                          <td className="px-3 py-2 text-right align-top">{formatBRL(sub)}</td>
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-3 py-4 text-center text-gray-400">
+                      <td colSpan={4} className="px-3 py-4 text-center" style={{ color: THEME.textMuted }}>
                         Sem itens para este pedido.
                       </td>
                     </tr>
@@ -203,40 +259,47 @@ export default function ModalDetalhesPedido({ open, onClose, numero, idEmpresa }
 
             {/* Totais */}
             <div className="flex flex-col gap-2 items-end">
-              <div className="text-sm text-gray-300">
-                Subtotal: <span className="font-semibold">{formatBRL(subtotal)}</span>
+              <div className="text-sm">
+                <span style={{ color: THEME.textMuted }}>Subtotal: </span>
+                <span className="font-semibold">{formatBRL(subtotal)}</span>
               </div>
-              <div className="text-sm text-gray-300">
-                Entrega: <span className="font-semibold">{formatBRL(entrega)}</span>
+              <div className="text-sm">
+                <span style={{ color: THEME.textMuted }}>Entrega: </span>
+                <span className="font-semibold">{formatBRL(entrega)}</span>
               </div>
-              <div className="text-lg font-bold text-[#ff9f43]">
+              <div className="text-lg font-bold" style={{ color: THEME.title }}>
                 Total: {formatBRL(total)}
               </div>
             </div>
 
-            {/* Resumo bruto */}
+            {/* Resumo bruto (se houver) */}
             {data?.resumo && (
               <div className="mt-4">
-                <h4 className="text-sm text-gray-400 mb-1">Resumo bruto:</h4>
-                <pre className="p-3 bg-[#0F121A] rounded-lg text-xs whitespace-pre-wrap text-gray-300">
-                  {data.resumo}
+                <h4 className="text-sm" style={{ color: THEME.textMuted }}>Resumo bruto:</h4>
+                <pre
+                  className="p-3 rounded-lg text-xs whitespace-pre-wrap"
+                  style={{ background: "#1b3c4d", color: THEME.text }}
+                >
+{data.resumo}
                 </pre>
               </div>
             )}
           </>
         )}
 
-        {/* Botões */}
+        {/* Ações */}
         <div className="mt-6 text-right flex gap-2 justify-end">
           <button
             onClick={handlePrint}
-            className="bg-[#2a2f39] text-gray-100 font-semibold px-4 py-2 rounded-md hover:bg-[#3a3f49] transition"
+            className="px-4 py-2 rounded-md font-semibold transition"
+            style={{ background: THEME.btnDark, color: THEME.btnDarkText }}
           >
             🖨️ Imprimir
           </button>
           <button
             onClick={onClose}
-            className="bg-[#ff9f43] text-[#1B1E25] font-semibold px-4 py-2 rounded-md hover:bg-[#ffb763] transition"
+            className="px-4 py-2 rounded-md font-semibold transition"
+            style={{ background: THEME.btnOrange, color: THEME.btnOrangeText }}
           >
             Fechar
           </button>
