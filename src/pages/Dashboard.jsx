@@ -10,7 +10,7 @@ const THEME = {
   panelBorder: "rgba(255,159,67,0.30)",
 
   // cards/caixas dentro das colunas
-  cardBg:    "#254759",      // “cor do bloco do login” (um pouco mais claro)
+  cardBg:    "#012e46",      // “cor do bloco #254759   do login” (um pouco mais claro)
   cardBorder:"rgba(255,159,67,0.30)",
   cardShadow:"0 6px 20px rgba(0,0,0,0.25)",
 
