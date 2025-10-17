@@ -16,7 +16,7 @@ export default function Layout() {
       <header className="bg-[#0c1d2a] border-b border-[#ff9f43]/30 px-4 py-3 flex justify-between items-center">
 
 <div
-  className="font-extrabold tracking-tight text-3xl md:text-2xl"
+  className="font-extrabold tracking-tight text-4xl md:text-4xl"
   style={{ color: "#ff9f43" }}
 >
   🍕 AdminDelivery
