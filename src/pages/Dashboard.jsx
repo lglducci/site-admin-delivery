@@ -323,7 +323,7 @@ style={{ background: "#012e46"      }}  //THEME.pageBg
  <div
   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 mx-auto"
   style={{
-    backgroundColor: "#2c2c2c",   // cinza de fundo
+    backgroundColor: "#345671",   // cinza de fundo
     transform: "scale(0.8)",      // reduz 80% do tamanho atual
     transformOrigin: "top center",
     borderRadius: "12px",
