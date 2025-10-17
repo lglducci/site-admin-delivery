@@ -313,13 +313,14 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
 
       {/* Colunas */}
       
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-      <Coluna titulo="Recebido"  items={grupos.r} />
-      <Coluna titulo="Produção" items={grupos.pr} />
-      <Coluna titulo="Entrega"  items={grupos.e} />
-      <Coluna titulo="Concluído" items={grupos.c} />
+    
     </div>
-
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 bg-red-700 p-4">
+  <div className="bg-yellow-700 p-3 rounded-xl text-white">Recebido</div>
+  <div className="bg-orange-700 p-3 rounded-xl text-white">Produção</div>
+  <div className="bg-blue-700 p-3 rounded-xl text-white">Entrega</div>
+  <div className="bg-green-700 p-3 rounded-xl text-white">Concluído</div>
+</div>
 
       {/* 🪟 Modal Detalhes */}
       {showDetalhes && pedidoSelecionado && (
