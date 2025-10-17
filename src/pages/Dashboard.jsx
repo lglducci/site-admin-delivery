@@ -1,31 +1,23 @@
  import React, { useEffect, useMemo, useState } from "react";
 import ModalDetalhesPedido from "../components/ModalDetalhesPedido";
 
- /* 🎨 Tema azul (coerente com Login e KDS) */
+
 const THEME = {
-  // página
-  pageBg:    "#153b54",      // fundo geral #0e2a3a (mais escuro)
-  // painel grande (contêiner que envolve as colunas)
-  panelBg:   "#17384a",
-  panelBorder: "rgba(255,159,67,0.30)",
-
-  // cards/caixas dentro das colunas
-  cardBg:    "#012e46",      // “cor do bloco #254759   do login” (um pouco mais claro)
-  cardBorder:"rgba(255,159,67,0.30)",
-  cardShadow:"0 6px 20px rgba(0,0,0,0.25)",
-
-  // tipografia e acentos
-  title:     "#ff9f43",
-  text:      "#e8eef2",
-  textMuted: "#bac7cf",
-
-  // botões
-  btnDark:   "#2a2f39",
-  btnDarkText:"#e5e7eb",
+  pageBg: "#0d1117",
+  panelBg: "#1e2a32",
+  panelBorder: "rgba(255,140,0,0.35)",
+  cardBg: "#0b1a24",
+  cardBorder: "rgba(255,140,0,0.25)",
+  cardShadow: "0 6px 20px rgba(0,0,0,0.35)",
+  title: "#ff9f43",
+  text: "#f3f3f3",
+  textMuted: "#aeb9c4",
+  btnDark: "#26323a",
+  btnDarkText: "#e5e7eb",
   btnOrange: "#ff9f43",
-  btnOrangeText:"#1b1e25",
+  btnOrangeText: "#1b1e25",
 };
-
+ 
 function getEmpresaSafe() {
   try {
     return JSON.parse(localStorage.getItem("empresa") || "{}");
