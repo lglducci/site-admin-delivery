@@ -14,7 +14,7 @@ export default function Layout() {
     <div className="min-h-screen bg-[#0F0F0F] text-white flex flex-col">
       {/* Menu fixo */}  
       
-      <header className="bg-[#06283c] border-b border-[#06283c]/40 px-4 py-10 flex justify-between items-center">
+      <header className="bg-[#091219] border-b border-[#091219]/40 px-6 py-12 flex justify-between items-center">
 
 <div
   className="font-extrabold tracking-tight text-2xl md:text-2xl"
