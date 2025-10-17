@@ -12,8 +12,8 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-[#0F0F0F] text-white flex flex-col">
-      {/* Menu fixo */}
-      <header className="bg-[#1B1E25] border-b border-[#ff9f43]/30 px-4 py-3 flex justify-between items-center">
+      {/* Menu fixo */}  
+      <header className="bg-[#0c1d2a] border-b border-[#ff9f43]/30 px-4 py-3 flex justify-between items-center">
         <div className="font-bold text-[#ff9f43] text-lg">🍕 AdminDelivery</div>
 
         {/* Se for /kds, mostra só o botão sair */}
