@@ -13,7 +13,8 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-[#0F0F0F] text-white flex flex-col">
       {/* Menu fixo */}  
-      <header className="bg-[#0c1d2a] border-b border-[#ff9f43]/30 px-4 py-3 flex justify-between items-center">
+      
+      <header className="bg-[#0c1d2a] border-b border-[#ff9f43]/30 px-4 py-6 flex justify-between items-center">
 
 <div
   className="font-extrabold tracking-tight text-4xl md:text-4xl"
