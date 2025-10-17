@@ -93,8 +93,8 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
         ref={printRef}
         className="print-area relative w-[92vw] max-w-3xl max-h-[86vh] overflow-hidden rounded-2xl"
         style={{
-          backgroundColor: " #012e46",  
-          color: "#091219",
+          backgroundColor: "#012e46",
+          color: "#e5e7eb",
           border: "1px solid #ff9f43",
           boxShadow: "0 0 24px rgba(255,159,67,0.3)",
         }}
@@ -123,112 +123,111 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
             </div>
           </div>
 
-          
-  {/* resumo */}
+          {/* resumo */}
           {resumoTexto && (
-            <div
-  className="mt-1 text-xs md:text-sm resumo-bruto"
-  style={{ color: "#ff9f43", fontWeight: "600" }}
->
-  {resumoTexto}
-</div>
-
+            <div className="mt-1 text-xs md:text-sm" style={{ color: "#ff9f43", fontWeight: "600" }}>
+              {resumoTexto}
+            </div>
           )}
         </div>
-
-           
-       
 
         {/* conteúdo */}
         <div className="p-4 overflow-auto max-h-[68vh] text-sm md:text-base">
           {loading ? (
-            <p className="text-gray-900">Carregando itens…</p>
+            <p className="text-gray-400">Carregando itens…</p>
           ) : itens.length === 0 ? (
-            <p className="text-gray-800">Sem itens para exibir.</p>
+            <p className="text-gray-400">Sem itens para exibir.</p>
           ) : (
             <ul className="space-y-3">
-             {itens.map((it, idx) => {
-  const categoria = (it.categoria || "").toLowerCase();
-  const isPizza = categoria.includes("pizza");
-  const isBebida = categoria.includes("bebida");
-  const isBorda = categoria.includes("borda");
-  const icone = isPizza ? "🍕" : isBebida ? "🥤" : isBorda ? "🧀" : "•";
+              {itens.map((it, idx) => {
+                const categoria = (it.categoria || "").toLowerCase();
+                const isPizza = categoria.includes("pizza");
+                const isBebida = categoria.includes("bebida");
+                const isBorda = categoria.includes("borda");
+                const icone = isPizza ? "🍕" : isBebida ? "🥤" : isBorda ? "🧀" : "•";
 
-  const numeroItem = it?.ordem_item ?? it?.ordem ?? it?.numero ?? idx + 1;
-  const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
+                const numeroItem = it?.ordem_item ?? it?.ordem ?? it?.numero ?? idx + 1;
+                const qtd = Number(it?.quantidade) > 0 ? Number(it.quantidade) : 1;
 
-  return (
-    <li
-      key={idx}
-      className="rounded-lg p-3 border shadow-sm"
-      style={{
-        borderColor: "rgba(255,159,67,0.5)",
-        backgroundColor: "#0e1a24", // fundo escuro elegante
-      }}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
-              style={{
-                backgroundColor: "#143447", // bolinha escura
-                color: "#ff9f43",            // número laranja
-                border: "1px solid rgba(255,159,67,0.6)",
-              }}
-              title={`Item ${numeroItem}`}
-            >
-              {numeroItem}
-            </span>
+                return (
+                  <li
+                    key={idx}
+                    className="rounded-lg p-3 border shadow-sm"
+                    style={{
+                      borderColor: "rgba(255,159,67,0.5)",
+                      backgroundColor: "#0e1a24",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
+                            style={{
+                              backgroundColor: "#143447",
+                              color: "#ff9f43",
+                              border: "1px solid rgba(255,159,67,0.6)",
+                            }}
+                            title={`Item ${numeroItem}`}
+                          >
+                            {numeroItem}
+                          </span>
 
-            <span className="text-base">{icone}</span>
-            <span className="font-semibold text-[#ff9f43]">
-              {it.nome || "Item"}
-            </span>
-          </div>
+                          <span className="text-base">{icone}</span>
+                          <span className="font-semibold text-[#ff9f43]">
+                            {it.nome || "Item"}
+                          </span>
+                        </div>
 
-          {/* 🔹 Detalhes reforçados */}
-          <div className="mt-1 text-gray-200 text-sm leading-snug">
-            {it.tamanho && (
-              <span className="font-semibold text-white">
-                Tamanho:{" "}
-                <span className="text-[#ff9f43] font-semibold">
-                  {it.tamanho}
-                </span>
-              </span>
-            )}
-            {it.tamanho && qtd ? " • " : ""}
-            {qtd && (
-              <span className="font-semibold text-white">
-                Qtd:{" "}
-                <span className="text-[#ff9f43] font-semibold">
-                  {qtd}
-                </span>
-              </span>
-            )}
-            {categoria && (
-              <>
-                {(it.tamanho || qtd) ? " • " : ""}
-                <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
-                  {categoria}
-                </span>
-              </>
-            )}
+                        {/* 🔹 Detalhes reforçados */}
+                        <div className="mt-1 text-gray-200 text-sm leading-snug">
+                          {it.tamanho && (
+                            <span className="font-semibold text-white">
+                              Tamanho:{" "}
+                              <span className="text-[#ff9f43] font-semibold">
+                                {it.tamanho}
+                              </span>
+                            </span>
+                          )}
+                          {it.tamanho && qtd ? " • " : ""}
+                          {qtd && (
+                            <span className="font-semibold text-white">
+                              Qtd:{" "}
+                              <span className="text-[#ff9f43] font-semibold">
+                                {qtd}
+                              </span>
+                            </span>
+                          )}
+                          {categoria && (
+                            <>
+                              {(it.tamanho || qtd) ? " • " : ""}
+                              <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
+                                {categoria}
+                              </span>
+                            </>
+                          )}
 
-            {it.descricao && (
-              <div className="mt-1 text-gray-100 font-medium leading-snug">
-                {it.descricao}
-              </div>
-            )}
+                          {it.descricao && (
+                            <div className="mt-1 text-gray-100 font-medium leading-snug">
+                              {it.descricao}
+                            </div>
+                          )}
 
-            {(it.numero_pai || it.nome_pai) && (
-              <div className="mt-1 text-xs text-gray-400 font-semibold">
-                Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
-              </div>
-            )}
-          </div>
+                          {(it.numero_pai || it.nome_pai) && (
+                            <div className="mt-1 text-xs text-gray-400 font-semibold">
+                              Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
-    </li>
+    </div>
   );
-})}
+}
