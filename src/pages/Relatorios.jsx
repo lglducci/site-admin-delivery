@@ -79,10 +79,10 @@ export default function Relatorios() {
 
   return (
     
-   
+ 
       
-        <div className="min-h-screen text-white p-6 bg-[#012e46]">
-       <div className="max-w-5xl mx-auto bg-[#ffffff] rounded-2xl shadow-xl border border-[#ffffff]/60 p-6">
+        <div className="min-h-screen text-white p-6 bg-[#06283c]">
+       <div className="max-w-5xl mx-auto bg-[#012e46] rounded-2xl shadow-xl border border-[#ffffff]/60 p-6">
 
        
         <div className="flex items-center justify-between mb-4">
