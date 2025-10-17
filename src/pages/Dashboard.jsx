@@ -140,8 +140,10 @@ const avancar = async (numero) => {
                   setPedidoSelecionado(p);
                   setShowDetalhes(true);
                 }}
-                className="text-base md:text-lg font-semibold hover:underline"
-                style={{ color: THEME.title }}
+                 
+                className="text-lg md:text-xl font-bold hover:underline"
+ 
+               style={{ color: "#ffae4a" }}
               >
                 nº {numero}
               </a>
