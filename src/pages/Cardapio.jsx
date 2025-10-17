@@ -9,6 +9,7 @@ const THEME = {
   // painel grande (topo)
   panelBg: "#17384a",
   panelBorder: "rgba(255,159,67,0.30)",
+  panelwhite: #ffffff,
 
   // cards
   cardBg: "#012e46",
@@ -25,6 +26,7 @@ const THEME = {
   btnDarkText: "#e5e7eb",
   btnOrange: "#ff9f43",
   btnOrangeText: "#1b1e25",
+ 
 };
 
 const CATEGORIES = [
@@ -120,7 +122,7 @@ export default function Cardapio() {
   return (
     <div
       className="min-h-screen p-6"
-      style={{ background: THEME.pageBg, color: THEME.text }}
+      style={{ background:  panelwhite , color: THEME.text }}   // THEME.pageBg
     >
       {/* Topo em painel */}
       <div
