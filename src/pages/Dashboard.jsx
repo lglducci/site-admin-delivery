@@ -127,7 +127,7 @@ const avancar = async (numero) => {
       <div
         className="rounded-xl p-3 md:p-4 border shadow-md mb-3 transition-all"
         
-       style={{ background:  "#99abb5", borderColor: THEME.cardBorder }}
+       style={{ background:  "#52738f", borderColor: THEME.cardBorder }}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
