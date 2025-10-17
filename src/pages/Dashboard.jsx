@@ -135,7 +135,7 @@ const avancar = async (numero) => {
       <div
         className="rounded-xl p-3 md:p-4 border shadow-md mb-3 transition-all"
         
-       style={{ background: "#ffffff", borderColor: THEME.cardBorder }}
+       style={{ background:  "#678290", borderColor: THEME.cardBorder }}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -322,7 +322,7 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
       {/* Colunas */}
  
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10 p-5"
-     style={{ backgroundColor: "#222831" }}>
+     style={{ backgroundColor: "#99abb5" }}>
   <Coluna titulo="Recebido"  items={grupos.r} />
   <Coluna titulo="Produção" items={grupos.pr} />
   <Coluna titulo="Entrega"  items={grupos.e} />
