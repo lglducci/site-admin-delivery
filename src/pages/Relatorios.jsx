@@ -82,7 +82,9 @@ export default function Relatorios() {
    
       
         <div className="min-h-screen text-white p-6 bg-[#012e46]">
-      <div className="max-w-5xl mx-auto bg-gray-800 rounded-2xl shadow-xl border border-orange-500 p-6">
+       <div className="max-w-5xl mx-auto bg-[#0f3c56] rounded-2xl shadow-xl border border-[#ff9f43]/60 p-6">
+
+       
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-orange-400">📈 Relatórios</h1>
           <input
