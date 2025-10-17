@@ -232,7 +232,7 @@ style={{ background: "#ffffff"      }}  //THEME.pageBg
       {/* Cabeçalho */}
       <div
         className="flex justify-between items-center mb-6 shadow-lg rounded-xl p-4 border relative z-50"
-        style={{backgroundColor: THEME.panelBg, borderColor: THEME.panelBorder}}
+        style={{backgroundColor: "#ffffff"  , borderColor: THEME.panelBorder}}   //THEME.panelBg
 
 
        
