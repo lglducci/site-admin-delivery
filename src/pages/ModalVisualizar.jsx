@@ -160,86 +160,74 @@ export default function ModalVisualizar({ open, onClose, numero, idEmpresa }) {
 
                 return (
                   <li
-                    key={idx}
-                    className="rounded-lg p-3 border"
-                    style={{
-                      borderColor: isBorda
-                        ? "rgba(255, 180, 50, 0.5)"
-                        : "rgba(255,159,67,0.6)",
-                      backgroundColor: isBorda ? "#fff7e6" : "#fffdf8",
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
-                            style={{
-                              backgroundColor: "#ffecd2",
-                              color: "#1b1e25",
-                              border: "1px solid rgba(255,159,67,0.6)",
-                            }}
-                            title={`Item ${numeroItem}`}
-                          >
-                            {numeroItem}
-                          </span>
+  key={idx}
+  className="rounded-lg p-3 border"
+  style={{
+    borderColor: isBorda
+      ? "rgba(255, 180, 50, 0.5)"
+      : "rgba(255,159,67,0.6)",
+    backgroundColor: isBorda ? "#fff7e6" : "#fffdf8",
+  }}
+>
+  <div className="flex items-start justify-between gap-2">
+    <div className="flex-1">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-flex items-center justify-center rounded-full text-[11px] w-6 h-6 shrink-0"
+          style={{
+            backgroundColor: "#ffecd2",
+            color: "#1b1e25",
+            border: "1px solid rgba(255,159,67,0.6)",
+          }}
+          title={`Item ${numeroItem}`}
+        >
+          {numeroItem}
+        </span>
 
-                          <span className="text-base">{icone}</span>
-                          <span className="font-semibold" style={{ color: "#ff9f43" }}>
-                            {it.nome || "Item"}
-                          </span>
-                        </div>
+        <span className="text-base">{icone}</span>
+        <span className="font-semibold" style={{ color: "#ff9f43" }}>
+          {it.nome || "Item"}
+        </span>
+      </div>
 
-                       
-<div className="mt-1 text-gray-100 text-sm leading-snug">
-  {it.tamanho && (
-    <span className="font-semibold text-white">
-      Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
-    </span>
-  )}
-  {it.tamanho && qtd ? " • " : ""}
-  {qtd && (
-    <span className="font-semibold text-white">
-      Qtd: <span className="text-[#ff9f43]">{qtd}</span>
-    </span>
-  )}
-  {categoria && (
-    <>
-      {(it.tamanho || qtd) ? " • " : ""}
-      <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
-        {categoria}
-      </span>
-    </>
-  )}
+      {/* 🔹 Bloco reforçado */}
+      <div className="mt-1 text-gray-100 text-sm leading-snug">
+        {it.tamanho && (
+          <span className="font-semibold text-white">
+            Tamanho: <span className="text-[#ff9f43]">{it.tamanho}</span>
+          </span>
+        )}
+        {it.tamanho && qtd ? " • " : ""}
+        {qtd && (
+          <span className="font-semibold text-white">
+            Qtd: <span className="text-[#ff9f43]">{qtd}</span>
+          </span>
+        )}
+        {categoria && (
+          <>
+            {(it.tamanho || qtd) ? " • " : ""}
+            <span className="uppercase tracking-wide text-xs font-bold text-[#ff9f43]">
+              {categoria}
+            </span>
+          </>
+        )}
 
-  {it.descricao && (
-    <div className="mt-1 text-gray-200 font-medium leading-snug">
-      {it.descricao}
+        {it.descricao && (
+          <div className="mt-1 text-gray-200 font-medium leading-snug">
+            {it.descricao}
+          </div>
+        )}
+
+        {(it.numero_pai || it.nome_pai) && (
+          <div className="mt-1 text-xs text-gray-900">
+            Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
+          </div>
+        )}
+      </div>
     </div>
-  )}
-</div>
+  </div>
+</li>
 
-
-
-
-
-
-
-
-
-
-
-                       
-                          {/* 🔙 Vinculado a item ou borda */}
-                          {(it.numero_pai || it.nome_pai) && (
-                            <div className="mt-1 text-xs text-gray-900">
-                              Vinculado a: {it.nome_pai || `#${it.numero_pai}`}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </li>
                 );
               })}
             </ul>
