@@ -80,7 +80,8 @@ export default function Relatorios() {
   return (
     
    
-       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
+      
+        <div className="min-h-screen text-white p-6 bg-[#012e46]">
       <div className="max-w-5xl mx-auto bg-gray-800 rounded-2xl shadow-xl border border-orange-500 p-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-orange-400">📈 Relatórios</h1>
