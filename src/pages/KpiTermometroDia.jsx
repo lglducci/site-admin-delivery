@@ -4,23 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 /* 🎨 Tema azul coerente com Login/KDS */
 const THEME = {
-  // página
   pageBg: "#012e46",
-  // painel/containers
   panelBg: "#153b54",
   panelBorder: "rgba(255,159,67,0.30)",
-  // cards
   cardBg: "#254759",
   cardBorder: "rgba(255,159,67,0.30)",
-  // tipografia e acentos
   title: "#ff9f43",
   text: "#e8eef2",
   textMuted: "#bac7cf",
-  // inputs
   fieldBg: "#1f3b4d",
   fieldBorder: "rgba(255,159,67,0.25)",
   focusRing: "#ff9f43",
-  // botões
   btnDark: "#2a2f39",
   btnDarkText: "#e5e7eb",
   btnOrange: "#ff9f43",
@@ -83,7 +77,14 @@ export default function KpiTermometroDia() {
     item_min: 0,
     vendas_hora: [],
     top_itens: [],
-    margem_estimada: { receita_itens: 0, custo_estimado: 0, margem_estimada: 0 },
+    // novos campos
+    receita_itens: 0,
+    custo_min: 0,
+    custo_max: 0,
+    lucro_min: 0,
+    lucro_max: 0,
+    margem_min: 0,
+    margem_max: 0,
     observacoes: null,
   });
 
@@ -107,30 +108,56 @@ export default function KpiTermometroDia() {
       const r = await fetch(url.toString(), { cache: "no-store" });
       const json = await r.json().catch(() => ({}));
 
+      // novo payload: [ { kpi_termometro_dia: { ... } } ]
       const payload = Array.isArray(json) ? json[0] : json;
       const core = payload?.kpi_termometro_dia ?? payload ?? {};
 
+      const pedidos = Number(core.qtd_pedidos ?? core.pedidos ?? 0);
+      const receita_bruta = Number(core.receita_bruta ?? 0);
+      const receita_liquida = Number(core.receita_liquida ?? receita_bruta ?? 0);
+      const entrega_qtd = Number(core.qtd_entrega ?? 0);
+      const retirada_qtd = Number(core.qtd_retirada ?? 0);
+      const entrega_taxa_unit = Number(core.taxa_entrega ?? taxaEntrega ?? 0);
+      const entrega_taxa_total = Number(core.taxa_total ?? entrega_taxa_unit * entrega_qtd);
+      const receita_itens = Number(core.receita_itens ?? 0);
+      const custo_min = Number(core.custo_min ?? 0);
+      const custo_max = Number(core.custo_max ?? 0);
+      const lucro_min = Number(core.lucro_min ?? (receita_liquida - custo_max));
+      const lucro_max = Number(core.lucro_max ?? (receita_liquida - custo_min));
+      const margem_min = Number(core.margem_min ?? 0);
+      const margem_max = Number(core.margem_max ?? 0);
+
+      const ticket_medio_liquido =
+        pedidos > 0 ? receita_liquida / pedidos : 0;
+
       setKpi({
-        pedidos: Number(core.pedidos ?? 0),
-        receita_bruta: Number(core.receita_bruta ?? 0),
-        receita_liquida: Number(core.receita_liquida ?? 0),
-        entrega_qtd: Number(core.entrega_qtd ?? 0),
-        retirada_qtd: Number(core.retirada_qtd ?? 0),
-        entrega_taxa_unit: Number(core.entrega_taxa_unit ?? taxaEntrega ?? 0),
-        entrega_taxa_total: Number(core.entrega_taxa_total ?? 0),
-        ticket_medio_liquido: Number(core.ticket_medio_liquido ?? 0),
-        pedido_max: Number(core.pedido_max ?? 0),
-        pedido_min: Number(core.pedido_min ?? 0),
+        pedidos,
+        receita_bruta,
+        receita_liquida,
+        entrega_qtd,
+        retirada_qtd,
+        entrega_taxa_unit,
+        entrega_taxa_total,
+        ticket_medio_liquido,
+        // se não vier, deixamos 0 (ou você pode calcular no backend depois)
+        pedido_max: Number(core.pedido_max ?? (pedidos === 1 ? receita_bruta : 0)),
+        pedido_min: Number(core.pedido_min ?? (pedidos === 1 ? receita_bruta : 0)),
         item_max: Number(core.item_max ?? 0),
         item_min: Number(core.item_min ?? 0),
         vendas_hora: Array.isArray(core.vendas_hora) ? core.vendas_hora : [],
         top_itens: Array.isArray(core.top_itens) ? core.top_itens : [],
-        margem_estimada: core.margem_estimada || {
-          receita_itens: 0,
-          custo_estimado: 0,
-          margem_estimada: 0,
+        // novos
+        receita_itens,
+        custo_min,
+        custo_max,
+        lucro_min,
+        lucro_max,
+        margem_min,
+        margem_max,
+        observacoes: core.observacoes ?? {
+          regra:
+            "receita_liquida = receita_bruta - (taxa_entrega * qtd_entrega); margem (min–max) baseada em pizza_modelo",
         },
-        observacoes: core.observacoes ?? null,
       });
     } catch (e) {
       console.error(e);
@@ -268,11 +295,13 @@ export default function KpiTermometroDia() {
           <Card title="Pedido Mín" value={C(kpi.pedido_min)} />
           <Card title="Item Máx" value={C(kpi.item_max)} />
           <Card title="Item Mín" value={C(kpi.item_min)} />
+          {/* Margem com intervalo + apoio de receita_itens e custo(min–max) */}
           <Card
             title="Margem Estimada"
-            value={`${C(kpi.margem_estimada?.margem_estimada || 0)} (Receita itens ${C(
-              kpi.margem_estimada?.receita_itens || 0
-            )} - Custo ${C(kpi.margem_estimada?.custo_estimado || 0)})`}
+            value={
+              `${C(kpi.lucro_min)} – ${C(kpi.lucro_max)} ` +
+              `(Receita itens ${C(kpi.receita_itens)} • Custo ${C(kpi.custo_min)}–${C(kpi.custo_max)})`
+            }
           />
         </div>
 
