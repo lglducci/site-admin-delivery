@@ -284,8 +284,8 @@ export default function KpiTermometroDia() {
           <Card
             title="Margem Estimada"
             value={
-              `${C(kpi.lucro_min)} – ${C(kpi.lucro_max)} ` +
-              `(Receita itens ${C(kpi.receita_itens)} • Custo ${C(kpi.custo_min)}–${C(kpi.custo_max)})`
+              `${C(kpi.lucro_min)} a ${C(kpi.lucro_max)} ` +
+              `(Receita itens ${C(kpi.receita_itens)} • Custo ${C(kpi.custo_min)} a ${C(kpi.custo_max)})`
             }
           />
         </div>
