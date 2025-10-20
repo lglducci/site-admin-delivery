@@ -94,30 +94,39 @@ export default function KpiTermometroDia() {
     return `${yyyy}-${mm}-${dd}`;
   }, [dataRef]);
 
- async function carregar() {
-  try {
-    setErr("");
-    setLoading(true);
+ // controla requisições e evita travar o Supabase
+const loadingRef = React.useRef(false);
 
-    // 1) KPIs principais
+async function carregar() {
+  if (loadingRef.current) return; // evita chamadas duplas
+  loadingRef.current = true;
+  setErr("");
+  setLoading(true);
+
+  const ctrl = new AbortController();
+  carregar.ctrl?.abort(); // cancela requisição anterior se houver
+  carregar.ctrl = ctrl;
+
+  try {
+    // 1️⃣ KPIs principais
     const url1 = new URL(`${API_BASE}/kpi_termometro_dia`);
     url1.searchParams.set("id_empresa", String(idEmpresa));
     if (dataIso) url1.searchParams.set("data", dataIso);
-    const r1 = await fetch(url1.toString(), { cache: "no-store" });
+    const r1 = await fetch(url1.toString(), { cache: "no-store", signal: ctrl.signal });
     const j1 = await r1.json().catch(() => ({}));
     const p1 = Array.isArray(j1) ? j1[0] : j1;
     const core1 = p1?.kpi_termometro_dia ?? p1 ?? {};
 
-    // 2) Detalhes (vendas_hora/top_itens)
+    // 2️⃣ Detalhes (vendas_hora/top_itens)
     const url2 = new URL(`${API_BASE}/kpi_termometro_itens`);
     url2.searchParams.set("id_empresa", String(idEmpresa));
     if (dataIso) url2.searchParams.set("data", dataIso);
-    const r2 = await fetch(url2.toString(), { cache: "no-store" });
+    const r2 = await fetch(url2.toString(), { cache: "no-store", signal: ctrl.signal });
     const j2 = await r2.json().catch(() => ({}));
     const p2 = Array.isArray(j2) ? j2[0] : j2;
     const core2 = p2?.kpi_termometro_itens ?? p2 ?? {};
 
-    // monta estado final (mantém seus campos atuais)
+    // monta estado final
     setKpi(prev => ({
       ...prev,
       pedidos: Number(core1.qtd_pedidos ?? core1.pedidos ?? 0),
@@ -127,10 +136,6 @@ export default function KpiTermometroDia() {
       retirada_qtd: Number(core1.qtd_retirada ?? 0),
       entrega_taxa_unit: Number(core1.taxa_entrega ?? taxaEntrega ?? 0),
       entrega_taxa_total: Number(core1.taxa_total ?? 0),
-      ticket_medio_liquido:
-        Number(core1.qtd_pedidos ?? 0) > 0
-          ? Number(core1.receita_liquida ?? core1.receita_bruta ?? 0) / Number(core1.qtd_pedidos ?? 1)
-          : 0,
       receita_itens: Number(core1.receita_itens ?? 0),
       custo_min: Number(core1.custo_min ?? 0),
       custo_max: Number(core1.custo_max ?? 0),
@@ -138,24 +143,28 @@ export default function KpiTermometroDia() {
       lucro_max: Number(core1.lucro_max ?? 0),
       margem_min: Number(core1.margem_min ?? 0),
       margem_max: Number(core1.margem_max ?? 0),
-
-      // estes dois vêm do webhook 2:
       vendas_hora: Array.isArray(core2.vendas_hora) ? core2.vendas_hora : [],
       top_itens: Array.isArray(core2.top_itens) ? core2.top_itens : [],
     }));
   } catch (e) {
-    console.error(e);
-    setErr("Falha ao carregar KPIs.");
+    if (e.name !== "AbortError") {
+      console.error(e);
+      setErr("Falha ao carregar KPIs.");
+    }
   } finally {
+    if (carregar.ctrl === ctrl) carregar.ctrl = null;
+    loadingRef.current = false;
     setLoading(false);
   }
 }
 
+useEffect(() => {
+  carregar();
+  // ao fechar a janela, aborta a requisição
+  return () => carregar.ctrl?.abort();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
-  useEffect(() => {
-    carregar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const fieldCls =
     "w-full rounded px-3 py-2 focus:outline-none transition-shadow";
