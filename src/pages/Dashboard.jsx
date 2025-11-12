@@ -280,7 +280,7 @@ style={{ background: "#012e46"      }}  //THEME.pageBg
                 }}
               >
                 {[
-                  ["🏢", "Dados da Empresa", "https://webhook.lglducci.com.br/webhook/config_empresa"],
+                   ["🏢", "Dados da Empresa", "/editar-empresa"], // ✅ abre a nova página local
                   ["💬", "Mensagem Padrão", "https://webhook.lglducci.com.br/webhook/mensagem_padrao"],
                   ["📈", "Relatórios", "/relatorios"],
                   ["🍕", "Cardápio", "/cardapio"],
