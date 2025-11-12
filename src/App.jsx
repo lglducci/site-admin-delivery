@@ -31,8 +31,8 @@ export default function App() {
 
         </Route>
 
-        {/* Login fora do layout (sem menu) */}
-        <Route path="/" element={<Login />} />
+        {/* Login fora do layout (sem menu) */} 
+       <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
