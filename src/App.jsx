@@ -32,7 +32,11 @@ export default function App() {
         </Route>
 
         {/* Login fora do layout (sem menu) */} 
-       <Route path="/login" element={<Login />} />
+          {/* login separado */}
+        <Route path="/login" element={<Login />} />
+
+        {/* rota raiz redireciona pro login */}
+        <Route path="/" element={<Login />} />
       </Routes>
     </Router>
   );
