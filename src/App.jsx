@@ -10,6 +10,7 @@ import PizzaModelo from "./pages/PizzaModelo.jsx";
 import Relatorios from "./pages/Relatorios.jsx";
 import KpiTermometroDia from "./pages/KpiTermometroDia";
 import KdsView from "./pages/KdsView";
+import EditarEmpresa from "./pages/EditarEmpresa";
 
 export default function App() {
   return (
@@ -26,6 +27,8 @@ export default function App() {
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/kpi" element={<KpiTermometroDia />} />
           <Route path="/kds" element={<KdsView />} />
+          <Route path="/editar-empresa" element={<EditarEmpresa />} />
+
         </Route>
 
         {/* Login fora do layout (sem menu) */}
